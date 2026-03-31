@@ -51,12 +51,24 @@ export default function RankingPage() {
                     {entry.display_name}
                     {isMe && <span className="text-primary ml-1">(você)</span>}
                   </p>
-                  <div className="flex gap-3 text-xs text-muted-foreground mt-0.5 items-center">
+                  <div className="flex gap-3 text-xs text-muted-foreground mt-0.5 items-center flex-wrap">
                     <span>Jogos: {entry.points_matches}</span>
                     <span>Exatos: {entry.exact_hits}</span>
                     {entry.champion_flag_url && (
-                      <span className="flex items-center gap-1">
+                      <span className="flex items-center gap-1" title={`Campeão: ${entry.champion_team_name}`}>
                         🏆 <img src={entry.champion_flag_url} alt={entry.champion_team_name ?? ''} className="w-4 h-3 rounded-sm" />
+                      </span>
+                    )}
+                    {entry.top_scorer_name && (
+                      <span className="flex items-center gap-1" title={`Artilheiro: ${entry.top_scorer_name}`}>
+                        ⚽ {entry.top_scorer_flag_url && <img src={entry.top_scorer_flag_url} alt="" className="w-4 h-3 rounded-sm" />}
+                        <span className="truncate max-w-[60px]">{entry.top_scorer_name}</span>
+                      </span>
+                    )}
+                    {entry.mvp_name && (
+                      <span className="flex items-center gap-1" title={`MVP: ${entry.mvp_name}`}>
+                        ⭐ {entry.mvp_flag_url && <img src={entry.mvp_flag_url} alt="" className="w-4 h-3 rounded-sm" />}
+                        <span className="truncate max-w-[60px]">{entry.mvp_name}</span>
                       </span>
                     )}
                   </div>
