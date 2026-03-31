@@ -51,10 +51,14 @@ export default function RankingPage() {
                     {entry.display_name}
                     {isMe && <span className="text-primary ml-1">(você)</span>}
                   </p>
-                  <div className="flex gap-3 text-xs text-muted-foreground mt-0.5">
+                  <div className="flex gap-3 text-xs text-muted-foreground mt-0.5 items-center">
                     <span>Jogos: {entry.points_matches}</span>
-                    <span>Campeão: {entry.points_knockout}</span>
                     <span>Exatos: {entry.exact_hits}</span>
+                    {entry.champion_flag_url && (
+                      <span className="flex items-center gap-1">
+                        🏆 <img src={entry.champion_flag_url} alt={entry.champion_team_name ?? ''} className="w-4 h-3 rounded-sm" />
+                      </span>
+                    )}
                   </div>
                 </div>
 
