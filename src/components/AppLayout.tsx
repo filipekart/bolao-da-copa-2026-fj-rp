@@ -1,9 +1,10 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, History, Swords, Medal, User, Shield, Star } from 'lucide-react';
+import { Home, History, Swords, Medal, User, Shield, Star, Trophy } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useMatchReminders } from '@/hooks/useMatchReminders';
 import { usePushSubscription } from '@/hooks/usePushSubscription';
+import { RulesModal } from '@/components/RulesModal';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
@@ -24,7 +25,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen gradient-dark flex flex-col">
-      <main className="flex-1 max-w-lg mx-auto w-full px-4 pt-4 pb-24">
+      {/* Header with rules button */}
+      <div className="max-w-lg mx-auto w-full px-4 pt-3 flex justify-end">
+        <RulesModal />
+      </div>
+      <main className="flex-1 max-w-lg mx-auto w-full px-4 pb-24">
         {children}
       </main>
 
