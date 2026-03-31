@@ -43,7 +43,7 @@ export default function ExtrasPage() {
         <PlayerPredictionTab
           category="top_scorer"
           title="Artilheiro"
-          description="Escolha quem será o artilheiro da Copa 2026."
+          description="Escolha quem será o artilheiro da Copa 2026. Vale 50 pontos!"
           icon={<Target className="w-5 h-5 text-accent" />}
         />
       )}
@@ -51,7 +51,7 @@ export default function ExtrasPage() {
         <PlayerPredictionTab
           category="mvp"
           title="MVP"
-          description="Escolha quem será o melhor jogador (MVP) da Copa 2026."
+          description="Escolha quem será o melhor jogador (MVP) da Copa 2026. Vale 50 pontos!"
           icon={<Award className="w-5 h-5 text-accent" />}
         />
       )}
