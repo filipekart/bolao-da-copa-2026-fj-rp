@@ -26,7 +26,15 @@ export function useMyPredictions() {
         .in('id', matchIds);
       if (matchErr) throw matchErr;
 
-      const matchMap = new Map(matches?.map(m => [m.id, m]) ?? []);
+      // Get group info for home teams
+      const teamIds = [...new Set(matches?.flatMap(m => [m.home_team_id, m.away_team_id]).filter(Boolean) ?? [])];
+      const { data: teams } = await supabase
+        .from('teams')
+        .select('id, group_name')
+        .in('id', teamIds as string[]);
+      const teamGroupMap = new Map(teams?.map(t => [t.id, t.group_name]) ?? []);
+
+      const matchMap = new Map(matches?.map(m => [m.id, { ...m, group_name: teamGroupMap.get(m.home_team_id!) ?? null }]) ?? []);
       return predictions.map(p => ({
         ...p,
         match: matchMap.get(p.match_id) ?? null,
