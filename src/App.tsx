@@ -11,7 +11,7 @@ import MatchDetailPage from "./pages/MatchDetailPage";
 import MyBetsPage from "./pages/MyBetsPage";
 import KnockoutPage from "./pages/KnockoutPage";
 import RankingPage from "./pages/RankingPage";
-import ChampionPage from "./pages/ChampionPage";
+import ExtrasPage from "./pages/ExtrasPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
@@ -61,7 +61,7 @@ function ProtectedRoutes() {
         <Route path="/match/:matchId" element={<MatchDetailPage />} />
         <Route path="/bets" element={<MyBetsPage />} />
         <Route path="/knockout" element={<KnockoutPage />} />
-        <Route path="/champion" element={<ChampionPage />} />
+        <Route path="/extras" element={<ExtrasPage />} />
         <Route path="/ranking" element={<RankingPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         {isAdmin && <Route path="/admin" element={<AdminPage />} />}

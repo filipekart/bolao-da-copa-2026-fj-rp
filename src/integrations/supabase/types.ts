@@ -14,6 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      extra_predictions: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          player_name: string
+          submitted_at: string
+          team_id: string | null
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          player_name: string
+          submitted_at?: string
+          team_id?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          player_name?: string
+          submitted_at?: string
+          team_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extra_predictions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "extra_predictions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "v_group_standings"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "extra_predictions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["away_team_id"]
+          },
+          {
+            foreignKeyName: "extra_predictions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["home_team_id"]
+          },
+        ]
+      }
       knockout_predictions: {
         Row: {
           created_at: string
