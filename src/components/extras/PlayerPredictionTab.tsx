@@ -1,10 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/auth';
-import { Loader2, Lock } from 'lucide-react';
+import { Loader2, Lock, Search } from 'lucide-react';
 import { toast } from 'sonner';
-import { useState, ReactNode } from 'react';
-import { Input } from '@/components/ui/input';
+import { useState, ReactNode, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 
 interface Props {
@@ -22,6 +21,22 @@ function useTeams() {
       if (error) throw error;
       return data;
     },
+  });
+}
+
+function usePlayers(teamId: string | null) {
+  return useQuery({
+    queryKey: ['players', teamId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('players')
+        .select('*')
+        .eq('team_id', teamId!)
+        .order('name');
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!teamId,
   });
 }
 
@@ -62,12 +77,31 @@ export default function PlayerPredictionTab({ category, title, description, icon
     enabled: !!user,
   });
 
-  const [playerName, setPlayerName] = useState('');
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [teamSearch, setTeamSearch] = useState('');
   const [showTeamPicker, setShowTeamPicker] = useState(false);
 
+  const [playerName, setPlayerName] = useState('');
+  const [playerSearch, setPlayerSearch] = useState('');
+  const [showPlayerPicker, setShowPlayerPicker] = useState(false);
+
+  const { data: players, isLoading: playersLoading } = usePlayers(selectedTeamId);
+
   const isLocked = firstKickoff ? new Date() >= firstKickoff : false;
+
+  const selectedTeam = teams?.find(t => t.id === selectedTeamId);
+
+  const filteredTeams = useMemo(
+    () => teams?.filter(t => t.name.toLowerCase().includes(teamSearch.toLowerCase())) ?? [],
+    [teams, teamSearch]
+  );
+
+  const filteredPlayers = useMemo(
+    () => players?.filter(p => p.name.toLowerCase().includes(playerSearch.toLowerCase())) ?? [],
+    [players, playerSearch]
+  );
+
+  const hasPlayers = (players?.length ?? 0) > 0;
 
   const submitMutation = useMutation({
     mutationFn: async () => {
@@ -103,12 +137,17 @@ export default function PlayerPredictionTab({ category, title, description, icon
     );
   }
 
-  const selectedTeam = teams?.find(t => t.id === selectedTeamId);
-  const filteredTeams = teams?.filter(t => t.name.toLowerCase().includes(teamSearch.toLowerCase())) ?? [];
-
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: description.replace(/(\d+ pontos!)/, '<span class="text-accent font-bold">$1</span>') }} />
+      <p
+        className="text-sm text-muted-foreground"
+        dangerouslySetInnerHTML={{
+          __html: description.replace(
+            /(\d+ pontos!)/,
+            '<span class="text-accent font-bold">$1</span>'
+          ),
+        }}
+      />
 
       {isLocked && (
         <div className="glass rounded-xl p-4 flex items-center gap-3 border border-accent/30">
@@ -143,37 +182,42 @@ export default function PlayerPredictionTab({ category, title, description, icon
       {/* Form */}
       {!isLocked && (
         <div className="space-y-3">
+          {/* Step 1: Team picker */}
           <div className="space-y-2">
-            <label className="text-sm text-foreground font-medium">Nome do jogador</label>
-            <Input
-              placeholder="Ex: Mbappé"
-              value={playerName}
-              onChange={e => setPlayerName(e.target.value)}
-              className="bg-secondary border-border text-foreground placeholder:text-muted-foreground"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm text-foreground font-medium">Seleção</label>
+            <label className="text-sm text-foreground font-medium">1. Seleção</label>
             {selectedTeam ? (
               <button
-                onClick={() => { setSelectedTeamId(null); setShowTeamPicker(true); }}
+                onClick={() => {
+                  setSelectedTeamId(null);
+                  setPlayerName('');
+                  setPlayerSearch('');
+                  setShowTeamPicker(true);
+                  setShowPlayerPicker(false);
+                }}
                 className="w-full glass rounded-xl px-4 py-3 flex items-center gap-3 ring-1 ring-primary"
               >
-                {selectedTeam.flag_url && <img src={selectedTeam.flag_url} alt="" className="w-6 h-4 rounded-sm" />}
+                {selectedTeam.flag_url && (
+                  <img src={selectedTeam.flag_url} alt="" className="w-6 h-4 rounded-sm" />
+                )}
                 <span className="text-sm text-foreground font-medium">{selectedTeam.name}</span>
                 <span className="text-[10px] text-muted-foreground ml-auto">trocar</span>
               </button>
             ) : (
               <>
-                <input
-                  type="text"
-                  placeholder="Buscar seleção..."
-                  value={teamSearch}
-                  onChange={e => { setTeamSearch(e.target.value); setShowTeamPicker(true); }}
-                  onFocus={() => setShowTeamPicker(true)}
-                  className="w-full glass rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
-                />
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Buscar seleção..."
+                    value={teamSearch}
+                    onChange={e => {
+                      setTeamSearch(e.target.value);
+                      setShowTeamPicker(true);
+                    }}
+                    onFocus={() => setShowTeamPicker(true)}
+                    className="w-full glass rounded-xl pl-9 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
                 {showTeamPicker && (
                   <div className="space-y-1 max-h-[30vh] overflow-y-auto">
                     {filteredTeams.map(team => (
@@ -183,10 +227,15 @@ export default function PlayerPredictionTab({ category, title, description, icon
                           setSelectedTeamId(team.id);
                           setShowTeamPicker(false);
                           setTeamSearch('');
+                          setPlayerName('');
+                          setPlayerSearch('');
+                          setShowPlayerPicker(false);
                         }}
                         className="w-full glass rounded-xl px-4 py-2.5 flex items-center gap-3 transition-all hover:ring-1 hover:ring-primary"
                       >
-                        {team.flag_url && <img src={team.flag_url} alt="" className="w-6 h-4 rounded-sm" />}
+                        {team.flag_url && (
+                          <img src={team.flag_url} alt="" className="w-6 h-4 rounded-sm" />
+                        )}
                         <span className="text-sm text-foreground">{team.name}</span>
                       </button>
                     ))}
@@ -196,12 +245,105 @@ export default function PlayerPredictionTab({ category, title, description, icon
             )}
           </div>
 
+          {/* Step 2: Player picker (only after team selected) */}
+          {selectedTeamId && (
+            <div className="space-y-2">
+              <label className="text-sm text-foreground font-medium">2. Jogador</label>
+
+              {playersLoading ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                </div>
+              ) : hasPlayers ? (
+                /* Players available — searchable list */
+                <>
+                  {playerName ? (
+                    <button
+                      onClick={() => {
+                        setPlayerName('');
+                        setPlayerSearch('');
+                        setShowPlayerPicker(true);
+                      }}
+                      className="w-full glass rounded-xl px-4 py-3 flex items-center gap-3 ring-1 ring-primary"
+                    >
+                      <span className="text-sm text-foreground font-medium">{playerName}</span>
+                      <span className="text-[10px] text-muted-foreground ml-auto">trocar</span>
+                    </button>
+                  ) : (
+                    <>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <input
+                          type="text"
+                          placeholder="Buscar jogador..."
+                          value={playerSearch}
+                          onChange={e => {
+                            setPlayerSearch(e.target.value);
+                            setShowPlayerPicker(true);
+                          }}
+                          onFocus={() => setShowPlayerPicker(true)}
+                          className="w-full glass rounded-xl pl-9 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+                      {showPlayerPicker && (
+                        <div className="space-y-1 max-h-[30vh] overflow-y-auto">
+                          {filteredPlayers.length > 0 ? (
+                            filteredPlayers.map(p => (
+                              <button
+                                key={p.id}
+                                onClick={() => {
+                                  setPlayerName(p.name);
+                                  setShowPlayerPicker(false);
+                                  setPlayerSearch('');
+                                }}
+                                className="w-full glass rounded-xl px-4 py-2.5 flex items-center gap-3 transition-all hover:ring-1 hover:ring-primary"
+                              >
+                                <span className="text-sm text-foreground">{p.name}</span>
+                                {p.position && (
+                                  <span className="text-[10px] text-muted-foreground ml-auto">
+                                    {p.position}
+                                  </span>
+                                )}
+                              </button>
+                            ))
+                          ) : (
+                            <p className="text-xs text-muted-foreground text-center py-3">
+                              Nenhum jogador encontrado
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              ) : (
+                /* No players yet — manual input */
+                <div className="space-y-1">
+                  <input
+                    type="text"
+                    placeholder="Digite o nome do jogador..."
+                    value={playerName}
+                    onChange={e => setPlayerName(e.target.value)}
+                    className="w-full glass rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
+                  />
+                  <p className="text-[10px] text-muted-foreground">
+                    Elenco ainda não disponível — digite manualmente.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           <Button
             onClick={() => submitMutation.mutate()}
             disabled={submitMutation.isPending || !playerName.trim() || !selectedTeamId}
             className="w-full gradient-pitch text-primary-foreground font-semibold h-11"
           >
-            {submitMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : `Confirmar ${title}`}
+            {submitMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              `Confirmar ${title}`
+            )}
           </Button>
         </div>
       )}
