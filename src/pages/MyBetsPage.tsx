@@ -22,6 +22,7 @@ function formatDate(iso: string) {
 
 export default function MyBetsPage() {
   const { data: predictions, isLoading } = useMyPredictions();
+  const [search, setSearch] = useState('');
   const navigate = useNavigate();
 
   if (isLoading) {
