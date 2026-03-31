@@ -8,6 +8,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin } = useAuth();
+  useMatchReminders();
 
   const tabs = [
     { path: '/', icon: Home, label: 'Jogos' },
