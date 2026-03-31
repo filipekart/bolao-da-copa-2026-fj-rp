@@ -188,22 +188,44 @@ function GroupCard({
   }));
   const standings = calculatePredictedStandings(predictedMatches);
 
+  // Get unique teams in this group
+  const groupTeamIds = useMemo(() => {
+    const ids = new Set<string>();
+    matches.forEach(m => { ids.add(m.home_team_id); ids.add(m.away_team_id); });
+    return Array.from(ids);
+  }, [matches]);
+
   return (
     <div className="glass rounded-xl overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center justify-between px-4 py-3"
       >
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-display font-bold text-foreground">Grupo {groupName}</span>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-sm font-display font-bold text-foreground shrink-0">Grupo {groupName}</span>
+          <span className="text-muted-foreground text-xs shrink-0">(</span>
+          <div className="flex items-center gap-1 overflow-hidden">
+            {groupTeamIds.map((id, i) => (
+              <div key={id} className="flex items-center gap-0.5 shrink-0">
+                {teamFlags.get(id) && (
+                  <img src={teamFlags.get(id)!} alt="" className="w-4 h-3 rounded-sm" />
+                )}
+                <span className="text-[10px] text-muted-foreground truncate max-w-[50px]">
+                  {teamNames.get(id) ?? '?'}
+                </span>
+                {i < groupTeamIds.length - 1 && <span className="text-muted-foreground text-[10px]">,</span>}
+              </div>
+            ))}
+          </div>
+          <span className="text-muted-foreground text-xs shrink-0">)</span>
           {allHavePredictions && (
-            <Check className="w-4 h-4 text-primary" />
+            <Check className="w-4 h-4 text-primary shrink-0" />
           )}
         </div>
         {expanded ? (
-          <ChevronUp className="w-4 h-4 text-muted-foreground" />
+          <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+          <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
         )}
       </button>
 
