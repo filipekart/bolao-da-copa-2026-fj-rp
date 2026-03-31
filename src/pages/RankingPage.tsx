@@ -53,7 +53,7 @@ export default function RankingPage() {
                   </p>
                   <div className="flex gap-3 text-xs text-muted-foreground mt-0.5">
                     <span>Jogos: {entry.points_matches}</span>
-                    <span>Mata-mata: {entry.points_knockout}</span>
+                    <span>2ª Fase: {entry.points_knockout}</span>
                     <span>Exatos: {entry.exact_hits}</span>
                   </div>
                 </div>
