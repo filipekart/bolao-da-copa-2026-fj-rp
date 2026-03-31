@@ -61,7 +61,7 @@ function ProtectedRoutes() {
         <Route path="/match/:matchId" element={<MatchDetailPage />} />
         <Route path="/bets" element={<MyBetsPage />} />
         <Route path="/knockout" element={<KnockoutPage />} />
-        <Route path="/champion" element={<ChampionPage />} />
+        <Route path="/extras" element={<ExtrasPage />} />
         <Route path="/ranking" element={<RankingPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         {isAdmin && <Route path="/admin" element={<AdminPage />} />}

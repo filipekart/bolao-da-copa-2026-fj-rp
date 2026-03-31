@@ -16,7 +16,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     { path: '/', icon: Home, label: 'Jogos' },
     { path: '/bets', icon: History, label: 'Palpites' },
     { path: '/knockout', icon: Swords, label: '2ª Fase' },
-    { path: '/champion', icon: Trophy, label: 'Campeão' },
+    { path: '/extras', icon: Star, label: 'Extras' },
     { path: '/ranking', icon: Medal, label: 'Ranking' },
     { path: '/profile', icon: User, label: 'Perfil' },
     ...(isAdmin ? [{ path: '/admin', icon: Shield, label: 'Admin' }] : []),
