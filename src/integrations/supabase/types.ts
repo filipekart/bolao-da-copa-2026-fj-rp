@@ -51,6 +51,13 @@ export type Database = {
             foreignKeyName: "knockout_predictions_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "v_group_standings"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "knockout_predictions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "v_matches_with_teams"
             referencedColumns: ["away_team_id"]
           },
@@ -99,6 +106,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knockout_results_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "v_group_standings"
+            referencedColumns: ["team_id"]
           },
           {
             foreignKeyName: "knockout_results_team_id_fkey"
@@ -285,6 +299,13 @@ export type Database = {
             foreignKeyName: "matches_away_team_id_fkey"
             columns: ["away_team_id"]
             isOneToOne: false
+            referencedRelation: "v_group_standings"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "matches_away_team_id_fkey"
+            columns: ["away_team_id"]
+            isOneToOne: false
             referencedRelation: "v_matches_with_teams"
             referencedColumns: ["away_team_id"]
           },
@@ -306,6 +327,13 @@ export type Database = {
             foreignKeyName: "matches_home_team_id_fkey"
             columns: ["home_team_id"]
             isOneToOne: false
+            referencedRelation: "v_group_standings"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "matches_home_team_id_fkey"
+            columns: ["home_team_id"]
+            isOneToOne: false
             referencedRelation: "v_matches_with_teams"
             referencedColumns: ["away_team_id"]
           },
@@ -322,6 +350,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_winner_team_id_fkey"
+            columns: ["winner_team_id"]
+            isOneToOne: false
+            referencedRelation: "v_group_standings"
+            referencedColumns: ["team_id"]
           },
           {
             foreignKeyName: "matches_winner_team_id_fkey"
@@ -413,6 +448,23 @@ export type Database = {
       }
     }
     Views: {
+      v_group_standings: {
+        Row: {
+          draws: number | null
+          flag_url: string | null
+          goal_difference: number | null
+          goals_against: number | null
+          goals_for: number | null
+          group_name: string | null
+          losses: number | null
+          played: number | null
+          points: number | null
+          team_id: string | null
+          team_name: string | null
+          wins: number | null
+        }
+        Relationships: []
+      }
       v_matches_with_teams: {
         Row: {
           away_team_flag_url: string | null
