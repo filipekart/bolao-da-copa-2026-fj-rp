@@ -83,6 +83,15 @@ function AuthGuard() {
   return <AuthPage />;
 }
 
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/auth" element={<AuthGuard />} />
+      <Route path="/*" element={<ProtectedRoutes />} />
+    </Routes>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -90,10 +99,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/auth" element={<AuthGuard />} />
-            <Route path="/*" element={<ProtectedRoutes />} />
-          </Routes>
+          <AppRoutes />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
