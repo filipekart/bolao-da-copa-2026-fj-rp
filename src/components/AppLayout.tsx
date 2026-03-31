@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, History, Swords, Medal, User, Shield, Trophy } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useMatchReminders } from '@/hooks/useMatchReminders';
+import { usePushSubscription } from '@/hooks/usePushSubscription';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
