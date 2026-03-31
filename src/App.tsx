@@ -14,6 +14,7 @@ import RankingPage from "./pages/RankingPage";
 import ChampionPage from "./pages/ChampionPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
 import { Loader2, ShieldAlert } from "lucide-react";
 
