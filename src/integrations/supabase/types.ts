@@ -14,16 +14,501 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      knockout_predictions: {
+        Row: {
+          created_at: string
+          id: string
+          stage: Database["public"]["Enums"]["knockout_stage"]
+          submitted_at: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          stage: Database["public"]["Enums"]["knockout_stage"]
+          submitted_at?: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          stage?: Database["public"]["Enums"]["knockout_stage"]
+          submitted_at?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knockout_predictions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knockout_predictions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["away_team_id"]
+          },
+          {
+            foreignKeyName: "knockout_predictions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["home_team_id"]
+          },
+          {
+            foreignKeyName: "knockout_predictions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knockout_results: {
+        Row: {
+          confirmed_at: string
+          created_at: string
+          id: string
+          stage: Database["public"]["Enums"]["knockout_stage"]
+          team_id: string
+        }
+        Insert: {
+          confirmed_at?: string
+          created_at?: string
+          id?: string
+          stage: Database["public"]["Enums"]["knockout_stage"]
+          team_id: string
+        }
+        Update: {
+          confirmed_at?: string
+          created_at?: string
+          id?: string
+          stage?: Database["public"]["Enums"]["knockout_stage"]
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knockout_results_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knockout_results_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["away_team_id"]
+          },
+          {
+            foreignKeyName: "knockout_results_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["home_team_id"]
+          },
+        ]
+      }
+      leaderboard: {
+        Row: {
+          exact_hits: number
+          points_knockout: number
+          points_matches: number
+          points_total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          exact_hits?: number
+          points_knockout?: number
+          points_matches?: number
+          points_total?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          exact_hits?: number
+          points_knockout?: number
+          points_matches?: number
+          points_total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leaderboard_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      match_predictions: {
+        Row: {
+          created_at: string
+          id: string
+          match_id: string
+          points_awarded: number
+          predicted_away_score: number
+          predicted_home_score: number
+          rule_applied: Database["public"]["Enums"]["prediction_rule"]
+          scored_at: string | null
+          submitted_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_id: string
+          points_awarded?: number
+          predicted_away_score: number
+          predicted_home_score: number
+          rule_applied?: Database["public"]["Enums"]["prediction_rule"]
+          scored_at?: string | null
+          submitted_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_id?: string
+          points_awarded?: number
+          predicted_away_score?: number
+          predicted_home_score?: number
+          rule_applied?: Database["public"]["Enums"]["prediction_rule"]
+          scored_at?: string | null
+          submitted_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_predictions_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_predictions_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_predictions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matches: {
+        Row: {
+          away_team_id: string
+          city: string | null
+          created_at: string
+          external_id: string | null
+          home_team_id: string
+          id: string
+          kickoff_at: string
+          match_number: number | null
+          official_away_score: number | null
+          official_home_score: number | null
+          source_name: string
+          stage: Database["public"]["Enums"]["match_stage"]
+          status: Database["public"]["Enums"]["match_status"]
+          synced_at: string | null
+          updated_at: string
+          venue: string | null
+          winner_team_id: string | null
+        }
+        Insert: {
+          away_team_id: string
+          city?: string | null
+          created_at?: string
+          external_id?: string | null
+          home_team_id: string
+          id?: string
+          kickoff_at: string
+          match_number?: number | null
+          official_away_score?: number | null
+          official_home_score?: number | null
+          source_name?: string
+          stage: Database["public"]["Enums"]["match_stage"]
+          status?: Database["public"]["Enums"]["match_status"]
+          synced_at?: string | null
+          updated_at?: string
+          venue?: string | null
+          winner_team_id?: string | null
+        }
+        Update: {
+          away_team_id?: string
+          city?: string | null
+          created_at?: string
+          external_id?: string | null
+          home_team_id?: string
+          id?: string
+          kickoff_at?: string
+          match_number?: number | null
+          official_away_score?: number | null
+          official_home_score?: number | null
+          source_name?: string
+          stage?: Database["public"]["Enums"]["match_stage"]
+          status?: Database["public"]["Enums"]["match_status"]
+          synced_at?: string | null
+          updated_at?: string
+          venue?: string | null
+          winner_team_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_away_team_id_fkey"
+            columns: ["away_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_away_team_id_fkey"
+            columns: ["away_team_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["away_team_id"]
+          },
+          {
+            foreignKeyName: "matches_away_team_id_fkey"
+            columns: ["away_team_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["home_team_id"]
+          },
+          {
+            foreignKeyName: "matches_home_team_id_fkey"
+            columns: ["home_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_home_team_id_fkey"
+            columns: ["home_team_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["away_team_id"]
+          },
+          {
+            foreignKeyName: "matches_home_team_id_fkey"
+            columns: ["home_team_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["home_team_id"]
+          },
+          {
+            foreignKeyName: "matches_winner_team_id_fkey"
+            columns: ["winner_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_winner_team_id_fkey"
+            columns: ["winner_team_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["away_team_id"]
+          },
+          {
+            foreignKeyName: "matches_winner_team_id_fkey"
+            columns: ["winner_team_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["home_team_id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      teams: {
+        Row: {
+          created_at: string
+          external_id: string | null
+          fifa_code: string | null
+          flag_url: string | null
+          group_name: string | null
+          id: string
+          name: string
+          short_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          external_id?: string | null
+          fifa_code?: string | null
+          flag_url?: string | null
+          group_name?: string | null
+          id?: string
+          name: string
+          short_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          external_id?: string | null
+          fifa_code?: string | null
+          flag_url?: string | null
+          group_name?: string | null
+          id?: string
+          name?: string
+          short_name?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      v_matches_with_teams: {
+        Row: {
+          away_team_flag_url: string | null
+          away_team_id: string | null
+          away_team_name: string | null
+          city: string | null
+          external_id: string | null
+          home_team_flag_url: string | null
+          home_team_id: string | null
+          home_team_name: string | null
+          id: string | null
+          kickoff_at: string | null
+          match_number: number | null
+          official_away_score: number | null
+          official_home_score: number | null
+          source_name: string | null
+          stage: Database["public"]["Enums"]["match_stage"] | null
+          status: Database["public"]["Enums"]["match_status"] | null
+          venue: string | null
+        }
+        Relationships: []
+      }
+      v_ranking: {
+        Row: {
+          display_name: string | null
+          exact_hits: number | null
+          points_knockout: number | null
+          points_matches: number | null
+          points_total: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leaderboard_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
-      [_ in never]: never
+      calculate_match_prediction_points: {
+        Args: {
+          pred_away: number
+          pred_home: number
+          real_away: number
+          real_home: number
+        }
+        Returns: {
+          points: number
+          rule_applied: Database["public"]["Enums"]["prediction_rule"]
+        }[]
+      }
+      get_result_label: {
+        Args: { away_goals: number; home_goals: number }
+        Returns: string
+      }
+      refresh_leaderboard: { Args: never; Returns: undefined }
+      score_finished_matches: { Args: never; Returns: undefined }
+      submit_match_prediction: {
+        Args: {
+          p_match_id: string
+          p_predicted_away_score: number
+          p_predicted_home_score: number
+        }
+        Returns: {
+          created_at: string
+          id: string
+          match_id: string
+          points_awarded: number
+          predicted_away_score: number
+          predicted_home_score: number
+          rule_applied: Database["public"]["Enums"]["prediction_rule"]
+          scored_at: string | null
+          submitted_at: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "match_predictions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
-      [_ in never]: never
+      knockout_stage:
+        | "ROUND_OF_16"
+        | "QUARTER_FINAL"
+        | "SEMI_FINAL"
+        | "FINAL"
+        | "CHAMPION"
+      match_stage:
+        | "GROUP_STAGE"
+        | "ROUND_OF_32"
+        | "ROUND_OF_16"
+        | "QUARTER_FINAL"
+        | "SEMI_FINAL"
+        | "FINAL"
+      match_status:
+        | "SCHEDULED"
+        | "LIVE"
+        | "FINISHED"
+        | "CANCELLED"
+        | "POSTPONED"
+      prediction_rule:
+        | "EXACT_SCORE"
+        | "RESULT_ONLY"
+        | "WINNER_AND_WINNER_GOALS"
+        | "WINNER_AND_LOSER_GOALS"
+        | "DRAW_RESULT_ONLY"
+        | "MISS"
+        | "PENDING"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +635,32 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      knockout_stage: [
+        "ROUND_OF_16",
+        "QUARTER_FINAL",
+        "SEMI_FINAL",
+        "FINAL",
+        "CHAMPION",
+      ],
+      match_stage: [
+        "GROUP_STAGE",
+        "ROUND_OF_32",
+        "ROUND_OF_16",
+        "QUARTER_FINAL",
+        "SEMI_FINAL",
+        "FINAL",
+      ],
+      match_status: ["SCHEDULED", "LIVE", "FINISHED", "CANCELLED", "POSTPONED"],
+      prediction_rule: [
+        "EXACT_SCORE",
+        "RESULT_ONLY",
+        "WINNER_AND_WINNER_GOALS",
+        "WINNER_AND_LOSER_GOALS",
+        "DRAW_RESULT_ONLY",
+        "MISS",
+        "PENDING",
+      ],
+    },
   },
 } as const
