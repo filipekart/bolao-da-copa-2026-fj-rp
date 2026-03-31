@@ -341,16 +341,19 @@ export type Database = {
       }
       profiles: {
         Row: {
+          approved: boolean
           created_at: string
           display_name: string
           id: string
         }
         Insert: {
+          approved?: boolean
           created_at?: string
           display_name: string
           id: string
         }
         Update: {
+          approved?: boolean
           created_at?: string
           display_name?: string
           id?: string
@@ -387,6 +390,24 @@ export type Database = {
           id?: string
           name?: string
           short_name?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -452,6 +473,13 @@ export type Database = {
         Args: { away_goals: number; home_goals: number }
         Returns: string
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       refresh_leaderboard: { Args: never; Returns: undefined }
       score_finished_matches: { Args: never; Returns: undefined }
       submit_match_prediction: {
@@ -482,6 +510,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "user"
       knockout_stage:
         | "ROUND_OF_16"
         | "QUARTER_FINAL"
@@ -636,6 +665,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "user"],
       knockout_stage: [
         "ROUND_OF_16",
         "QUARTER_FINAL",
