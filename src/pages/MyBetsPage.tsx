@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useMyPredictions } from '@/hooks/usePredictions';
-import { Loader2, History, Clock, MapPin } from 'lucide-react';
+import { Loader2, History, Clock, MapPin, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
 
 const ruleLabels: Record<string, { label: string; color: string }> = {
   EXACT_SCORE: { label: '🎯 Placar exato! +25', color: 'text-primary' },
@@ -20,6 +22,7 @@ function formatDate(iso: string) {
 
 export default function MyBetsPage() {
   const { data: predictions, isLoading } = useMyPredictions();
+  const [search, setSearch] = useState('');
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -36,14 +39,32 @@ export default function MyBetsPage() {
         <History className="w-5 h-5 text-primary" /> Meus Palpites
       </h1>
 
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar por time..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+
       {!predictions?.length ? (
         <div className="text-center py-12 text-muted-foreground">
           <p>Você ainda não fez nenhum palpite.</p>
         </div>
       ) : (
         (() => {
+          const q = search.toLowerCase().trim();
+          const filtered = predictions.filter(p => {
+            if (!q) return true;
+            const m = p.match;
+            return m?.home_team_name?.toLowerCase().includes(q) ||
+                   m?.away_team_name?.toLowerCase().includes(q);
+          });
+
           // Sort by kickoff date
-          const sorted = [...predictions].sort((a, b) => {
+          const sorted = [...filtered].sort((a, b) => {
             const da = a.match?.kickoff_at ? new Date(a.match.kickoff_at).getTime() : 0;
             const db = b.match?.kickoff_at ? new Date(b.match.kickoff_at).getTime() : 0;
             return da - db;
