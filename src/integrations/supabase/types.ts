@@ -433,6 +433,62 @@ export type Database = {
           },
         ]
       }
+      players: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          position: string | null
+          shirt_number: number | null
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          position?: string | null
+          shirt_number?: number | null
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          position?: string | null
+          shirt_number?: number | null
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "players_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "players_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "v_group_standings"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "players_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["away_team_id"]
+          },
+          {
+            foreignKeyName: "players_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "v_matches_with_teams"
+            referencedColumns: ["home_team_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           approved: boolean
