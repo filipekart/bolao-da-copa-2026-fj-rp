@@ -42,6 +42,7 @@ export interface PendingUser {
   display_name: string;
   approved: boolean;
   created_at: string;
+  pix_key: string | null;
 }
 
 export function usePendingUsers() {
@@ -50,7 +51,7 @@ export function usePendingUsers() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, display_name, approved, created_at')
+        .select('id, display_name, approved, created_at, pix_key')
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data as PendingUser[];

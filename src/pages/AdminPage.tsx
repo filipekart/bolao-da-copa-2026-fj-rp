@@ -57,15 +57,32 @@ function UserApprovalSection() {
           <p className="text-sm text-muted-foreground">Aprovados ({approved.length})</p>
           {approved.map(u => (
             <div key={u.id} className="glass rounded-xl p-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-primary" />
-                <span className="text-sm text-foreground">{u.display_name}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-primary shrink-0" />
+                  <span className="text-sm text-foreground">{u.display_name}</span>
+                </div>
+                {u.pix_key && (
+                  <div className="flex items-center gap-1.5 mt-1 ml-6">
+                    <Wallet className="w-3 h-3 text-accent" />
+                    <span className="text-[11px] text-muted-foreground truncate max-w-[180px]">{u.pix_key}</span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(u.pix_key!);
+                        toast.success('PIX copiado!');
+                      }}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
               </div>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={() => approveUser.mutate({ userId: u.id, approved: false })}
-                className="text-destructive hover:text-destructive"
+                className="text-destructive hover:text-destructive shrink-0"
               >
                 <X className="w-4 h-4" />
               </Button>
