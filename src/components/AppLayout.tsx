@@ -10,6 +10,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const { isAdmin } = useAuth();
   useMatchReminders();
+  usePushSubscription();
 
   const tabs = [
     { path: '/', icon: Home, label: 'Jogos' },
