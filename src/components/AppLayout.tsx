@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, History, Swords, Medal, User, Shield } from 'lucide-react';
+import { Home, History, Swords, Medal, User, Shield, Trophy } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -12,6 +12,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     { path: '/', icon: Home, label: 'Jogos' },
     { path: '/bets', icon: History, label: 'Palpites' },
     { path: '/knockout', icon: Swords, label: '2ª Fase' },
+    { path: '/champion', icon: Trophy, label: 'Campeão' },
     { path: '/ranking', icon: Medal, label: 'Ranking' },
     { path: '/profile', icon: User, label: 'Perfil' },
     ...(isAdmin ? [{ path: '/admin', icon: Shield, label: 'Admin' }] : []),
