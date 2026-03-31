@@ -21,7 +21,7 @@ export interface MatchWithTeams {
   away_team_flag_url: string | null;
 }
 
-export function useMatches(stage?: string) {
+export function useMatches(stage?: 'GROUP_STAGE' | 'ROUND_OF_32' | 'ROUND_OF_16' | 'QUARTER_FINAL' | 'SEMI_FINAL' | 'FINAL') {
   return useQuery({
     queryKey: ['matches', stage],
     queryFn: async () => {
