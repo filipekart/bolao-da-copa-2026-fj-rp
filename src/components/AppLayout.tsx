@@ -2,11 +2,13 @@ import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, History, Swords, Medal, User, Shield, Trophy } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
+import { useMatchReminders } from '@/hooks/useMatchReminders';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin } = useAuth();
+  useMatchReminders();
 
   const tabs = [
     { path: '/', icon: Home, label: 'Jogos' },
