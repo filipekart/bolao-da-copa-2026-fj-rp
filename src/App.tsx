@@ -90,6 +90,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/auth" element={<AuthGuard />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/*" element={<ProtectedRoutes />} />
     </Routes>
   );
