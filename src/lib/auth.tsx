@@ -6,6 +6,9 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isAdmin: boolean;
+  isApproved: boolean;
+  profileLoading: boolean;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -17,18 +20,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  const fetchProfileData = async (userId: string) => {
+    setProfileLoading(true);
+    try {
+      const [profileRes, roleRes] = await Promise.all([
+        supabase.from('profiles').select('approved').eq('id', userId).single(),
+        supabase.from('user_roles').select('role').eq('user_id', userId).eq('role', 'admin'),
+      ]);
+      setIsApproved(profileRes.data?.approved ?? false);
+      setIsAdmin((roleRes.data?.length ?? 0) > 0);
+    } catch {
+      setIsApproved(false);
+      setIsAdmin(false);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session?.user) {
+        setTimeout(() => fetchProfileData(session.user.id), 0);
+      } else {
+        setIsAdmin(false);
+        setIsApproved(false);
+        setProfileLoading(false);
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session?.user) {
+        fetchProfileData(session.user.id);
+      } else {
+        setProfileLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -57,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, isApproved, profileLoading, signUp, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );
