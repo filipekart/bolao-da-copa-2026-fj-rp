@@ -188,11 +188,17 @@ function GroupCard({
   }));
   const standings = calculatePredictedStandings(predictedMatches);
 
-  // Get unique teams in this group
+  // Get unique teams in this group, seed (first match home team) first
   const groupTeamIds = useMemo(() => {
     const ids = new Set<string>();
     matches.forEach(m => { ids.add(m.home_team_id); ids.add(m.away_team_id); });
-    return Array.from(ids);
+    // The first match's home team is typically the head seed
+    const seedId = matches[0]?.home_team_id;
+    const arr = Array.from(ids);
+    if (seedId) {
+      arr.sort((a, b) => (a === seedId ? -1 : b === seedId ? 1 : 0));
+    }
+    return arr;
   }, [matches]);
 
   return (
