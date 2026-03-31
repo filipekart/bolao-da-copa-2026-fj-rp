@@ -11,7 +11,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const tabs = [
     { path: '/', icon: Home, label: 'Jogos' },
     { path: '/bets', icon: History, label: 'Palpites' },
-    { path: '/knockout', icon: Swords, label: 'Mata-mata' },
+    { path: '/knockout', icon: Swords, label: '2ª Fase' },
     { path: '/ranking', icon: Medal, label: 'Ranking' },
     { path: '/profile', icon: User, label: 'Perfil' },
     ...(isAdmin ? [{ path: '/admin', icon: Shield, label: 'Admin' }] : []),
