@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, History, Swords, Medal, User, Shield, Trophy } from 'lucide-react';
+import { Home, History, Swords, Medal, User, Shield, Star } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useMatchReminders } from '@/hooks/useMatchReminders';
 import { usePushSubscription } from '@/hooks/usePushSubscription';
