@@ -1,18 +1,21 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, History, Swords, Medal, User } from 'lucide-react';
-
-const tabs = [
-  { path: '/', icon: Home, label: 'Jogos' },
-  { path: '/bets', icon: History, label: 'Palpites' },
-  { path: '/knockout', icon: Swords, label: 'Mata-mata' },
-  { path: '/ranking', icon: Medal, label: 'Ranking' },
-  { path: '/profile', icon: User, label: 'Perfil' },
-];
+import { Home, History, Swords, Medal, User, Shield } from 'lucide-react';
+import { useAuth } from '@/lib/auth';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAdmin } = useAuth();
+
+  const tabs = [
+    { path: '/', icon: Home, label: 'Jogos' },
+    { path: '/bets', icon: History, label: 'Palpites' },
+    { path: '/knockout', icon: Swords, label: 'Mata-mata' },
+    { path: '/ranking', icon: Medal, label: 'Ranking' },
+    { path: '/profile', icon: User, label: 'Perfil' },
+    ...(isAdmin ? [{ path: '/admin', icon: Shield, label: 'Admin' }] : []),
+  ];
 
   return (
     <div className="min-h-screen gradient-dark flex flex-col">
@@ -20,7 +23,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      {/* Bottom tab bar */}
       <nav className="fixed bottom-0 left-0 right-0 glass border-t border-border">
         <div className="max-w-lg mx-auto flex items-center justify-around py-2">
           {tabs.map(tab => {
@@ -29,7 +31,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <button
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
-                className={`flex flex-col items-center gap-0.5 px-3 py-1 transition-all ${
+                className={`flex flex-col items-center gap-0.5 px-2 py-1 transition-all ${
                   isActive ? 'text-primary' : 'text-muted-foreground'
                 }`}
               >
