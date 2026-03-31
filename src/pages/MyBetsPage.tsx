@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useMyPredictions } from '@/hooks/usePredictions';
-import { Loader2, History, Clock, MapPin } from 'lucide-react';
+import { Loader2, History, Clock, MapPin, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
 
 const ruleLabels: Record<string, { label: string; color: string }> = {
   EXACT_SCORE: { label: '🎯 Placar exato! +25', color: 'text-primary' },
