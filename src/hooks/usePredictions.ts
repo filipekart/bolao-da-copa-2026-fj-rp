@@ -8,13 +8,29 @@ export function useMyPredictions() {
   return useQuery({
     queryKey: ['my-predictions', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Get predictions
+      const { data: predictions, error } = await supabase
         .from('match_predictions')
-        .select('*, matches(*)')
+        .select('*')
         .eq('user_id', user!.id)
         .order('submitted_at', { ascending: false });
       if (error) throw error;
-      return data;
+
+      if (!predictions?.length) return [];
+
+      // Get match details with teams
+      const matchIds = [...new Set(predictions.map(p => p.match_id))];
+      const { data: matches, error: matchErr } = await supabase
+        .from('v_matches_with_teams')
+        .select('*')
+        .in('id', matchIds);
+      if (matchErr) throw matchErr;
+
+      const matchMap = new Map(matches?.map(m => [m.id, m]) ?? []);
+      return predictions.map(p => ({
+        ...p,
+        match: matchMap.get(p.match_id) ?? null,
+      }));
     },
     enabled: !!user,
   });
