@@ -569,6 +569,7 @@ export type Database = {
         | "SEMI_FINAL"
         | "FINAL"
         | "CHAMPION"
+        | "ROUND_OF_32"
       match_stage:
         | "GROUP_STAGE"
         | "ROUND_OF_32"
@@ -724,6 +725,7 @@ export const Constants = {
         "SEMI_FINAL",
         "FINAL",
         "CHAMPION",
+        "ROUND_OF_32",
       ],
       match_stage: [
         "GROUP_STAGE",
