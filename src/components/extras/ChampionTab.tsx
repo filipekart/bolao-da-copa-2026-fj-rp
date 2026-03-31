@@ -102,7 +102,7 @@ export default function ChampionTab() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Escolha quem será o campeão da Copa 2026. Vale <span className="text-accent font-bold">50 pontos</span>!
+        Escolha quem será o campeão da Copa 2026. Vale <span className="text-accent font-bold">100 pontos</span>!
       </p>
 
       {isLocked && (
