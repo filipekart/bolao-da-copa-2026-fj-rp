@@ -108,7 +108,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">{description}</p>
+      <p className="text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: description.replace(/(\d+ pontos!)/, '<span class="text-accent font-bold">$1</span>') }} />
 
       {isLocked && (
         <div className="glass rounded-xl p-4 flex items-center gap-3 border border-accent/30">
