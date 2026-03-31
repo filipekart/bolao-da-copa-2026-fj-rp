@@ -380,18 +380,21 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          pix_key: string | null
         }
         Insert: {
           approved?: boolean
           created_at?: string
           display_name: string
           id: string
+          pix_key?: string | null
         }
         Update: {
           approved?: boolean
           created_at?: string
           display_name?: string
           id?: string
+          pix_key?: string | null
         }
         Relationships: []
       }
