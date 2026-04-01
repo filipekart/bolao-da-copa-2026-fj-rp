@@ -20,10 +20,9 @@ export function useGroupRanking() {
 
       if (predError) throw predError;
 
-      // Get profiles for display names
+      // Get profiles for display names (using secure function that excludes pix_key)
       const { data: profiles, error: profError } = await supabase
-        .from('profiles')
-        .select('id, display_name');
+        .rpc('get_public_profiles');
 
       if (profError) throw profError;
 
