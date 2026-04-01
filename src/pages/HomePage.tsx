@@ -166,6 +166,15 @@ function GroupCard({
   teamNames,
   teamFlags,
   existingPredictionIds,
+  hasUpcoming24h,
+  matches,
+  scores,
+  onScoreChange,
+  onSave,
+  saving,
+  teamNames,
+  teamFlags,
+  existingPredictionIds,
 }: {
   groupName: string;
   matches: MatchWithTeams[];

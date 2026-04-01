@@ -67,7 +67,8 @@
     "savedSuccess": "¡Pronósticos del Grupo {{group}} guardados!",
     "errorCount": "{{count}} pronóstico(s) con error: {{message}}",
     "saveError": "Error al guardar",
-    "liveNow": "EN VIVO ahora"
+    "liveNow": "EN VIVO ahora",
+    "next24h": "Próximas 24h"
   },
   "match": {
     "back": "Volver",
