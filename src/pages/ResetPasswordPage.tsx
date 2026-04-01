@@ -15,18 +15,32 @@ export default function ResetPasswordPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Listen for PASSWORD_RECOVERY event from Supabase (works with both hash and PKCE flows)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsRecovery(true);
+      }
+    });
+
+    // Check hash for type=recovery (legacy/hash flow)
     const hash = window.location.hash;
     if (hash.includes('type=recovery')) {
       setIsRecovery(true);
-    } else {
-      // Listen for auth state change with recovery event
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-        if (event === 'PASSWORD_RECOVERY') {
+    }
+
+    // Check URL params for PKCE flow — exchange code for session
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const type = params.get('type');
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (!error && type === 'recovery') {
           setIsRecovery(true);
         }
       });
-      return () => subscription.unsubscribe();
     }
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleReset = async (e: React.FormEvent) => {
