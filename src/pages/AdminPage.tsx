@@ -163,7 +163,6 @@ function UserApprovalSection() {
                   </div>
                 )}
               </div>
-              </div>
             </div>
           ))}
         </div>
