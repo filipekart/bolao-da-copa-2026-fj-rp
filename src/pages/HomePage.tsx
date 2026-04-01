@@ -365,6 +365,33 @@ export default function HomePage() {
     return new Map(Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b)));
   }, [matches, teamGroups]);
 
+  // Determine which groups have matches in the next 24h
+  const upcoming24hGroups = useMemo(() => {
+    const now = new Date();
+    const in24h = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const set = new Set<string>();
+    for (const [groupName, groupMatches] of matchesByGroup) {
+      if (groupMatches.some(m => {
+        const k = new Date(m.kickoff_at);
+        return k > now && k <= in24h;
+      })) {
+        set.add(groupName);
+      }
+    }
+    return set;
+  }, [matchesByGroup]);
+
+  // Sort groups: upcoming 24h first, then alphabetical
+  const sortedGroupEntries = useMemo(() => {
+    return Array.from(matchesByGroup.entries()).sort(([a], [b]) => {
+      const aUp = upcoming24hGroups.has(a);
+      const bUp = upcoming24hGroups.has(b);
+      if (aUp && !bUp) return -1;
+      if (!aUp && bUp) return 1;
+      return a.localeCompare(b);
+    });
+  }, [matchesByGroup, upcoming24hGroups]);
+
   const existingPredictionIds = useMemo(() => {
     return new Set(existingPredictions?.map(p => p.match_id) ?? []);
   }, [existingPredictions]);
