@@ -73,7 +73,9 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
       })}
     </div>
   );
-}
+});
+
+RankingList.displayName = 'RankingList';
 
 export default function RankingPage() {
   const { data: ranking, isLoading } = useRanking();
