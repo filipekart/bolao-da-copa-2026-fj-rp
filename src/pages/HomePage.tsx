@@ -89,7 +89,7 @@ function MatchRow({
         {match.away_team_flag_url && (
           <img src={match.away_team_flag_url} alt="" className="w-5 h-3.5 rounded-sm flex-shrink-0" />
         )}
-        <span className="text-xs text-foreground truncate">{match.away_team_name}</span>
+        <span className="text-xs text-foreground truncate">{awayName}</span>
       </div>
     </div>
   );
