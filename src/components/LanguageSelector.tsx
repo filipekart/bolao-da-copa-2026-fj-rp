@@ -5,6 +5,7 @@ const LANGUAGES = [
   { code: 'pt', label: '🇧🇷 PT', full: 'Português' },
   { code: 'en', label: '🇺🇸 EN', full: 'English' },
   { code: 'es', label: '🇪🇸 ES', full: 'Español' },
+  { code: 'fr', label: '🇫🇷 FR', full: 'Français' },
 ];
 
 export function LanguageSelector({ variant = 'compact' }: { variant?: 'compact' | 'full' }) {
