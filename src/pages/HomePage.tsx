@@ -24,13 +24,17 @@ function MatchRow({
   score,
   onChange,
   locked,
+  teamNames,
 }: {
   match: MatchWithTeams;
   score: { home: number; away: number };
   onChange: (home: number, away: number) => void;
   locked: boolean;
+  teamNames?: Map<string, string>;
 }) {
   const isFinished = match.status === 'FINISHED';
+  const homeName = teamNames?.get(match.home_team_id) ?? match.home_team_name;
+  const awayName = teamNames?.get(match.away_team_id) ?? match.away_team_name;
 
   return (
     <div className="flex items-center gap-1 py-2">
