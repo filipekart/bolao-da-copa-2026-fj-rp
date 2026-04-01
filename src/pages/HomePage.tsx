@@ -476,8 +476,8 @@ export default function HomePage() {
         <div className="flex items-center gap-3">
           <Trophy className="w-7 h-7 text-primary-foreground" />
           <div>
-            <h1 className="text-lg font-display font-bold text-primary-foreground">Copa 2026</h1>
-            <p className="text-primary-foreground/80 text-xs">Aposte em todos os jogos por grupo</p>
+         <h1 className="text-lg font-display font-bold text-primary-foreground">{t('home.title')}</h1>
+            <p className="text-primary-foreground/80 text-xs">{t('home.subtitle')}</p>
           </div>
         </div>
       </div>
