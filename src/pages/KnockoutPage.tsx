@@ -88,7 +88,7 @@ function GroupTable({ group, standings }: { group: string; standings: GroupStand
                   <td className="px-2 py-2">
                     <div className="flex items-center gap-1.5">
                       {s.flag_url && <img src={s.flag_url} alt="" className="w-4 h-3 rounded-sm" />}
-                      <span className="text-foreground font-medium truncate max-w-[80px]">{s.team_name}</span>
+                      <span className="text-foreground font-medium truncate max-w-[80px]">{tt(s.team_id, s.team_name)}</span>
                     </div>
                   </td>
                   <td className="text-center px-1 py-2 text-muted-foreground">{s.played}</td>
