@@ -1,17 +1,25 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, History, Swords, Medal, User, Shield, Star, Trophy } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useMatchReminders } from '@/hooks/useMatchReminders';
 import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { RulesModal } from '@/components/RulesModal';
+import { NotificationBanner } from '@/components/NotificationBanner';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin } = useAuth();
   useMatchReminders();
-  usePushSubscription();
+  const { subscribe } = usePushSubscription();
+
+  // Auto-subscribe if permission already granted
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      subscribe();
+    }
+  }, [subscribe]);
 
   const tabs = [
     { path: '/', icon: Home, label: 'Jogos' },
