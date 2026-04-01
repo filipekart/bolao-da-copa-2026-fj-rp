@@ -3,19 +3,10 @@ import { useMyPredictions } from '@/hooks/usePredictions';
 import { Loader2, History, Clock, MapPin, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
+import { useTranslation } from 'react-i18next';
 
-const ruleLabels: Record<string, { label: string; color: string }> = {
-  EXACT_SCORE: { label: '🎯 Placar exato! +25', color: 'text-primary' },
-  WINNER_AND_WINNER_GOALS: { label: '✅ Vencedor + gols do vencedor +18', color: 'text-primary' },
-  WINNER_AND_LOSER_GOALS: { label: '✅ Vencedor + gols do perdedor +12', color: 'text-primary' },
-  RESULT_ONLY: { label: '👍 Resultado certo +10', color: 'text-accent' },
-  DRAW_RESULT_ONLY: { label: '👍 Empate certo +10', color: 'text-accent' },
-  MISS: { label: '❌ Errou', color: 'text-destructive' },
-  PENDING: { label: '⏳ Aguardando resultado', color: 'text-muted-foreground' },
-};
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('pt-BR', {
+function formatDate(iso: string, lang: string) {
+  return new Date(iso).toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', {
     day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
   });
 }
@@ -24,6 +15,18 @@ export default function MyBetsPage() {
   const { data: predictions, isLoading } = useMyPredictions();
   const [search, setSearch] = useState('');
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.substring(0, 2) ?? 'pt';
+
+  const ruleLabels: Record<string, { label: string; color: string }> = {
+    EXACT_SCORE: { label: t('bets.rules.EXACT_SCORE'), color: 'text-primary' },
+    WINNER_AND_WINNER_GOALS: { label: t('bets.rules.WINNER_AND_WINNER_GOALS'), color: 'text-primary' },
+    WINNER_AND_LOSER_GOALS: { label: t('bets.rules.WINNER_AND_LOSER_GOALS'), color: 'text-primary' },
+    RESULT_ONLY: { label: t('bets.rules.RESULT_ONLY'), color: 'text-accent' },
+    DRAW_RESULT_ONLY: { label: t('bets.rules.DRAW_RESULT_ONLY'), color: 'text-accent' },
+    MISS: { label: t('bets.rules.MISS'), color: 'text-destructive' },
+    PENDING: { label: t('bets.rules.PENDING'), color: 'text-muted-foreground' },
+  };
 
   if (isLoading) {
     return (
@@ -36,13 +39,13 @@ export default function MyBetsPage() {
   return (
     <div className="space-y-4 animate-fade-in">
       <h1 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
-        <History className="w-5 h-5 text-primary" /> Meus Palpites
+        <History className="w-5 h-5 text-primary" /> {t('bets.title')}
       </h1>
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
-          placeholder="Buscar por time..."
+          placeholder={t('bets.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-9"
@@ -51,7 +54,7 @@ export default function MyBetsPage() {
 
       {!predictions?.length ? (
         <div className="text-center py-12 text-muted-foreground">
-          <p>Você ainda não fez nenhum palpite.</p>
+          <p>{t('bets.noPredictions')}</p>
         </div>
       ) : (
         (() => {
@@ -63,14 +66,12 @@ export default function MyBetsPage() {
                    m?.away_team_name?.toLowerCase().includes(q);
           });
 
-          // Sort by kickoff date
           const sorted = [...filtered].sort((a, b) => {
             const da = a.match?.kickoff_at ? new Date(a.match.kickoff_at).getTime() : 0;
             const db = b.match?.kickoff_at ? new Date(b.match.kickoff_at).getTime() : 0;
             return da - db;
           });
 
-          // Group by group_name
           const groups = new Map<string, typeof sorted>();
           for (const p of sorted) {
             const groupName = (p.match as any)?.group_name ?? 'Outros';
@@ -78,7 +79,6 @@ export default function MyBetsPage() {
             groups.get(groupName)!.push(p);
           }
 
-          // Sort group keys (A, B, C... then "Outros" last)
           const sortedKeys = [...groups.keys()].sort((a, b) => {
             if (a === 'Outros') return 1;
             if (b === 'Outros') return -1;
@@ -90,7 +90,7 @@ export default function MyBetsPage() {
               {sortedKeys.map(groupName => (
                 <div key={groupName}>
                   <h2 className="text-sm font-bold text-primary mb-2">
-                    Grupo {groupName}
+                    {t('bets.group')} {groupName}
                   </h2>
                   <div className="space-y-3">
                     {groups.get(groupName)!.map((p) => {
@@ -107,10 +107,10 @@ export default function MyBetsPage() {
                           {match && (
                             <>
                               <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                                <span>{match.stage?.replace(/_/g, ' ')}</span>
+                                <span>{t(`match.stages.${match.stage}`, match.stage?.replace(/_/g, ' '))}</span>
                                 <div className="flex items-center gap-1">
                                   <Clock className="w-3 h-3" />
-                                  {formatDate(match.kickoff_at!)}
+                                  {formatDate(match.kickoff_at!, lang)}
                                 </div>
                               </div>
 
@@ -156,7 +156,7 @@ export default function MyBetsPage() {
                           <div className="flex items-center justify-between pt-2 border-t border-border/50">
                             <div>
                               <p className="text-xs text-muted-foreground">
-                                Seu palpite:{' '}
+                                {t('bets.yourPrediction')}:{' '}
                                 <span className="text-foreground font-semibold">
                                   {p.predicted_home_score} × {p.predicted_away_score}
                                 </span>
