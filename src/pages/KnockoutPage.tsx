@@ -147,7 +147,7 @@ function BracketMatchCard({
           )}
           <div className="min-w-0">
             <span className="text-sm text-foreground font-medium truncate block">
-              {hasRealMatch ? realMatch.home_team_name : entry.home}
+              {hasRealMatch ? tt(realMatch.home_team_id, realMatch.home_team_name) : entry.home}
             </span>
             {hasRealMatch && (
               <span className="text-[9px] text-muted-foreground">{entry.homeLabel}</span>
