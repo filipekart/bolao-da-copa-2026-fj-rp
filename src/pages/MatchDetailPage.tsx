@@ -23,6 +23,7 @@ export default function MatchDetailPage() {
   const submitPrediction = useSubmitPrediction();
   const { t, i18n } = useTranslation();
   const lang = i18n.language?.substring(0, 2) ?? 'pt';
+  const tt = useTranslatedTeamName();
 
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
