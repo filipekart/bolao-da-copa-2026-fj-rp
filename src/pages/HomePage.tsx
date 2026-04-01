@@ -212,13 +212,16 @@ function GroupCard({
   }, [matches]);
 
   return (
-    <div className="glass rounded-xl overflow-hidden">
+    <div className={`glass rounded-xl overflow-hidden ${hasUpcoming24h ? 'ring-1 ring-primary/50' : ''}`}>
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center justify-between px-4 py-3"
       >
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-sm font-display font-bold text-foreground shrink-0">{t('home.group')} {groupName}</span>
+          {hasUpcoming24h && (
+            <span className="text-[10px] font-semibold text-destructive shrink-0">🔴 {t('home.next24h')}</span>
+          )}
           <span className="text-muted-foreground text-xs shrink-0">(</span>
           <div className="flex items-center gap-1 overflow-hidden">
             {groupTeamIds.map((id, i) => (
