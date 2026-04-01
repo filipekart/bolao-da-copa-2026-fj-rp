@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -29,7 +29,6 @@ export function usePushSubscription() {
     if (!user) return;
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
-    // Don't register SW in iframe (Lovable preview)
     try {
       if (window.self !== window.top) return;
     } catch {
@@ -40,12 +39,16 @@ export function usePushSubscription() {
       const registration = await navigator.serviceWorker.register('/sw.js');
       await navigator.serviceWorker.ready;
 
-      // Check existing subscription
       let subscription = await registration.pushManager.getSubscription();
 
       if (!subscription) {
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') return;
+        // If already granted (e.g. re-subscribe), go ahead; otherwise request
+        if (Notification.permission === 'default') {
+          const permission = await Notification.requestPermission();
+          if (permission !== 'granted') return;
+        } else if (Notification.permission !== 'granted') {
+          return;
+        }
 
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
@@ -53,7 +56,6 @@ export function usePushSubscription() {
         });
       }
 
-      // Save subscription to database
       const key = subscription.getKey('p256dh');
       const auth = subscription.getKey('auth');
       if (!key || !auth) return;
@@ -73,7 +75,5 @@ export function usePushSubscription() {
     }
   }, [user]);
 
-  useEffect(() => {
-    subscribe();
-  }, [subscribe]);
+  return { subscribe };
 }

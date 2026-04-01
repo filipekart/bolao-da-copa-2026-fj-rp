@@ -1,17 +1,25 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, History, Swords, Medal, User, Shield, Star, Trophy } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useMatchReminders } from '@/hooks/useMatchReminders';
 import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { RulesModal } from '@/components/RulesModal';
+import { NotificationBanner } from '@/components/NotificationBanner';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin } = useAuth();
   useMatchReminders();
-  usePushSubscription();
+  const { subscribe } = usePushSubscription();
+
+  // Auto-subscribe if permission already granted
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      subscribe();
+    }
+  }, [subscribe]);
 
   const tabs = [
     { path: '/', icon: Home, label: 'Jogos' },
@@ -28,6 +36,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
       {/* Header with rules button */}
       <div className="max-w-lg mx-auto w-full px-4 pt-3 flex justify-end">
         <RulesModal />
+      </div>
+      <div className="max-w-lg mx-auto w-full px-4">
+        <NotificationBanner onAccept={subscribe} />
       </div>
       <main className="flex-1 max-w-lg mx-auto w-full px-4 pb-24">
         {children}
