@@ -176,9 +176,10 @@ function GroupCard({
   teamNames: Map<string, string>;
   teamFlags: Map<string, string | null>;
   existingPredictionIds: Set<string>;
+  hasUpcoming24h?: boolean;
 }) {
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(!!hasUpcoming24h);
 
   const now = new Date();
   const allLocked = matches.every(m => new Date(m.kickoff_at) <= now);
