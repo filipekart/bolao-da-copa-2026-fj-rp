@@ -129,7 +129,7 @@ export default function MyBetsPage() {
                                     <img src={match.home_team_flag_url} alt="" className="w-6 h-4 rounded-sm" />
                                   )}
                                   <span className="text-sm font-medium text-foreground truncate">
-                                    {match.home_team_name}
+                                    {tt(match.home_team_id, match.home_team_name)}
                                   </span>
                                 </div>
 
