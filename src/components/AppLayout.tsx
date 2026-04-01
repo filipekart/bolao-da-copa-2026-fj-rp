@@ -6,6 +6,7 @@ import { useMatchReminders } from '@/hooks/useMatchReminders';
 import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { RulesModal } from '@/components/RulesModal';
 import { NotificationBanner } from '@/components/NotificationBanner';
+import { InstallBanner } from '@/components/InstallBanner';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
