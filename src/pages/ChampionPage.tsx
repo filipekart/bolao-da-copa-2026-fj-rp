@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/auth';
 import { Loader2, Trophy, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { useTeamNameByCode } from '@/hooks/useTranslatedTeamName';
 
 function useTeams() {
   return useQuery({
