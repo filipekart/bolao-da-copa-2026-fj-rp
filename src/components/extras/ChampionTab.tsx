@@ -25,7 +25,7 @@ function useChampionPrediction() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('knockout_predictions')
-        .select('*, teams(name, flag_url)')
+        .select('*, teams(name, flag_url, fifa_code)')
         .eq('user_id', user!.id)
         .eq('stage', 'CHAMPION')
         .maybeSingle();
