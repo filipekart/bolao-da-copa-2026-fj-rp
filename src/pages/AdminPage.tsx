@@ -5,6 +5,7 @@ import {
   useApproveUser,
   useUpdateMatchResult,
   useRecalculateScores,
+  useUpdateUserName,
   useFetchFifaResults,
 } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
