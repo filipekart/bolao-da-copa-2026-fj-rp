@@ -89,10 +89,35 @@ function UserApprovalSection() {
           {approved.map(u => (
             <div key={u.id} className="glass rounded-xl p-3 flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span className="text-sm text-foreground">{u.display_name}</span>
-                </div>
+                {editingNameId === u.id ? (
+                  <div className="flex items-center gap-1">
+                    <Input
+                      value={newName}
+                      onChange={e => setNewName(e.target.value)}
+                      className="h-7 text-sm bg-secondary border-border"
+                      autoFocus
+                    />
+                    <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => {
+                      const trimmed = newName.trim();
+                      if (!trimmed) { toast.error('Nome não pode ser vazio'); return; }
+                      const nameRegex = /^[a-zA-ZÀ-ÿ0-9 ]+$/;
+                      if (!nameRegex.test(trimmed)) { toast.error('Nome não pode conter caracteres especiais'); return; }
+                      updateName.mutate({ userId: u.id, displayName: trimmed });
+                      setEditingNameId(null);
+                    }}><Check className="w-3.5 h-3.5 text-primary" /></Button>
+                    <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setEditingNameId(null)}>
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary shrink-0" />
+                    <span className="text-sm text-foreground">{u.display_name}</span>
+                    <button onClick={() => { setEditingNameId(u.id); setNewName(u.display_name); }} className="text-muted-foreground hover:text-foreground">
+                      <Pencil className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
                 {u.pix_key && (
                   <div className="flex items-center gap-1.5 mt-1 ml-6">
                     <Wallet className="w-3 h-3 text-accent" />
