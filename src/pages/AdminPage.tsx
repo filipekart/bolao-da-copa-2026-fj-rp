@@ -19,9 +19,11 @@ import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 function UserApprovalSection() {
   const { data: users, isLoading } = usePendingUsers();
   const approveUser = useApproveUser();
+  const deleteUser = useDeleteUser();
   const updateName = useUpdateUserName();
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const { t } = useTranslation();
 
   if (isLoading) return <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />;
