@@ -214,7 +214,7 @@ function GroupCard({
         className="w-full flex items-center justify-between px-4 py-3"
       >
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-sm font-display font-bold text-foreground shrink-0">Grupo {groupName}</span>
+          <span className="text-sm font-display font-bold text-foreground shrink-0">{t('home.group')} {groupName}</span>
           <span className="text-muted-foreground text-xs shrink-0">(</span>
           <div className="flex items-center gap-1 overflow-hidden">
             {groupTeamIds.map((id, i) => (
