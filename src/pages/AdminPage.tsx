@@ -163,39 +163,6 @@ function UserApprovalSection() {
                   </div>
                 )}
               </div>
-              <div className="flex gap-1 shrink-0">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => approveUser.mutate({ userId: u.id, approved: false })}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-                {deletingId === u.id ? (
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] text-destructive">{t('admin.confirmDelete')}</span>
-                    <Button size="sm" variant="ghost" className="h-7 px-1.5 text-destructive" onClick={() => {
-                      deleteUser.mutate(u.id);
-                      setDeletingId(null);
-                    }}>
-                      <Check className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button size="sm" variant="ghost" className="h-7 px-1.5" onClick={() => setDeletingId(null)}>
-                      <X className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setDeletingId(u.id)}
-                    className="text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
             </div>
           ))}
         </div>
