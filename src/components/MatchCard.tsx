@@ -18,6 +18,7 @@ export function MatchCard({ match }: { match: MatchWithTeams }) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const lang = i18n.language?.substring(0, 2) ?? 'pt';
+  const tt = useTranslatedTeamName();
   const isFinished = match.status === 'FINISHED';
   const isLive = match.status === 'LIVE';
   const isPast = new Date(match.kickoff_at) <= new Date();
