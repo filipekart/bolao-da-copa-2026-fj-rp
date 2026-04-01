@@ -101,7 +101,7 @@ export default function ChampionPage() {
   }
 
   const filteredTeams = teams?.filter(t =>
-    t.name.toLowerCase().includes(search.toLowerCase())
+    tn(t.name, t.fifa_code).toLowerCase().includes(search.toLowerCase())
   ) ?? [];
 
   // Group teams by group
