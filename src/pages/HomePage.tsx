@@ -40,7 +40,7 @@ function MatchRow({
     <div className="flex items-center gap-1 py-2">
       {/* Home team */}
       <div className="flex items-center gap-1 flex-1 min-w-0 justify-end">
-        <span className="text-xs text-foreground truncate text-right">{match.home_team_name}</span>
+        <span className="text-xs text-foreground truncate text-right">{homeName}</span>
         {match.home_team_flag_url && (
           <img src={match.home_team_flag_url} alt="" className="w-5 h-3.5 rounded-sm flex-shrink-0" />
         )}
