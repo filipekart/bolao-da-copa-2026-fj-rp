@@ -77,6 +77,24 @@ export function useApproveUser() {
   });
 }
 
+export function useUpdateUserName() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ userId, displayName }: { userId: string; displayName: string }) => {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ display_name: displayName })
+        .eq('id', userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pending-users'] });
+      toast.success('Nome atualizado!');
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
 export function useUpdateMatchResult() {
   const queryClient = useQueryClient();
   return useMutation({
