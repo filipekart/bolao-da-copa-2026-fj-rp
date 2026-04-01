@@ -1,6 +1,7 @@
 import { useGroupStandings, GroupStanding } from '@/hooks/useGroupStandings';
 import { useMatches } from '@/hooks/useMatches';
-import { Loader2, Trophy, Calendar } from 'lucide-react';
+import { Loader2, Trophy, Calendar, Info } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useState } from 'react';
 
 // FIFA official R32 bracket (match numbers 73-88)
