@@ -44,12 +44,29 @@ export default function AuthPage() {
       if (isLogin) {
         await signIn(email, password);
       } else {
-        if (!displayName.trim()) {
+        const trimmed = displayName.trim();
+        if (!trimmed) {
           toast.error('Informe seu nome');
           setLoading(false);
           return;
         }
-        await signUp(email, password, displayName.trim());
+        const nameRegex = /^[a-zA-ZÀ-ÿ0-9 ]+$/;
+        if (!nameRegex.test(trimmed)) {
+          toast.error('O nome não pode conter caracteres especiais');
+          setLoading(false);
+          return;
+        }
+        try {
+          await signUp(email, password, trimmed);
+        } catch (signUpErr: unknown) {
+          const msg = signUpErr instanceof Error ? signUpErr.message : '';
+          if (msg.includes('profiles_display_name_unique') || msg.includes('duplicate key')) {
+            toast.error('Este nome já está em uso. Escolha outro.');
+            setLoading(false);
+            return;
+          }
+          throw signUpErr;
+        }
         toast.success('Conta criada! Verifique seu email.');
       }
     } catch (err: unknown) {
