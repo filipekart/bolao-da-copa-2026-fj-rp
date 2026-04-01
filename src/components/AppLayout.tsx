@@ -33,7 +33,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen gradient-dark flex flex-col">
-      <div className="max-w-lg mx-auto w-full px-4 pt-6">
+      <div className="max-w-lg mx-auto w-full px-4 pt-10">
         <InstallBanner />
         <NotificationBanner onAccept={subscribe} />
       </div>
