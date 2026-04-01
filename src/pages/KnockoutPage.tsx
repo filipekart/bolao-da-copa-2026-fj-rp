@@ -277,6 +277,7 @@ export default function KnockoutPage() {
                     realMatch={matchByNumber.get(entry.matchNum)}
                     t={t}
                     lang={lang}
+                    tt={tt}
                   />
                 ))}
               </div>
