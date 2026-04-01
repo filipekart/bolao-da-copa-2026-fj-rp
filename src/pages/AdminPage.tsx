@@ -164,6 +164,7 @@ function MatchResultSection() {
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
   const { t } = useTranslation();
+  const tt = useTranslatedTeamName();
 
   if (isLoading) return <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />;
 
