@@ -39,6 +39,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <RulesModal />
       </div>
       <div className="max-w-lg mx-auto w-full px-4">
+        <InstallBanner />
         <NotificationBanner onAccept={subscribe} />
       </div>
       <main className="flex-1 max-w-lg mx-auto w-full px-4 pb-24">
