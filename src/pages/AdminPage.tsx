@@ -16,6 +16,9 @@ import { toast } from 'sonner';
 function UserApprovalSection() {
   const { data: users, isLoading } = usePendingUsers();
   const approveUser = useApproveUser();
+  const updateName = useUpdateUserName();
+  const [editingNameId, setEditingNameId] = useState<string | null>(null);
+  const [newName, setNewName] = useState('');
 
   if (isLoading) return <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />;
 
