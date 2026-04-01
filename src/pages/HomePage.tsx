@@ -324,9 +324,9 @@ export default function HomePage() {
   // Team lookup maps
   const teamNames = useMemo(() => {
     const map = new Map<string, string>();
-    teams?.forEach(t => map.set(t.id, t.name));
+    teams?.forEach(t => map.set(t.id, translateTeamName(t.name, t.fifa_code, lang)));
     return map;
-  }, [teams]);
+  }, [teams, lang]);
 
   const teamFlags = useMemo(() => {
     const map = new Map<string, string | null>();
