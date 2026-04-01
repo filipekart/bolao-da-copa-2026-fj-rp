@@ -486,7 +486,7 @@ export default function HomePage() {
         <div className="space-y-2">
           <h2 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-            Ao vivo
+            {t('home.liveNow')}
           </h2>
           {liveMatches.map(m => (
             <div key={m.id} className="glass rounded-xl p-3 flex items-center justify-between">
