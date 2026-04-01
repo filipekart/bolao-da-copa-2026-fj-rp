@@ -53,10 +53,12 @@ const FINAL_BRACKET = [
 ];
 
 function GroupTable({ group, standings }: { group: string; standings: GroupStanding[] }) {
+  const { t } = useTranslation();
+  const tt = useTranslatedTeamName();
   return (
     <div className="glass rounded-xl overflow-hidden">
       <div className="gradient-pitch px-3 py-2">
-        <h3 className="text-sm font-display font-bold text-primary-foreground">Grupo {group}</h3>
+        <h3 className="text-sm font-display font-bold text-primary-foreground">{t('home.group')} {group}</h3>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
