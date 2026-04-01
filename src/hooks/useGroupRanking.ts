@@ -37,16 +37,18 @@ export function useGroupRanking() {
         userMap.set(p.user_id, existing);
       });
 
-      // Include all profiles even if 0 points
-      const result: GroupRankingEntry[] = (profiles ?? []).map(p => {
-        const stats = userMap.get(p.id) || { points: 0, exact: 0 };
-        return {
-          user_id: p.id,
-          display_name: p.display_name,
-          group_points: stats.points,
-          exact_hits: stats.exact,
-        };
-      });
+      // Include only approved profiles
+      const result: GroupRankingEntry[] = (profiles ?? [])
+        .filter(p => p.approved)
+        .map(p => {
+          const stats = userMap.get(p.id) || { points: 0, exact: 0 };
+          return {
+            user_id: p.id,
+            display_name: p.display_name,
+            group_points: stats.points,
+            exact_hits: stats.exact,
+          };
+        });
 
       return result.sort((a, b) => b.group_points - a.group_points);
     },
