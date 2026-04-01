@@ -77,7 +77,7 @@ export default function ProfilePage() {
     { label: t('profile.winnerAndWinnerGoals'), points: 18, example: 'Palpite 3×1, Real 3×0' },
     { label: t('profile.winnerAndLoserGoals'), points: 12, example: 'Palpite 2×1, Real 3×1' },
     { label: t('profile.resultOnly'), points: 10, example: 'Palpite 1×0, Real 2×0' },
-    { label: t('profile.drawNotExact'), points: 10, example: 'Palpite 1×1, Real 0×0' },
+    { label: t('profile.drawNotExact'), points: 16, example: 'Palpite 1×1, Real 0×0' },
     { label: t('profile.missed'), points: 0, example: 'Palpite 1×0, Real 0×1' },
   ];
 
