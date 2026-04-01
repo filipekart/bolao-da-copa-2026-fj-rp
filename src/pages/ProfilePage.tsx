@@ -89,6 +89,65 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* Regras de Pontuação */}
+      <Collapsible>
+        <div className="glass rounded-2xl p-5">
+          <CollapsibleTrigger className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-accent" />
+              <h2 className="text-sm font-display font-bold text-foreground">Regras de Pontuação</h2>
+            </div>
+            <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-4 space-y-4 text-sm">
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground">⚽ Palpites por Jogo</h3>
+              <div className="space-y-1.5">
+                {[
+                  { label: 'Placar exato', points: 25, example: 'Palpite 2×1, Real 2×1' },
+                  { label: 'Vencedor + gols do vencedor', points: 18, example: 'Palpite 3×1, Real 3×0' },
+                  { label: 'Vencedor + gols do perdedor', points: 12, example: 'Palpite 2×1, Real 3×1' },
+                  { label: 'Apenas resultado certo', points: 10, example: 'Palpite 1×0, Real 2×0' },
+                  { label: 'Empate (não exato)', points: 10, example: 'Palpite 1×1, Real 0×0' },
+                  { label: 'Errou', points: 0, example: 'Palpite 1×0, Real 0×1' },
+                ].map(r => (
+                  <div key={r.label} className="flex items-start justify-between gap-2 py-1.5 border-b border-border/50 last:border-0">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-foreground font-medium">{r.label}</p>
+                      <p className="text-[11px] text-muted-foreground">{r.example}</p>
+                    </div>
+                    <span className="text-primary font-bold whitespace-nowrap">{r.points} pts</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground">🏆 Palpites Extras</h3>
+              <div className="space-y-1.5">
+                {[
+                  { label: 'Campeão', points: 100 },
+                  { label: 'Artilheiro', points: 50 },
+                  { label: 'MVP', points: 50 },
+                ].map(r => (
+                  <div key={r.label} className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0">
+                    <span className="text-foreground">{r.label}</span>
+                    <span className="text-primary font-bold">{r.points} pts</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground">📋 Regras Gerais</h3>
+              <ul className="space-y-1 text-muted-foreground text-xs list-disc pl-4">
+                <li>Apostas são bloqueadas no horário de início de cada jogo.</li>
+                <li>Palpites de campeão, artilheiro e MVP são bloqueados após o início do primeiro jogo da Copa.</li>
+                <li>No mata-mata, considere o placar do tempo regulamentar + prorrogação (sem pênaltis).</li>
+              </ul>
+            </div>
+          </CollapsibleContent>
+        </div>
+      </Collapsible>
+
       {/* PIX */}
       <div className="glass rounded-2xl p-5 space-y-3">
         <div className="flex items-center gap-2">
