@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { forwardRef } from 'react';
 import { useRanking } from '@/hooks/useRanking';
 import { useGroupRanking } from '@/hooks/useGroupRanking';
 import { useAuth } from '@/lib/auth';
 import { Loader2, Trophy, Medal } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
-function RankingList({ ranking, userId, showField }: { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points' }) {
+const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points' }>(({ ranking, userId, showField }, ref) => {
   if (!ranking?.length) {
     return (
       <div className="text-center py-12 text-muted-foreground">
