@@ -12,6 +12,27 @@ export default function ProfilePage() {
   const { user, signOut } = useAuth();
   const queryClient = useQueryClient();
   const [pixKey, setPixKey] = useState('');
+  const { subscribe } = usePushSubscription();
+  const [notifStatus, setNotifStatus] = useState<'unknown' | 'granted' | 'denied' | 'default'>('unknown');
+
+  useEffect(() => {
+    if ('Notification' in window) {
+      setNotifStatus(Notification.permission as any);
+    }
+  }, []);
+
+  const handleEnableNotifications = useCallback(async () => {
+    localStorage.removeItem('push_banner_dismissed');
+    await subscribe();
+    if ('Notification' in window) {
+      setNotifStatus(Notification.permission as any);
+    }
+    if (Notification.permission === 'granted') {
+      toast.success('Notificações ativadas!');
+    } else if (Notification.permission === 'denied') {
+      toast.error('Notificações bloqueadas pelo navegador. Desbloqueie nas configurações do navegador.');
+    }
+  }, [subscribe]);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile', user?.id],
