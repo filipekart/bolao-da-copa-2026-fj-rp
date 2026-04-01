@@ -67,7 +67,8 @@
     "savedSuccess": "Pronostics du groupe {{group}} enregistrés !",
     "errorCount": "{{count}} pronostic(s) en erreur : {{message}}",
     "saveError": "Erreur lors de l'enregistrement",
-    "liveNow": "EN DIRECT"
+    "liveNow": "EN DIRECT",
+    "next24h": "Prochaines 24h"
   },
   "match": {
     "back": "Retour",

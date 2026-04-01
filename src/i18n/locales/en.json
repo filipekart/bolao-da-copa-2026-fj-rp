@@ -67,7 +67,8 @@
     "savedSuccess": "Group {{group}} predictions saved!",
     "errorCount": "{{count}} prediction(s) with error: {{message}}",
     "saveError": "Error saving",
-    "liveNow": "LIVE now"
+    "liveNow": "LIVE now",
+    "next24h": "Next 24h"
   },
   "match": {
     "back": "Back",
