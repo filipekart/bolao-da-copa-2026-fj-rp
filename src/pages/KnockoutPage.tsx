@@ -4,6 +4,7 @@ import { Loader2, Trophy, Calendar, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 
 const R32_BRACKET = [
   { matchNum: 73, home: '2ºA', away: '2ºB', homeLabel: '2º Grupo A', awayLabel: '2º Grupo B' },
@@ -52,10 +53,12 @@ const FINAL_BRACKET = [
 ];
 
 function GroupTable({ group, standings }: { group: string; standings: GroupStanding[] }) {
+  const { t } = useTranslation();
+  const tt = useTranslatedTeamName();
   return (
     <div className="glass rounded-xl overflow-hidden">
       <div className="gradient-pitch px-3 py-2">
-        <h3 className="text-sm font-display font-bold text-primary-foreground">Grupo {group}</h3>
+        <h3 className="text-sm font-display font-bold text-primary-foreground">{t('home.group')} {group}</h3>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
@@ -85,7 +88,7 @@ function GroupTable({ group, standings }: { group: string; standings: GroupStand
                   <td className="px-2 py-2">
                     <div className="flex items-center gap-1.5">
                       {s.flag_url && <img src={s.flag_url} alt="" className="w-4 h-3 rounded-sm" />}
-                      <span className="text-foreground font-medium truncate max-w-[80px]">{s.team_name}</span>
+                      <span className="text-foreground font-medium truncate max-w-[80px]">{tt(s.team_id, s.team_name)}</span>
                     </div>
                   </td>
                   <td className="text-center px-1 py-2 text-muted-foreground">{s.played}</td>
@@ -113,11 +116,13 @@ function BracketMatchCard({
   realMatch,
   t,
   lang,
+  tt,
 }: {
   entry: BracketEntry;
   realMatch?: any;
   t: any;
   lang: string;
+  tt: (teamId: string | null | undefined, fallbackName?: string) => string;
 }) {
   const hasRealMatch = realMatch && realMatch.home_team_name;
   const isFinished = realMatch?.status === 'FINISHED';
@@ -129,9 +134,9 @@ function BracketMatchCard({
         {hasRealMatch && realMatch.kickoff_at && (
           <div className="flex items-center gap-1">
             <Calendar className="w-3 h-3" />
-            {new Date(realMatch.kickoff_at).toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', { day: '2-digit', month: 'short' })}
+            {new Date(realMatch.kickoff_at).toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US', { day: '2-digit', month: 'short' })}
             {' '}
-            {new Date(realMatch.kickoff_at).toLocaleTimeString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+            {new Date(realMatch.kickoff_at).toLocaleTimeString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
           </div>
         )}
       </div>
@@ -142,7 +147,7 @@ function BracketMatchCard({
           )}
           <div className="min-w-0">
             <span className="text-sm text-foreground font-medium truncate block">
-              {hasRealMatch ? realMatch.home_team_name : entry.home}
+              {hasRealMatch ? tt(realMatch.home_team_id, realMatch.home_team_name) : entry.home}
             </span>
             {hasRealMatch && (
               <span className="text-[9px] text-muted-foreground">{entry.homeLabel}</span>
@@ -157,7 +162,7 @@ function BracketMatchCard({
         <div className="flex items-center gap-2 flex-1 min-w-0 justify-end text-right">
           <div className="min-w-0">
             <span className="text-sm text-foreground font-medium truncate block">
-              {hasRealMatch ? realMatch.away_team_name : entry.away}
+              {hasRealMatch ? tt(realMatch.away_team_id, realMatch.away_team_name) : entry.away}
             </span>
             {hasRealMatch && (
               <span className="text-[9px] text-muted-foreground">{entry.awayLabel}</span>
@@ -178,6 +183,7 @@ export default function KnockoutPage() {
   const [activeTab, setActiveTab] = useState<'groups' | 'bracket'>('bracket');
   const { t, i18n } = useTranslation();
   const lang = i18n.language?.substring(0, 2) ?? 'pt';
+  const tt = useTranslatedTeamName();
 
   const KNOCKOUT_STAGES = [
     { key: 'ROUND_OF_32', label: t('knockout.stages.ROUND_OF_32'), bracket: R32_BRACKET },
@@ -271,6 +277,7 @@ export default function KnockoutPage() {
                     realMatch={matchByNumber.get(entry.matchNum)}
                     t={t}
                     lang={lang}
+                    tt={tt}
                   />
                 ))}
               </div>

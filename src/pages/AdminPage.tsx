@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Shield, Users, Trophy, RefreshCw, Globe, Loader2, Check, X, Wallet, Copy, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 
 function UserApprovalSection() {
   const { data: users, isLoading } = usePendingUsers();
@@ -163,6 +164,7 @@ function MatchResultSection() {
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
   const { t } = useTranslation();
+  const tt = useTranslatedTeamName();
 
   if (isLoading) return <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />;
 
@@ -199,7 +201,7 @@ function MatchResultSection() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   {m.home_team_flag_url && <img src={m.home_team_flag_url} alt="" className="w-5 h-4 rounded-sm" />}
-                  <span className="text-sm text-foreground truncate">{m.home_team_name}</span>
+                  <span className="text-sm text-foreground truncate">{tt(m.home_team_id, m.home_team_name)}</span>
                 </div>
 
                 {isEditing ? (
@@ -227,7 +229,7 @@ function MatchResultSection() {
                 )}
 
                 <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-                  <span className="text-sm text-foreground truncate">{m.away_team_name}</span>
+                  <span className="text-sm text-foreground truncate">{tt(m.away_team_id, m.away_team_name)}</span>
                   {m.away_team_flag_url && <img src={m.away_team_flag_url} alt="" className="w-5 h-4 rounded-sm" />}
                 </div>
               </div>

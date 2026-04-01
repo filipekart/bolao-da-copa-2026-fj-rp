@@ -8,11 +8,14 @@ import { calculatePredictedStandings, deriveQualifiedTeams, PredictedMatch } fro
 import { Button } from '@/components/ui/button';
 import { Trophy, Loader2, Check, Lock, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { translateTeamName } from '@/lib/teamTranslations';
 
 type Scores = Record<string, { home: number; away: number }>;
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('pt-BR', {
+function formatDate(iso: string, lang = 'pt') {
+  const locale = lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US';
+  return new Date(iso).toLocaleDateString(locale, {
     day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
   });
 }
@@ -22,19 +25,23 @@ function MatchRow({
   score,
   onChange,
   locked,
+  teamNames,
 }: {
   match: MatchWithTeams;
   score: { home: number; away: number };
   onChange: (home: number, away: number) => void;
   locked: boolean;
+  teamNames?: Map<string, string>;
 }) {
   const isFinished = match.status === 'FINISHED';
+  const homeName = teamNames?.get(match.home_team_id) ?? match.home_team_name;
+  const awayName = teamNames?.get(match.away_team_id) ?? match.away_team_name;
 
   return (
     <div className="flex items-center gap-1 py-2">
       {/* Home team */}
       <div className="flex items-center gap-1 flex-1 min-w-0 justify-end">
-        <span className="text-xs text-foreground truncate text-right">{match.home_team_name}</span>
+        <span className="text-xs text-foreground truncate text-right">{homeName}</span>
         {match.home_team_flag_url && (
           <img src={match.home_team_flag_url} alt="" className="w-5 h-3.5 rounded-sm flex-shrink-0" />
         )}
@@ -83,7 +90,7 @@ function MatchRow({
         {match.away_team_flag_url && (
           <img src={match.away_team_flag_url} alt="" className="w-5 h-3.5 rounded-sm flex-shrink-0" />
         )}
-        <span className="text-xs text-foreground truncate">{match.away_team_name}</span>
+        <span className="text-xs text-foreground truncate">{awayName}</span>
       </div>
     </div>
   );
@@ -98,12 +105,13 @@ function PredictedStandingsTable({
   teamNames: Map<string, string>;
   teamFlags: Map<string, string | null>;
 }) {
+  const { t } = useTranslation();
   if (!standings.length) return null;
 
   return (
     <div className="mt-2 rounded-lg bg-secondary/50 overflow-hidden">
       <div className="px-3 py-1.5 text-[10px] font-medium text-muted-foreground">
-        Classificação prevista
+        {t('home.predictedStandings')}
       </div>
       <table className="w-full text-[11px]">
         <thead>
@@ -169,6 +177,7 @@ function GroupCard({
   teamFlags: Map<string, string | null>;
   existingPredictionIds: Set<string>;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   const now = new Date();
@@ -208,7 +217,7 @@ function GroupCard({
         className="w-full flex items-center justify-between px-4 py-3"
       >
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-sm font-display font-bold text-foreground shrink-0">Grupo {groupName}</span>
+          <span className="text-sm font-display font-bold text-foreground shrink-0">{t('home.group')} {groupName}</span>
           <span className="text-muted-foreground text-xs shrink-0">(</span>
           <div className="flex items-center gap-1 overflow-hidden">
             {groupTeamIds.map((id, i) => (
@@ -253,6 +262,7 @@ function GroupCard({
                   score={scores[m.id] ?? { home: 0, away: 0 }}
                   onChange={(home, away) => onScoreChange(m.id, home, away)}
                   locked={locked}
+                  teamNames={teamNames}
                 />
               </div>
             );
@@ -272,7 +282,7 @@ function GroupCard({
               disabled={saving}
               className="w-full mt-3 gradient-pitch text-primary-foreground font-semibold h-9 text-sm"
             >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar palpites'}
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : t('home.savePredictions')}
             </Button>
           )}
         </div>
@@ -288,6 +298,8 @@ export default function HomePage() {
   const queryClient = useQueryClient();
   const [scores, setScores] = useState<Scores>({});
   const [saving, setSaving] = useState<string | null>(null);
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.substring(0, 2) || 'pt';
 
   // Fetch user's existing predictions
   const { data: existingPredictions } = useQuery({
@@ -320,9 +332,9 @@ export default function HomePage() {
   // Team lookup maps
   const teamNames = useMemo(() => {
     const map = new Map<string, string>();
-    teams?.forEach(t => map.set(t.id, t.name));
+    teams?.forEach(t => map.set(t.id, translateTeamName(t.name, t.fifa_code, lang)));
     return map;
-  }, [teams]);
+  }, [teams, lang]);
 
   const teamFlags = useMemo(() => {
     const map = new Map<string, string | null>();
@@ -381,9 +393,9 @@ export default function HomePage() {
       const results = await Promise.all(promises);
       const errors = results.filter(r => r.error);
       if (errors.length) {
-        toast.error(`${errors.length} palpite(s) com erro: ${errors[0].error!.message}`);
+        toast.error(t('home.errorCount', { count: errors.length, message: errors[0].error!.message }));
       } else {
-        toast.success(`Palpites do Grupo ${groupName} salvos!`);
+        toast.success(t('home.savedSuccess', { group: groupName }));
       }
 
       // Invalidate queries
@@ -393,7 +405,7 @@ export default function HomePage() {
       // Auto-derive knockout predictions if all groups have predictions
       await deriveAndSaveKnockoutPredictions();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao salvar');
+      toast.error(err instanceof Error ? err.message : t('home.saveError'));
     } finally {
       setSaving(null);
     }
@@ -467,8 +479,8 @@ export default function HomePage() {
         <div className="flex items-center gap-3">
           <Trophy className="w-7 h-7 text-primary-foreground" />
           <div>
-            <h1 className="text-lg font-display font-bold text-primary-foreground">Copa 2026</h1>
-            <p className="text-primary-foreground/80 text-xs">Aposte em todos os jogos por grupo</p>
+         <h1 className="text-lg font-display font-bold text-primary-foreground">{t('home.title')}</h1>
+            <p className="text-primary-foreground/80 text-xs">{t('home.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -477,19 +489,19 @@ export default function HomePage() {
         <div className="space-y-2">
           <h2 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-            Ao vivo
+            {t('home.liveNow')}
           </h2>
           {liveMatches.map(m => (
             <div key={m.id} className="glass rounded-xl p-3 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 {m.home_team_flag_url && <img src={m.home_team_flag_url} alt="" className="w-5 h-3.5 rounded-sm" />}
-                <span className="text-xs text-foreground">{m.home_team_name}</span>
+                <span className="text-xs text-foreground">{teamNames.get(m.home_team_id) ?? m.home_team_name}</span>
               </div>
               <span className="text-sm font-bold text-foreground">
                 {m.official_home_score ?? 0} × {m.official_away_score ?? 0}
               </span>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-foreground">{m.away_team_name}</span>
+                <span className="text-xs text-foreground">{teamNames.get(m.away_team_id) ?? m.away_team_name}</span>
                 {m.away_team_flag_url && <img src={m.away_team_flag_url} alt="" className="w-5 h-3.5 rounded-sm" />}
               </div>
             </div>

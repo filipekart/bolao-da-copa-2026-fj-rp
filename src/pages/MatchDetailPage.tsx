@@ -5,10 +5,11 @@ import { useMatchPrediction, useSubmitPrediction } from '@/hooks/usePredictions'
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Clock, MapPin, Lock, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 
 function formatDateTime(iso: string, lang: string) {
-  const d = new Date(iso);
-  return d.toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', {
+  const locale = lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US';
+  return new Date(iso).toLocaleDateString(locale, {
     day: '2-digit', month: 'long', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   });
@@ -22,6 +23,7 @@ export default function MatchDetailPage() {
   const submitPrediction = useSubmitPrediction();
   const { t, i18n } = useTranslation();
   const lang = i18n.language?.substring(0, 2) ?? 'pt';
+  const tt = useTranslatedTeamName();
 
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
@@ -91,7 +93,7 @@ export default function MatchDetailPage() {
             {match.home_team_flag_url && (
               <img src={match.home_team_flag_url} alt="" className="w-10 h-7 rounded object-cover" />
             )}
-            <span className="text-sm font-medium text-foreground text-center">{match.home_team_name}</span>
+            <span className="text-sm font-medium text-foreground text-center">{tt(match.home_team_id, match.home_team_name)}</span>
           </div>
 
           <div className="px-4">
@@ -110,7 +112,7 @@ export default function MatchDetailPage() {
             {match.away_team_flag_url && (
               <img src={match.away_team_flag_url} alt="" className="w-10 h-7 rounded object-cover" />
             )}
-            <span className="text-sm font-medium text-foreground text-center">{match.away_team_name}</span>
+            <span className="text-sm font-medium text-foreground text-center">{tt(match.away_team_id, match.away_team_name)}</span>
           </div>
         </div>
       </div>

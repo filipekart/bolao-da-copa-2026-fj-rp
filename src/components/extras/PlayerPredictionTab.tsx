@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useState, ReactNode, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
+import { useTeamNameByCode } from '@/hooks/useTranslatedTeamName';
 
 interface Props {
   category: 'top_scorer' | 'mvp';
@@ -63,13 +64,14 @@ export default function PlayerPredictionTab({ category, title, description, icon
   const { data: teams, isLoading: teamsLoading } = useTeams();
   const { data: firstKickoff, isLoading: kickoffLoading } = useFirstMatchKickoff();
   const { t } = useTranslation();
+  const tn = useTeamNameByCode();
 
   const { data: prediction, isLoading: predLoading } = useQuery({
     queryKey: ['extra-prediction', category, user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('extra_predictions')
-        .select('*, teams(name, flag_url)')
+        .select('*, teams(name, flag_url, fifa_code)')
         .eq('user_id', user!.id)
         .eq('category', category)
         .maybeSingle();
@@ -94,8 +96,8 @@ export default function PlayerPredictionTab({ category, title, description, icon
   const selectedTeam = teams?.find(t => t.id === selectedTeamId);
 
   const filteredTeams = useMemo(
-    () => teams?.filter(t => t.name.toLowerCase().includes(teamSearch.toLowerCase())) ?? [],
-    [teams, teamSearch]
+    () => teams?.filter(t => tn(t.name, t.fifa_code).toLowerCase().includes(teamSearch.toLowerCase())) ?? [],
+    [teams, teamSearch, tn]
   );
 
   const filteredPlayers = useMemo(
@@ -172,7 +174,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
                 {prediction.player_name}
               </span>
               <p className="text-xs text-muted-foreground">
-                {(prediction as any).teams?.name}
+                {(prediction as any).teams?.name ? tn((prediction as any).teams.name, (prediction as any).teams?.fifa_code) : ''}
               </p>
             </div>
             <div className="ml-auto">{icon}</div>
@@ -198,7 +200,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
                 {selectedTeam.flag_url && (
                   <img src={selectedTeam.flag_url} alt="" className="w-6 h-4 rounded-sm" />
                 )}
-                <span className="text-sm text-foreground font-medium">{selectedTeam.name}</span>
+                <span className="text-sm text-foreground font-medium">{tn(selectedTeam.name, selectedTeam.fifa_code)}</span>
                 <span className="text-[10px] text-muted-foreground ml-auto">{t('extras.change')}</span>
               </button>
             ) : (
@@ -235,7 +237,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
                         {team.flag_url && (
                           <img src={team.flag_url} alt="" className="w-6 h-4 rounded-sm" />
                         )}
-                        <span className="text-sm text-foreground">{team.name}</span>
+                        <span className="text-sm text-foreground">{tn(team.name, team.fifa_code)}</span>
                       </button>
                     ))}
                   </div>

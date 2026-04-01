@@ -5,6 +5,7 @@ import { Loader2, Trophy, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTeamNameByCode } from '@/hooks/useTranslatedTeamName';
 
 function useTeams() {
   return useQuery({
@@ -24,7 +25,7 @@ function useChampionPrediction() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('knockout_predictions')
-        .select('*, teams(name, flag_url)')
+        .select('*, teams(name, flag_url, fifa_code)')
         .eq('user_id', user!.id)
         .eq('stage', 'CHAMPION')
         .maybeSingle();
@@ -60,6 +61,7 @@ export default function ChampionTab() {
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const { t } = useTranslation();
+  const tn = useTeamNameByCode();
 
   const isLocked = firstKickoff ? new Date() >= firstKickoff : false;
 
@@ -91,7 +93,7 @@ export default function ChampionTab() {
     );
   }
 
-  const filteredTeams = teams?.filter(tm => tm.name.toLowerCase().includes(search.toLowerCase())) ?? [];
+  const filteredTeams = teams?.filter(tm => tn(tm.name, tm.fifa_code).toLowerCase().includes(search.toLowerCase())) ?? [];
   const groupedTeams = new Map<string, typeof filteredTeams>();
   filteredTeams.forEach(tm => {
     const g = tm.group_name || t('extras.noGroup');
@@ -124,7 +126,7 @@ export default function ChampionTab() {
               <img src={(prediction as any).teams.flag_url} alt="" className="w-8 h-6 rounded-sm" />
             )}
             <span className="text-lg font-display font-bold text-foreground">
-              {(prediction as any).teams?.name ?? t('extras.unknownTeam')}
+              {(prediction as any).teams?.name ? tn((prediction as any).teams.name, (prediction as any).teams?.fifa_code) : t('extras.unknownTeam')}
             </span>
             <Trophy className="w-5 h-5 text-accent ml-auto" />
           </div>
@@ -157,7 +159,7 @@ export default function ChampionTab() {
                         }`}
                       >
                         {team.flag_url && <img src={team.flag_url} alt="" className="w-6 h-4 rounded-sm" />}
-                        <span className="text-sm text-foreground font-medium">{team.name}</span>
+                        <span className="text-sm text-foreground font-medium">{tn(team.name, team.fifa_code)}</span>
                         {isCurrent && <span className="text-[10px] text-accent ml-auto">{t('extras.current')}</span>}
                       </button>
                     );

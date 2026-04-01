@@ -2,21 +2,25 @@ import { useNavigate } from 'react-router-dom';
 import { type MatchWithTeams } from '@/hooks/useMatches';
 import { Clock, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
+
+function getLocale(lang: string) {
+  return lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US';
+}
 
 function formatDate(iso: string, lang: string) {
-  const d = new Date(iso);
-  return d.toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', { day: '2-digit', month: 'short' });
+  return new Date(iso).toLocaleDateString(getLocale(lang), { day: '2-digit', month: 'short' });
 }
 
 function formatTime(iso: string, lang: string) {
-  const d = new Date(iso);
-  return d.toLocaleTimeString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleTimeString(getLocale(lang), { hour: '2-digit', minute: '2-digit' });
 }
 
 export function MatchCard({ match }: { match: MatchWithTeams }) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const lang = i18n.language?.substring(0, 2) ?? 'pt';
+  const tt = useTranslatedTeamName();
   const isFinished = match.status === 'FINISHED';
   const isLive = match.status === 'LIVE';
   const isPast = new Date(match.kickoff_at) <= new Date();
@@ -52,7 +56,7 @@ export function MatchCard({ match }: { match: MatchWithTeams }) {
           {match.home_team_flag_url && (
             <img src={match.home_team_flag_url} alt="" className="w-6 h-4 rounded-sm object-cover" />
           )}
-          <span className="text-sm font-medium text-foreground truncate">{match.home_team_name}</span>
+          <span className="text-sm font-medium text-foreground truncate">{tt(match.home_team_id, match.home_team_name)}</span>
         </div>
 
         <div className="px-3 flex items-center gap-2">
@@ -68,7 +72,7 @@ export function MatchCard({ match }: { match: MatchWithTeams }) {
         </div>
 
         <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-          <span className="text-sm font-medium text-foreground truncate">{match.away_team_name}</span>
+          <span className="text-sm font-medium text-foreground truncate">{tt(match.away_team_id, match.away_team_name)}</span>
           {match.away_team_flag_url && (
             <img src={match.away_team_flag_url} alt="" className="w-6 h-4 rounded-sm object-cover" />
           )}

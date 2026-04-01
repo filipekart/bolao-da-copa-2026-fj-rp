@@ -4,9 +4,11 @@ import { Loader2, History, Clock, MapPin, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { useTranslation } from 'react-i18next';
+import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 
 function formatDate(iso: string, lang: string) {
-  return new Date(iso).toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', {
+  const locale = lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US';
+  return new Date(iso).toLocaleDateString(locale, {
     day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
   });
 }
@@ -17,6 +19,7 @@ export default function MyBetsPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const lang = i18n.language?.substring(0, 2) ?? 'pt';
+  const tt = useTranslatedTeamName();
 
   const ruleLabels: Record<string, { label: string; color: string }> = {
     EXACT_SCORE: { label: t('bets.rules.EXACT_SCORE'), color: 'text-primary' },
@@ -127,7 +130,7 @@ export default function MyBetsPage() {
                                     <img src={match.home_team_flag_url} alt="" className="w-6 h-4 rounded-sm" />
                                   )}
                                   <span className="text-sm font-medium text-foreground truncate">
-                                    {match.home_team_name}
+                                    {tt(match.home_team_id, match.home_team_name)}
                                   </span>
                                 </div>
 
@@ -143,7 +146,7 @@ export default function MyBetsPage() {
 
                                 <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
                                   <span className="text-sm font-medium text-foreground truncate">
-                                    {match.away_team_name}
+                                    {tt(match.away_team_id, match.away_team_name)}
                                   </span>
                                   {match.away_team_flag_url && (
                                     <img src={match.away_team_flag_url} alt="" className="w-6 h-4 rounded-sm" />

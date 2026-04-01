@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/auth';
 import { Loader2, Trophy, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { useTeamNameByCode } from '@/hooks/useTranslatedTeamName';
 
 function useTeams() {
   return useQuery({
@@ -26,7 +27,7 @@ function useChampionPrediction() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('knockout_predictions')
-        .select('*, teams(name, flag_url)')
+        .select('*, teams(name, flag_url, fifa_code)')
         .eq('user_id', user!.id)
         .eq('stage', 'CHAMPION')
         .maybeSingle();
@@ -61,6 +62,7 @@ export default function ChampionPage() {
   const queryClient = useQueryClient();
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const tn = useTeamNameByCode();
 
   const isLocked = firstKickoff ? new Date() >= firstKickoff : false;
 
@@ -99,7 +101,7 @@ export default function ChampionPage() {
   }
 
   const filteredTeams = teams?.filter(t =>
-    t.name.toLowerCase().includes(search.toLowerCase())
+    tn(t.name, t.fifa_code).toLowerCase().includes(search.toLowerCase())
   ) ?? [];
 
   // Group teams by group
@@ -140,7 +142,7 @@ export default function ChampionPage() {
               <img src={(prediction as any).teams.flag_url} alt="" className="w-8 h-6 rounded-sm" />
             )}
             <span className="text-lg font-display font-bold text-foreground">
-              {(prediction as any).teams?.name ?? 'Time desconhecido'}
+              {(prediction as any).teams?.name ? tn((prediction as any).teams.name, (prediction as any).teams?.fifa_code) : 'Time desconhecido'}
             </span>
             <Trophy className="w-5 h-5 text-accent ml-auto" />
           </div>
@@ -176,7 +178,7 @@ export default function ChampionPage() {
                         }`}
                       >
                         {team.flag_url && <img src={team.flag_url} alt="" className="w-6 h-4 rounded-sm" />}
-                        <span className="text-sm text-foreground font-medium">{team.name}</span>
+                        <span className="text-sm text-foreground font-medium">{tn(team.name, team.fifa_code)}</span>
                         {isCurrent && <span className="text-[10px] text-accent ml-auto">atual</span>}
                       </button>
                     );
