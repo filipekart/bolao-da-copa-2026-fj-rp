@@ -18,6 +18,7 @@ export default function MyBetsPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const lang = i18n.language?.substring(0, 2) ?? 'pt';
+  const tt = useTranslatedTeamName();
 
   const ruleLabels: Record<string, { label: string; color: string }> = {
     EXACT_SCORE: { label: t('bets.rules.EXACT_SCORE'), color: 'text-primary' },
