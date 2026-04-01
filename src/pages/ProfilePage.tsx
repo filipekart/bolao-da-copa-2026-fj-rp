@@ -93,7 +93,42 @@ export default function ProfilePage() {
         <div className="flex items-center gap-2">
           <Wallet className="w-5 h-5 text-accent" />
           <h2 className="text-sm font-display font-bold text-foreground">Chave PIX</h2>
+      </div>
+
+      {/* Notificações */}
+      {'Notification' in window && (
+        <div className="glass rounded-2xl p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            {notifStatus === 'granted' ? (
+              <Bell className="w-5 h-5 text-primary" />
+            ) : (
+              <BellOff className="w-5 h-5 text-muted-foreground" />
+            )}
+            <h2 className="text-sm font-display font-bold text-foreground">Notificações</h2>
+          </div>
+          {notifStatus === 'granted' ? (
+            <p className="text-xs text-muted-foreground">
+              ✅ Notificações ativadas. Você será avisado antes dos jogos e sobre palpites pendentes.
+            </p>
+          ) : notifStatus === 'denied' ? (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                🚫 Notificações bloqueadas. Para reativar, acesse as configurações do seu navegador e permita notificações para este site.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Ative as notificações para receber alertas antes dos jogos e lembretes de palpites pendentes.
+              </p>
+              <Button onClick={handleEnableNotifications} size="sm" className="text-xs">
+                <Bell className="w-4 h-4 mr-1" />
+                Ativar notificações
+              </Button>
+            </div>
+          )}
         </div>
+      )}
         <p className="text-xs text-muted-foreground">
           Insira sua chave PIX para receber premiações. Pode ser CPF, e-mail, telefone ou chave aleatória.
         </p>
