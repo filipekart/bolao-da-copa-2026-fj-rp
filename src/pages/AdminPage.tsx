@@ -7,6 +7,7 @@ import {
   useRecalculateScores,
   useUpdateUserName,
   useFetchFifaResults,
+  useDeleteUser,
 } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
