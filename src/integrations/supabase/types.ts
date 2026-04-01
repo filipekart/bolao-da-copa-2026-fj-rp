@@ -674,6 +674,14 @@ export type Database = {
           rule_applied: Database["public"]["Enums"]["prediction_rule"]
         }[]
       }
+      get_public_profiles: {
+        Args: never
+        Returns: {
+          approved: boolean
+          display_name: string
+          id: string
+        }[]
+      }
       get_result_label: {
         Args: { away_goals: number; home_goals: number }
         Returns: string
