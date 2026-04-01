@@ -174,7 +174,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
                 {prediction.player_name}
               </span>
               <p className="text-xs text-muted-foreground">
-                {(prediction as any).teams?.name}
+                {(prediction as any).teams?.name ? tn((prediction as any).teams.name, (prediction as any).teams?.fifa_code) : ''}
               </p>
             </div>
             <div className="ml-auto">{icon}</div>
