@@ -70,7 +70,12 @@ export default function AuthPage() {
         toast.success('Conta criada! Verifique seu email.');
       }
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao autenticar');
+      const msg = err instanceof Error ? err.message : 'Erro ao autenticar';
+      if (msg.toLowerCase().includes('invalid login credentials')) {
+        toast.error('Email ou senha incorretos. Verifique seus dados e tente novamente.');
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setLoading(false);
     }
