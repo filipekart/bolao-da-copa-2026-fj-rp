@@ -126,7 +126,7 @@ export default function ChampionTab() {
               <img src={(prediction as any).teams.flag_url} alt="" className="w-8 h-6 rounded-sm" />
             )}
             <span className="text-lg font-display font-bold text-foreground">
-              {(prediction as any).teams?.name ?? t('extras.unknownTeam')}
+              {(prediction as any).teams?.name ? tn((prediction as any).teams.name, (prediction as any).teams?.fifa_code) : t('extras.unknownTeam')}
             </span>
             <Trophy className="w-5 h-5 text-accent ml-auto" />
           </div>
