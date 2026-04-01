@@ -187,7 +187,6 @@ Deno.serve(async (req) => {
       }
 
       for (const [userId, subs] of subsByUser) {
-        // Skip if user already has a prediction for this match
         if (predictionSet.has(`${userId}:${match.id}`)) continue;
 
         const payload = JSON.stringify({
@@ -213,6 +212,86 @@ Deno.serve(async (req) => {
             }
           } catch (e) {
             console.error('Push send error:', e);
+          }
+        }
+      }
+    }
+
+    // --- Extras reminders (champion, top scorer, MVP) ---
+    // Find the first scheduled match (earliest kickoff)
+    const { data: firstMatch } = await supabase
+      .from('matches')
+      .select('kickoff_at')
+      .eq('status', 'SCHEDULED')
+      .order('kickoff_at', { ascending: true })
+      .limit(1)
+      .single();
+
+    if (firstMatch) {
+      const firstKickoff = new Date(firstMatch.kickoff_at);
+      const minutesUntilFirst = (firstKickoff.getTime() - now.getTime()) / (1000 * 60);
+
+      let extrasTimeLabel = '';
+      if (minutesUntilFirst <= 62 && minutesUntilFirst >= 58) {
+        extrasTimeLabel = '1 hora';
+      } else if (minutesUntilFirst <= 12 && minutesUntilFirst >= 8) {
+        extrasTimeLabel = '10 minutos';
+      }
+
+      if (extrasTimeLabel) {
+        // Fetch all extra predictions (champion, top_scorer, mvp)
+        const { data: extraPreds } = await supabase
+          .from('extra_predictions')
+          .select('user_id, category')
+          .in('category', ['top_scorer', 'mvp']);
+
+        const { data: championPreds } = await supabase
+          .from('knockout_predictions')
+          .select('user_id')
+          .eq('stage', 'CHAMPION');
+
+        const extraSet = new Set((extraPreds ?? []).map((p: any) => `${p.user_id}:${p.category}`));
+        const championSet = new Set((championPreds ?? []).map((p: any) => p.user_id));
+
+        const missingLabels: Record<string, string> = {
+          champion: 'Campeão',
+          top_scorer: 'Artilheiro',
+          mvp: 'MVP',
+        };
+
+        for (const [userId, subs] of subsByUser) {
+          const missing: string[] = [];
+          if (!championSet.has(userId)) missing.push(missingLabels.champion);
+          if (!extraSet.has(`${userId}:top_scorer`)) missing.push(missingLabels.top_scorer);
+          if (!extraSet.has(`${userId}:mvp`)) missing.push(missingLabels.mvp);
+
+          if (missing.length === 0) continue;
+
+          const missingText = missing.join(', ');
+          const payload = JSON.stringify({
+            title: `🏆 Falta ${extrasTimeLabel}!`,
+            body: `Você ainda não escolheu: ${missingText}. Após o 1º jogo, não será mais possível!`,
+            tag: `extras-reminder-${extrasTimeLabel}`,
+            url: '/extras',
+          });
+
+          for (const sub of subs) {
+            try {
+              const ok = await sendWebPush(
+                { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
+                payload,
+                vapidPrivateKey,
+                vapidPublicKey,
+                vapidSubject
+              );
+              if (ok) {
+                sent++;
+              } else {
+                expiredEndpoints.push(sub.endpoint);
+              }
+            } catch (e) {
+              console.error('Push send error (extras):', e);
+            }
           }
         }
       }
