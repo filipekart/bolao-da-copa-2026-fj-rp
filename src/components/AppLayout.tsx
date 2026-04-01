@@ -4,7 +4,6 @@ import { Home, History, Swords, Medal, User, Shield, Star, Trophy } from 'lucide
 import { useAuth } from '@/lib/auth';
 import { useMatchReminders } from '@/hooks/useMatchReminders';
 import { usePushSubscription } from '@/hooks/usePushSubscription';
-import { RulesModal } from '@/components/RulesModal';
 import { NotificationBanner } from '@/components/NotificationBanner';
 import { InstallBanner } from '@/components/InstallBanner';
 
