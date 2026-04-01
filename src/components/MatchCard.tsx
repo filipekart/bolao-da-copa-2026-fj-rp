@@ -4,14 +4,16 @@ import { Clock, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 
+function getLocale(lang: string) {
+  return lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US';
+}
+
 function formatDate(iso: string, lang: string) {
-  const d = new Date(iso);
-  return d.toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', { day: '2-digit', month: 'short' });
+  return new Date(iso).toLocaleDateString(getLocale(lang), { day: '2-digit', month: 'short' });
 }
 
 function formatTime(iso: string, lang: string) {
-  const d = new Date(iso);
-  return d.toLocaleTimeString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleTimeString(getLocale(lang), { hour: '2-digit', minute: '2-digit' });
 }
 
 export function MatchCard({ match }: { match: MatchWithTeams }) {

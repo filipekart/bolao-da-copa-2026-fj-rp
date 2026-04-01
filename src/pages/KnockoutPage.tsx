@@ -134,9 +134,9 @@ function BracketMatchCard({
         {hasRealMatch && realMatch.kickoff_at && (
           <div className="flex items-center gap-1">
             <Calendar className="w-3 h-3" />
-            {new Date(realMatch.kickoff_at).toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', { day: '2-digit', month: 'short' })}
+            {new Date(realMatch.kickoff_at).toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US', { day: '2-digit', month: 'short' })}
             {' '}
-            {new Date(realMatch.kickoff_at).toLocaleTimeString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+            {new Date(realMatch.kickoff_at).toLocaleTimeString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
           </div>
         )}
       </div>
