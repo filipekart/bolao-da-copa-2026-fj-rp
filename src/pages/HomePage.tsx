@@ -279,7 +279,7 @@ function GroupCard({
               disabled={saving}
               className="w-full mt-3 gradient-pitch text-primary-foreground font-semibold h-9 text-sm"
             >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar palpites'}
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : t('home.savePredictions')}
             </Button>
           )}
         </div>
