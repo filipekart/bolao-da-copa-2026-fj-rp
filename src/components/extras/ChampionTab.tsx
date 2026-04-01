@@ -93,7 +93,7 @@ export default function ChampionTab() {
     );
   }
 
-  const filteredTeams = teams?.filter(tm => tm.name.toLowerCase().includes(search.toLowerCase())) ?? [];
+  const filteredTeams = teams?.filter(tm => tn(tm.name, tm.fifa_code).toLowerCase().includes(search.toLowerCase())) ?? [];
   const groupedTeams = new Map<string, typeof filteredTeams>();
   filteredTeams.forEach(tm => {
     const g = tm.group_name || t('extras.noGroup');
