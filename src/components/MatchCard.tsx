@@ -1,28 +1,22 @@
 import { useNavigate } from 'react-router-dom';
 import { type MatchWithTeams } from '@/hooks/useMatches';
 import { Clock, MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-function formatDate(iso: string) {
+function formatDate(iso: string, lang: string) {
   const d = new Date(iso);
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+  return d.toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', { day: '2-digit', month: 'short' });
 }
 
-function formatTime(iso: string) {
+function formatTime(iso: string, lang: string) {
   const d = new Date(iso);
-  return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', { hour: '2-digit', minute: '2-digit' });
 }
-
-const stageLabels: Record<string, string> = {
-  GROUP_STAGE: 'Fase de Grupos',
-  ROUND_OF_32: 'Rodada de 32',
-  ROUND_OF_16: 'Oitavas',
-  QUARTER_FINAL: 'Quartas',
-  SEMI_FINAL: 'Semifinal',
-  FINAL: 'Final',
-};
 
 export function MatchCard({ match }: { match: MatchWithTeams }) {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.substring(0, 2) ?? 'pt';
   const isFinished = match.status === 'FINISHED';
   const isLive = match.status === 'LIVE';
   const isPast = new Date(match.kickoff_at) <= new Date();
@@ -34,21 +28,21 @@ export function MatchCard({ match }: { match: MatchWithTeams }) {
     >
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs text-muted-foreground font-medium">
-          {stageLabels[match.stage] ?? match.stage}
+          {t(`match.stages.${match.stage}`, match.stage)}
         </span>
         {isLive && (
           <span className="text-xs font-semibold text-destructive flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
-            AO VIVO
+            {t('match.live')}
           </span>
         )}
         {isFinished && (
-          <span className="text-xs font-medium text-primary">ENCERRADO</span>
+          <span className="text-xs font-medium text-primary">{t('match.finished')}</span>
         )}
         {!isFinished && !isLive && !isPast && (
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock className="w-3 h-3" />
-            {formatDate(match.kickoff_at)} · {formatTime(match.kickoff_at)}
+            {formatDate(match.kickoff_at, lang)} · {formatTime(match.kickoff_at, lang)}
           </div>
         )}
       </div>

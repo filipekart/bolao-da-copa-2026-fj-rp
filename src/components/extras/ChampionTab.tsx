@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/auth';
 import { Loader2, Trophy, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 function useTeams() {
   return useQuery({
@@ -58,6 +59,7 @@ export default function ChampionTab() {
   const queryClient = useQueryClient();
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const { t } = useTranslation();
 
   const isLocked = firstKickoff ? new Date() >= firstKickoff : false;
 
@@ -75,7 +77,7 @@ export default function ChampionTab() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['champion-prediction'] });
-      toast.success('Palpite de campeão salvo!');
+      toast.success(t('extras.championSaved'));
       setSelectedTeamId(null);
     },
     onError: (err: Error) => toast.error(err.message),
@@ -89,12 +91,12 @@ export default function ChampionTab() {
     );
   }
 
-  const filteredTeams = teams?.filter(t => t.name.toLowerCase().includes(search.toLowerCase())) ?? [];
+  const filteredTeams = teams?.filter(tm => tm.name.toLowerCase().includes(search.toLowerCase())) ?? [];
   const groupedTeams = new Map<string, typeof filteredTeams>();
-  filteredTeams.forEach(t => {
-    const g = t.group_name || 'Sem grupo';
+  filteredTeams.forEach(tm => {
+    const g = tm.group_name || t('extras.noGroup');
     const arr = groupedTeams.get(g) || [];
-    arr.push(t);
+    arr.push(tm);
     groupedTeams.set(g, arr);
   });
   const sortedGroups = Array.from(groupedTeams.entries()).sort(([a], [b]) => a.localeCompare(b));
@@ -102,27 +104,27 @@ export default function ChampionTab() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Escolha quem será o campeão da Copa 2026. Vale <span className="text-accent font-bold">100 pontos</span>!
+        {t('extras.championDesc').replace('<1>', '').replace('</1>', '')}
       </p>
 
       {isLocked && (
         <div className="glass rounded-xl p-4 flex items-center gap-3 border border-accent/30">
           <Lock className="w-5 h-5 text-accent shrink-0" />
           <p className="text-sm text-muted-foreground">
-            A Copa já começou. Não é mais possível alterar o palpite de campeão.
+            {t('extras.cupStartedChampion')}
           </p>
         </div>
       )}
 
       {prediction && (
         <div className="glass rounded-xl p-4 space-y-2">
-          <p className="text-xs text-muted-foreground font-medium">Seu palpite atual:</p>
+          <p className="text-xs text-muted-foreground font-medium">{t('extras.currentPrediction')}</p>
           <div className="flex items-center gap-3">
             {(prediction as any).teams?.flag_url && (
               <img src={(prediction as any).teams.flag_url} alt="" className="w-8 h-6 rounded-sm" />
             )}
             <span className="text-lg font-display font-bold text-foreground">
-              {(prediction as any).teams?.name ?? 'Time desconhecido'}
+              {(prediction as any).teams?.name ?? t('extras.unknownTeam')}
             </span>
             <Trophy className="w-5 h-5 text-accent ml-auto" />
           </div>
@@ -133,7 +135,7 @@ export default function ChampionTab() {
         <div className="space-y-3">
           <input
             type="text"
-            placeholder="Buscar seleção..."
+            placeholder={t('extras.searchTeam')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full glass rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
@@ -141,7 +143,7 @@ export default function ChampionTab() {
           <div className="space-y-4 max-h-[50vh] overflow-y-auto">
             {sortedGroups.map(([group, groupTeams]) => (
               <div key={group}>
-                <p className="text-xs font-medium text-muted-foreground mb-1.5 px-1">Grupo {group}</p>
+                <p className="text-xs font-medium text-muted-foreground mb-1.5 px-1">{t('extras.groupLabel')} {group}</p>
                 <div className="space-y-1">
                   {groupTeams.map(team => {
                     const isSelected = selectedTeamId === team.id;
@@ -156,7 +158,7 @@ export default function ChampionTab() {
                       >
                         {team.flag_url && <img src={team.flag_url} alt="" className="w-6 h-4 rounded-sm" />}
                         <span className="text-sm text-foreground font-medium">{team.name}</span>
-                        {isCurrent && <span className="text-[10px] text-accent ml-auto">atual</span>}
+                        {isCurrent && <span className="text-[10px] text-accent ml-auto">{t('extras.current')}</span>}
                       </button>
                     );
                   })}
@@ -170,7 +172,7 @@ export default function ChampionTab() {
               disabled={submitMutation.isPending}
               className="w-full gradient-gold text-accent-foreground font-display font-bold py-3 rounded-xl transition-all hover:opacity-90 disabled:opacity-50"
             >
-              {submitMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Confirmar Campeão'}
+              {submitMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : t('extras.confirmChampion')}
             </button>
           )}
         </div>

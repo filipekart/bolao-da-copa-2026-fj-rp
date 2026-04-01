@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Shield, Users, Trophy, RefreshCw, Globe, Loader2, Check, X, Wallet, Copy, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 function UserApprovalSection() {
   const { data: users, isLoading } = usePendingUsers();
@@ -19,6 +20,7 @@ function UserApprovalSection() {
   const updateName = useUpdateUserName();
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
+  const { t } = useTranslation();
 
   if (isLoading) return <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />;
 
@@ -28,12 +30,12 @@ function UserApprovalSection() {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-display font-semibold text-foreground flex items-center gap-2">
-        <Users className="w-5 h-5 text-primary" /> Aprovação de Usuários
+        <Users className="w-5 h-5 text-primary" /> {t('admin.userApproval')}
       </h2>
 
       {pending.length > 0 && (
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">Pendentes ({pending.length})</p>
+          <p className="text-sm text-muted-foreground">{t('admin.pending')} ({pending.length})</p>
           {pending.map(u => (
             <div key={u.id} className="glass rounded-xl p-3 flex items-center justify-between">
               <div className="flex-1 min-w-0">
@@ -47,9 +49,9 @@ function UserApprovalSection() {
                     />
                     <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => {
                       const trimmed = newName.trim();
-                      if (!trimmed) { toast.error('Nome não pode ser vazio'); return; }
+                      if (!trimmed) { toast.error(t('admin.nameEmpty')); return; }
                       const nameRegex = /^[a-zA-ZÀ-ÿ0-9 ]+$/;
-                      if (!nameRegex.test(trimmed)) { toast.error('Nome não pode conter caracteres especiais'); return; }
+                      if (!nameRegex.test(trimmed)) { toast.error(t('admin.nameInvalid')); return; }
                       updateName.mutate({ userId: u.id, displayName: trimmed });
                       setEditingNameId(null);
                     }}><Check className="w-3.5 h-3.5 text-primary" /></Button>
@@ -85,7 +87,7 @@ function UserApprovalSection() {
 
       {approved.length > 0 && (
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">Aprovados ({approved.length})</p>
+          <p className="text-sm text-muted-foreground">{t('admin.approved')} ({approved.length})</p>
           {approved.map(u => (
             <div key={u.id} className="glass rounded-xl p-3 flex items-center justify-between">
               <div className="flex-1 min-w-0">
@@ -99,9 +101,9 @@ function UserApprovalSection() {
                     />
                     <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => {
                       const trimmed = newName.trim();
-                      if (!trimmed) { toast.error('Nome não pode ser vazio'); return; }
+                      if (!trimmed) { toast.error(t('admin.nameEmpty')); return; }
                       const nameRegex = /^[a-zA-ZÀ-ÿ0-9 ]+$/;
-                      if (!nameRegex.test(trimmed)) { toast.error('Nome não pode conter caracteres especiais'); return; }
+                      if (!nameRegex.test(trimmed)) { toast.error(t('admin.nameInvalid')); return; }
                       updateName.mutate({ userId: u.id, displayName: trimmed });
                       setEditingNameId(null);
                     }}><Check className="w-3.5 h-3.5 text-primary" /></Button>
@@ -125,7 +127,7 @@ function UserApprovalSection() {
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(u.pix_key!);
-                        toast.success('PIX copiado!');
+                        toast.success(t('admin.pixCopied'));
                       }}
                       className="text-muted-foreground hover:text-foreground"
                     >
@@ -148,7 +150,7 @@ function UserApprovalSection() {
       )}
 
       {!users?.length && (
-        <p className="text-sm text-muted-foreground text-center py-4">Nenhum usuário cadastrado.</p>
+        <p className="text-sm text-muted-foreground text-center py-4">{t('admin.noUsers')}</p>
       )}
     </div>
   );
@@ -160,6 +162,7 @@ function MatchResultSection() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
+  const { t } = useTranslation();
 
   if (isLoading) return <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />;
 
@@ -170,11 +173,11 @@ function MatchResultSection() {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-display font-semibold text-foreground flex items-center gap-2">
-        <Trophy className="w-5 h-5 text-accent" /> Resultados dos Jogos
+        <Trophy className="w-5 h-5 text-accent" /> {t('admin.matchResults')}
       </h2>
 
       <p className="text-xs text-muted-foreground">
-        Para mata-mata, insira o placar do tempo regulamentar + prorrogação (sem pênaltis).
+        {t('admin.knockoutNote')}
       </p>
 
       <div className="space-y-2 max-h-[60vh] overflow-y-auto">
@@ -183,7 +186,7 @@ function MatchResultSection() {
           return (
             <div key={m.id} className="glass rounded-xl p-3 space-y-2">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{m.stage.replace(/_/g, ' ')}</span>
+                <span>{t(`match.stages.${m.stage}`, m.stage.replace(/_/g, ' '))}</span>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
                   m.status === 'FINISHED' ? 'bg-primary/20 text-primary' :
                   m.status === 'LIVE' ? 'bg-destructive/20 text-destructive' :
@@ -245,14 +248,14 @@ function MatchResultSection() {
                         setEditingId(null);
                       }}
                     >
-                      Salvar (Finalizado)
+                      {t('admin.saveFinished')}
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => setEditingId(null)}
                     >
-                      Cancelar
+                      {t('admin.cancel')}
                     </Button>
                   </>
                 ) : (
@@ -266,7 +269,7 @@ function MatchResultSection() {
                       setAwayScore(m.official_away_score ?? 0);
                     }}
                   >
-                    Editar resultado
+                    {t('admin.editResult')}
                   </Button>
                 )}
               </div>
@@ -282,14 +285,14 @@ export default function AdminPage() {
   const recalculate = useRecalculateScores();
   const fetchFifa = useFetchFifaResults();
   const [activeTab, setActiveTab] = useState<'users' | 'matches'>('users');
+  const { t } = useTranslation();
 
   return (
     <div className="space-y-6 animate-fade-in">
       <h1 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
-        <Shield className="w-5 h-5 text-accent" /> Painel Admin
+        <Shield className="w-5 h-5 text-accent" /> {t('admin.title')}
       </h1>
 
-      {/* Action buttons */}
       <div className="flex gap-2">
         <Button
           size="sm"
@@ -299,7 +302,7 @@ export default function AdminPage() {
           className="flex-1"
         >
           {fetchFifa.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
-          <span className="ml-1 text-xs">Buscar FIFA</span>
+          <span className="ml-1 text-xs">{t('admin.fetchFifa')}</span>
         </Button>
         <Button
           size="sm"
@@ -309,11 +312,10 @@ export default function AdminPage() {
           className="flex-1"
         >
           {recalculate.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-          <span className="ml-1 text-xs">Recalcular</span>
+          <span className="ml-1 text-xs">{t('admin.recalculate')}</span>
         </Button>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-1 p-1 bg-secondary rounded-xl">
         <button
           onClick={() => setActiveTab('users')}
@@ -321,7 +323,7 @@ export default function AdminPage() {
             activeTab === 'users' ? 'gradient-pitch text-primary-foreground' : 'text-muted-foreground'
           }`}
         >
-          Usuários
+          {t('admin.users')}
         </button>
         <button
           onClick={() => setActiveTab('matches')}
@@ -329,7 +331,7 @@ export default function AdminPage() {
             activeTab === 'matches' ? 'gradient-pitch text-primary-foreground' : 'text-muted-foreground'
           }`}
         >
-          Resultados
+          {t('admin.results')}
         </button>
       </div>
 

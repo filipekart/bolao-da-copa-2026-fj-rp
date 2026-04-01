@@ -3,10 +3,9 @@ import { useMatches } from '@/hooks/useMatches';
 import { Loader2, Trophy, Calendar, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-// FIFA official R32 bracket (match numbers 73-88)
 const R32_BRACKET = [
-  // Left half
   { matchNum: 73, home: '2ºA', away: '2ºB', homeLabel: '2º Grupo A', awayLabel: '2º Grupo B' },
   { matchNum: 74, home: '1ºE', away: '3º A/B/C/D/F', homeLabel: '1º Grupo E', awayLabel: 'Melhor 3º' },
   { matchNum: 75, home: '1ºF', away: '2ºC', homeLabel: '1º Grupo F', awayLabel: '2º Grupo C' },
@@ -15,7 +14,6 @@ const R32_BRACKET = [
   { matchNum: 78, home: '2ºE', away: '2ºI', homeLabel: '2º Grupo E', awayLabel: '2º Grupo I' },
   { matchNum: 79, home: '1ºA', away: '3º C/E/F/H/I', homeLabel: '1º Grupo A', awayLabel: 'Melhor 3º' },
   { matchNum: 80, home: '1ºL', away: '3º E/H/I/J/K', homeLabel: '1º Grupo L', awayLabel: 'Melhor 3º' },
-  // Right half
   { matchNum: 81, home: '1ºD', away: '3º B/E/F/I/J', homeLabel: '1º Grupo D', awayLabel: 'Melhor 3º' },
   { matchNum: 82, home: '1ºG', away: '3º A/E/H/I/J', homeLabel: '1º Grupo G', awayLabel: 'Melhor 3º' },
   { matchNum: 83, home: '2ºK', away: '2ºL', homeLabel: '2º Grupo K', awayLabel: '2º Grupo L' },
@@ -52,14 +50,6 @@ const SF_BRACKET = [
 const FINAL_BRACKET = [
   { matchNum: 104, home: 'V101', away: 'V102', homeLabel: 'Vencedor 101', awayLabel: 'Vencedor 102' },
 ];
-
-const KNOCKOUT_STAGES = [
-  { key: 'ROUND_OF_32', label: 'Fase de 32', bracket: R32_BRACKET },
-  { key: 'ROUND_OF_16', label: 'Oitavas de Final', bracket: R16_BRACKET },
-  { key: 'QUARTER_FINAL', label: 'Quartas de Final', bracket: QF_BRACKET },
-  { key: 'SEMI_FINAL', label: 'Semifinal', bracket: SF_BRACKET },
-  { key: 'FINAL', label: 'Final', bracket: FINAL_BRACKET },
-] as const;
 
 function GroupTable({ group, standings }: { group: string; standings: GroupStanding[] }) {
   return (
@@ -121,9 +111,13 @@ type BracketEntry = { matchNum: number; home: string; away: string; homeLabel: s
 function BracketMatchCard({
   entry,
   realMatch,
+  t,
+  lang,
 }: {
   entry: BracketEntry;
   realMatch?: any;
+  t: any;
+  lang: string;
 }) {
   const hasRealMatch = realMatch && realMatch.home_team_name;
   const isFinished = realMatch?.status === 'FINISHED';
@@ -131,13 +125,13 @@ function BracketMatchCard({
   return (
     <div className="glass rounded-xl p-3 space-y-1.5">
       <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-        <span className="font-medium">Jogo {entry.matchNum}</span>
+        <span className="font-medium">{t('knockout.game')} {entry.matchNum}</span>
         {hasRealMatch && realMatch.kickoff_at && (
           <div className="flex items-center gap-1">
             <Calendar className="w-3 h-3" />
-            {new Date(realMatch.kickoff_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+            {new Date(realMatch.kickoff_at).toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', { day: '2-digit', month: 'short' })}
             {' '}
-            {new Date(realMatch.kickoff_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+            {new Date(realMatch.kickoff_at).toLocaleTimeString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
           </div>
         )}
       </div>
@@ -182,6 +176,16 @@ export default function KnockoutPage() {
   const { data: standings, isLoading: standingsLoading } = useGroupStandings();
   const { data: allMatches, isLoading: matchesLoading } = useMatches();
   const [activeTab, setActiveTab] = useState<'groups' | 'bracket'>('bracket');
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.substring(0, 2) ?? 'pt';
+
+  const KNOCKOUT_STAGES = [
+    { key: 'ROUND_OF_32', label: t('knockout.stages.ROUND_OF_32'), bracket: R32_BRACKET },
+    { key: 'ROUND_OF_16', label: t('knockout.stages.ROUND_OF_16'), bracket: R16_BRACKET },
+    { key: 'QUARTER_FINAL', label: t('knockout.stages.QUARTER_FINAL'), bracket: QF_BRACKET },
+    { key: 'SEMI_FINAL', label: t('knockout.stages.SEMI_FINAL'), bracket: SF_BRACKET },
+    { key: 'FINAL', label: t('knockout.stages.FINAL'), bracket: FINAL_BRACKET },
+  ] as const;
 
   if (standingsLoading || matchesLoading) {
     return (
@@ -191,7 +195,6 @@ export default function KnockoutPage() {
     );
   }
 
-  // Group standings by group
   const groups = new Map<string, GroupStanding[]>();
   standings?.forEach(s => {
     const arr = groups.get(s.group_name) || [];
@@ -200,7 +203,6 @@ export default function KnockoutPage() {
   });
   const sortedGroups = Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b));
 
-  // Knockout matches by match_number for lookup
   const knockoutMatches = allMatches?.filter(m => m.stage !== 'GROUP_STAGE') ?? [];
   const matchByNumber = new Map<number, (typeof knockoutMatches)[0]>();
   knockoutMatches.forEach(m => {
@@ -210,10 +212,9 @@ export default function KnockoutPage() {
   return (
     <div className="space-y-4 animate-fade-in">
       <h1 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
-        <Trophy className="w-5 h-5 text-accent" /> 2ª Fase
+        <Trophy className="w-5 h-5 text-accent" /> {t('knockout.title')}
       </h1>
 
-      {/* Tabs */}
       <div className="flex gap-1 p-1 bg-secondary rounded-xl">
         <button
           onClick={() => setActiveTab('groups')}
@@ -221,7 +222,7 @@ export default function KnockoutPage() {
             activeTab === 'groups' ? 'gradient-pitch text-primary-foreground' : 'text-muted-foreground'
           }`}
         >
-          Classificação
+          {t('knockout.standings')}
         </button>
         <button
           onClick={() => setActiveTab('bracket')}
@@ -229,7 +230,7 @@ export default function KnockoutPage() {
             activeTab === 'bracket' ? 'gradient-pitch text-primary-foreground' : 'text-muted-foreground'
           }`}
         >
-          Chave
+          {t('knockout.bracket')}
         </button>
       </div>
 
@@ -238,11 +239,11 @@ export default function KnockoutPage() {
           <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 rounded-sm bg-primary" />
-              <span>Classificado</span>
+              <span>{t('knockout.classified')}</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 rounded-sm bg-accent" />
-              <span>Possível classificação (melhor 3º)</span>
+              <span>{t('knockout.possibleClassification')}</span>
             </div>
           </div>
           {sortedGroups.map(([group, teams]) => (
@@ -255,7 +256,7 @@ export default function KnockoutPage() {
             <Alert className="border-accent/50 bg-accent/10">
               <Info className="h-4 w-4 text-accent" />
               <AlertDescription className="text-sm text-muted-foreground">
-                Os palpites da 2ª fase serão liberados assim que os confrontos oficiais forem definidos.
+                {t('knockout.predictionsNotice')}
               </AlertDescription>
             </Alert>
           )}
@@ -268,6 +269,8 @@ export default function KnockoutPage() {
                     key={entry.matchNum}
                     entry={entry}
                     realMatch={matchByNumber.get(entry.matchNum)}
+                    t={t}
+                    lang={lang}
                   />
                 ))}
               </div>

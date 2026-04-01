@@ -17,11 +17,13 @@ import AdminPage from "./pages/AdminPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
 import { Loader2, ShieldAlert } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const queryClient = new QueryClient();
 
 function ProtectedRoutes() {
   const { user, loading, isAdmin, isApproved, profileLoading } = useAuth();
+  const { t } = useTranslation();
 
   if (loading || profileLoading) {
     return (
@@ -33,21 +35,20 @@ function ProtectedRoutes() {
 
   if (!user) return <Navigate to="/auth" replace />;
 
-  // Admins always have access; non-approved users see waiting screen
   if (!isAdmin && !isApproved) {
     return (
       <div className="min-h-screen gradient-dark flex items-center justify-center p-4">
         <div className="glass rounded-2xl p-8 max-w-sm text-center space-y-4">
           <ShieldAlert className="w-12 h-12 text-accent mx-auto" />
-          <h2 className="text-lg font-display font-bold text-foreground">Aguardando aprovação</h2>
+          <h2 className="text-lg font-display font-bold text-foreground">{t('approval.title')}</h2>
           <p className="text-sm text-muted-foreground">
-            Sua conta foi criada com sucesso! O administrador precisa aprovar seu cadastro para você acessar o bolão.
+            {t('approval.message')}
           </p>
           <button
             onClick={() => { void import('@/integrations/supabase/client').then(m => m.supabase.auth.signOut()); }}
             className="text-sm text-muted-foreground underline"
           >
-            Sair
+            {t('approval.signOut')}
           </button>
         </div>
       </div>

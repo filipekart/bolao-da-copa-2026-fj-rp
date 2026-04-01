@@ -6,15 +6,16 @@ import { useMatchReminders } from '@/hooks/useMatchReminders';
 import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { NotificationBanner } from '@/components/NotificationBanner';
 import { InstallBanner } from '@/components/InstallBanner';
+import { useTranslation } from 'react-i18next';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin } = useAuth();
+  const { t } = useTranslation();
   useMatchReminders();
   const { subscribe } = usePushSubscription();
 
-  // Auto-subscribe if permission already granted
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'granted') {
       subscribe();
@@ -22,13 +23,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
   }, [subscribe]);
 
   const tabs = [
-    { path: '/', icon: Home, label: 'Jogos' },
-    { path: '/bets', icon: History, label: 'Palpites' },
-    { path: '/knockout', icon: Swords, label: '2ª Fase' },
-    { path: '/extras', icon: Star, label: 'Extras' },
-    { path: '/ranking', icon: Medal, label: 'Ranking' },
-    { path: '/profile', icon: User, label: 'Perfil' },
-    ...(isAdmin ? [{ path: '/admin', icon: Shield, label: 'Admin' }] : []),
+    { path: '/', icon: Home, label: t('nav.games') },
+    { path: '/bets', icon: History, label: t('nav.bets') },
+    { path: '/knockout', icon: Swords, label: t('nav.knockout') },
+    { path: '/extras', icon: Star, label: t('nav.extras') },
+    { path: '/ranking', icon: Medal, label: t('nav.ranking') },
+    { path: '/profile', icon: User, label: t('nav.profile') },
+    ...(isAdmin ? [{ path: '/admin', icon: Shield, label: t('nav.admin') }] : []),
   ];
 
   return (

@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Trophy, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,11 +17,12 @@ export default function AuthPage() {
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
+  const { t } = useTranslation();
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      toast.error('Informe seu email');
+      toast.error(t('auth.enterEmail'));
       return;
     }
     setLoading(true);
@@ -28,10 +31,10 @@ export default function AuthPage() {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;
-      toast.success('Email de redefinição enviado! Verifique sua caixa de entrada.');
+      toast.success(t('auth.resetEmailSent'));
       setIsForgot(false);
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao enviar email');
+      toast.error(err instanceof Error ? err.message : t('auth.emailSendError'));
     } finally {
       setLoading(false);
     }
@@ -46,13 +49,13 @@ export default function AuthPage() {
       } else {
         const trimmed = displayName.trim();
         if (!trimmed) {
-          toast.error('Informe seu nome');
+          toast.error(t('auth.nameRequired'));
           setLoading(false);
           return;
         }
         const nameRegex = /^[a-zA-ZÀ-ÿ0-9 ]+$/;
         if (!nameRegex.test(trimmed)) {
-          toast.error('O nome não pode conter caracteres especiais');
+          toast.error(t('auth.nameInvalid'));
           setLoading(false);
           return;
         }
@@ -61,18 +64,18 @@ export default function AuthPage() {
         } catch (signUpErr: unknown) {
           const msg = signUpErr instanceof Error ? signUpErr.message : '';
           if (msg.includes('profiles_display_name_unique') || msg.includes('duplicate key')) {
-            toast.error('Este nome já está em uso. Escolha outro.');
+            toast.error(t('auth.nameInUse'));
             setLoading(false);
             return;
           }
           throw signUpErr;
         }
-        toast.success('Conta criada! Verifique seu email.');
+        toast.success(t('auth.accountCreated'));
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erro ao autenticar';
+      const msg = err instanceof Error ? err.message : t('auth.authError');
       if (msg.toLowerCase().includes('invalid login credentials')) {
-        toast.error('Email ou senha incorretos. Verifique seus dados e tente novamente.');
+        toast.error(t('auth.invalidCredentials'));
       } else {
         toast.error(msg);
       }
@@ -88,8 +91,11 @@ export default function AuthPage() {
           <div className="w-16 h-16 rounded-2xl gradient-pitch flex items-center justify-center mb-4">
             <Trophy className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Bolão Copa 2026</h1>
-          <p className="text-muted-foreground text-sm mt-1">Faça seus palpites e dispute com amigos</p>
+          <h1 className="text-2xl font-display font-bold text-foreground">{t('app.title')}</h1>
+          <p className="text-muted-foreground text-sm mt-1">{t('app.subtitle')}</p>
+          <div className="mt-3">
+            <LanguageSelector variant="compact" />
+          </div>
         </div>
 
         <div className="glass rounded-2xl p-6">
@@ -99,13 +105,13 @@ export default function AuthPage() {
                 onClick={() => setIsForgot(false)}
                 className="flex items-center gap-1 text-sm text-muted-foreground mb-4 hover:text-foreground transition-colors"
               >
-                <ArrowLeft className="w-4 h-4" /> Voltar ao login
+                <ArrowLeft className="w-4 h-4" /> {t('auth.backToLogin')}
               </button>
-              <h2 className="text-lg font-display font-bold text-foreground mb-1">Esqueci minha senha</h2>
-              <p className="text-sm text-muted-foreground mb-4">Informe seu email para receber o link de redefinição.</p>
+              <h2 className="text-lg font-display font-bold text-foreground mb-1">{t('auth.forgotTitle')}</h2>
+              <p className="text-sm text-muted-foreground mb-4">{t('auth.forgotDescription')}</p>
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-foreground text-sm">Email</Label>
+                  <Label htmlFor="email" className="text-foreground text-sm">{t('auth.email')}</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
@@ -113,7 +119,7 @@ export default function AuthPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="seu@email.com"
+                      placeholder={t('auth.emailPlaceholder')}
                       className="pl-10 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                       required
                     />
@@ -124,7 +130,7 @@ export default function AuthPage() {
                   disabled={loading}
                   className="w-full gradient-pitch text-primary-foreground font-semibold h-11"
                 >
-                  {loading ? 'Enviando...' : 'Enviar link de redefinição'}
+                  {loading ? t('auth.sending') : t('auth.sendResetLink')}
                 </Button>
               </form>
             </>
@@ -137,7 +143,7 @@ export default function AuthPage() {
                     isLogin ? 'gradient-pitch text-primary-foreground' : 'text-muted-foreground'
                   }`}
                 >
-                  Entrar
+                  {t('auth.login')}
                 </button>
                 <button
                   onClick={() => setIsLogin(false)}
@@ -145,21 +151,21 @@ export default function AuthPage() {
                     !isLogin ? 'gradient-pitch text-primary-foreground' : 'text-muted-foreground'
                   }`}
                 >
-                  Cadastrar
+                  {t('auth.signup')}
                 </button>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 {!isLogin && (
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-foreground text-sm">Nome</Label>
+                    <Label htmlFor="name" className="text-foreground text-sm">{t('auth.name')}</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         id="name"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
-                        placeholder="Nome e Sobrenome"
+                        placeholder={t('auth.namePlaceholder')}
                         className="pl-10 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                       />
                     </div>
@@ -167,7 +173,7 @@ export default function AuthPage() {
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-foreground text-sm">Email</Label>
+                  <Label htmlFor="email" className="text-foreground text-sm">{t('auth.email')}</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
@@ -175,7 +181,7 @@ export default function AuthPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="seu@email.com"
+                      placeholder={t('auth.emailPlaceholder')}
                       className="pl-10 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                       required
                     />
@@ -183,7 +189,7 @@ export default function AuthPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-foreground text-sm">Senha</Label>
+                  <Label htmlFor="password" className="text-foreground text-sm">{t('auth.password')}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
@@ -206,7 +212,7 @@ export default function AuthPage() {
                       onClick={() => setIsForgot(true)}
                       className="text-xs text-muted-foreground hover:text-foreground underline transition-colors"
                     >
-                      Esqueci minha senha
+                      {t('auth.forgotPassword')}
                     </button>
                   </div>
                 )}
@@ -216,7 +222,7 @@ export default function AuthPage() {
                   disabled={loading}
                   className="w-full gradient-pitch text-primary-foreground font-semibold h-11"
                 >
-                  {loading ? 'Carregando...' : isLogin ? 'Entrar' : 'Criar conta'}
+                  {loading ? t('auth.loading') : isLogin ? t('auth.login') : t('auth.createAccount')}
                 </Button>
               </form>
             </>

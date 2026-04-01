@@ -2,25 +2,25 @@ import { useState } from 'react';
 import { Star, Trophy, Target, Award } from 'lucide-react';
 import ChampionTab from '@/components/extras/ChampionTab';
 import PlayerPredictionTab from '@/components/extras/PlayerPredictionTab';
-
-const SUB_TABS = [
-  { key: 'champion', label: 'Campeão', icon: Trophy },
-  { key: 'top_scorer', label: 'Artilheiro', icon: Target },
-  { key: 'mvp', label: 'MVP', icon: Award },
-] as const;
-
-type TabKey = (typeof SUB_TABS)[number]['key'];
+import { useTranslation } from 'react-i18next';
 
 export default function ExtrasPage() {
-  const [activeTab, setActiveTab] = useState<TabKey>('champion');
+  const { t } = useTranslation();
+
+  const SUB_TABS = [
+    { key: 'champion' as const, label: t('extras.champion'), icon: Trophy },
+    { key: 'top_scorer' as const, label: t('extras.topScorer'), icon: Target },
+    { key: 'mvp' as const, label: t('extras.mvp'), icon: Award },
+  ];
+
+  const [activeTab, setActiveTab] = useState<'champion' | 'top_scorer' | 'mvp'>('champion');
 
   return (
     <div className="space-y-4 animate-fade-in">
       <h1 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
-        <Star className="w-5 h-5 text-accent" /> Extras
+        <Star className="w-5 h-5 text-accent" /> {t('extras.title')}
       </h1>
 
-      {/* Sub-tabs */}
       <div className="flex gap-1 p-1 bg-secondary rounded-xl">
         {SUB_TABS.map(tab => (
           <button
@@ -42,16 +42,16 @@ export default function ExtrasPage() {
       {activeTab === 'top_scorer' && (
         <PlayerPredictionTab
           category="top_scorer"
-          title="Artilheiro"
-          description="Escolha quem será o artilheiro da Copa 2026. Vale 50 pontos!"
+          title={t('extras.topScorer')}
+          description={t('extras.topScorerDesc')}
           icon={<Target className="w-5 h-5 text-accent" />}
         />
       )}
       {activeTab === 'mvp' && (
         <PlayerPredictionTab
           category="mvp"
-          title="MVP"
-          description="Escolha quem será o melhor jogador (MVP) da Copa 2026. Vale 50 pontos!"
+          title={t('extras.mvp')}
+          description={t('extras.mvpDesc')}
           icon={<Award className="w-5 h-5 text-accent" />}
         />
       )}
