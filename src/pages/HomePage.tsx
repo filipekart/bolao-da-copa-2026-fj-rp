@@ -492,13 +492,13 @@ export default function HomePage() {
             <div key={m.id} className="glass rounded-xl p-3 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 {m.home_team_flag_url && <img src={m.home_team_flag_url} alt="" className="w-5 h-3.5 rounded-sm" />}
-                <span className="text-xs text-foreground">{m.home_team_name}</span>
+                <span className="text-xs text-foreground">{teamNames.get(m.home_team_id) ?? m.home_team_name}</span>
               </div>
               <span className="text-sm font-bold text-foreground">
                 {m.official_home_score ?? 0} × {m.official_away_score ?? 0}
               </span>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-foreground">{m.away_team_name}</span>
+                <span className="text-xs text-foreground">{teamNames.get(m.away_team_id) ?? m.away_team_name}</span>
                 {m.away_team_flag_url && <img src={m.away_team_flag_url} alt="" className="w-5 h-3.5 rounded-sm" />}
               </div>
             </div>
