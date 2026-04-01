@@ -542,7 +542,7 @@ export default function HomePage() {
 
       {/* Group betting cards */}
       <div className="space-y-3">
-        {Array.from(matchesByGroup.entries()).map(([groupName, groupMatches]) => (
+        {sortedGroupEntries.map(([groupName, groupMatches]) => (
           <GroupCard
             key={groupName}
             groupName={groupName}
@@ -554,6 +554,7 @@ export default function HomePage() {
             teamNames={teamNames}
             teamFlags={teamFlags}
             existingPredictionIds={existingPredictionIds}
+            hasUpcoming24h={upcoming24hGroups.has(groupName)}
           />
         ))}
       </div>
