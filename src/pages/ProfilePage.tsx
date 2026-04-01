@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { LogOut, User, Wallet, Loader2, Check } from 'lucide-react';
+import { LogOut, User, Wallet, Loader2, Check, Bell, BellOff } from 'lucide-react';
+import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
