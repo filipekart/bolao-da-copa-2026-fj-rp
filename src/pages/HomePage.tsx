@@ -259,6 +259,7 @@ function GroupCard({
                   score={scores[m.id] ?? { home: 0, away: 0 }}
                   onChange={(home, away) => onScoreChange(m.id, home, away)}
                   locked={locked}
+                  teamNames={teamNames}
                 />
               </div>
             );
