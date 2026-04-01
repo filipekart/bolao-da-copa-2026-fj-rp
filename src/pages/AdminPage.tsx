@@ -201,7 +201,7 @@ function MatchResultSection() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   {m.home_team_flag_url && <img src={m.home_team_flag_url} alt="" className="w-5 h-4 rounded-sm" />}
-                  <span className="text-sm text-foreground truncate">{m.home_team_name}</span>
+                  <span className="text-sm text-foreground truncate">{tt(m.home_team_id, m.home_team_name)}</span>
                 </div>
 
                 {isEditing ? (
