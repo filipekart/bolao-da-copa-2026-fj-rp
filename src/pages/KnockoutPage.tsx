@@ -251,6 +251,14 @@ export default function KnockoutPage() {
         </div>
       ) : (
         <div className="space-y-6">
+          {R32_BRACKET.some(e => !matchByNumber.get(e.matchNum)?.home_team_name) && (
+            <Alert className="border-accent/50 bg-accent/10">
+              <Info className="h-4 w-4 text-accent" />
+              <AlertDescription className="text-sm text-muted-foreground">
+                Os palpites da 2ª fase serão liberados assim que os confrontos oficiais forem definidos.
+              </AlertDescription>
+            </Alert>
+          )}
           {KNOCKOUT_STAGES.map(stage => (
             <div key={stage.key} className="space-y-2">
               <h2 className="text-sm font-display font-semibold text-foreground">{stage.label}</h2>
