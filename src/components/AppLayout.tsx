@@ -6,6 +6,7 @@ import { useMatchReminders } from '@/hooks/useMatchReminders';
 import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { RulesModal } from '@/components/RulesModal';
 import { NotificationBanner } from '@/components/NotificationBanner';
+import { InstallBanner } from '@/components/InstallBanner';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <RulesModal />
       </div>
       <div className="max-w-lg mx-auto w-full px-4">
+        <InstallBanner />
         <NotificationBanner onAccept={subscribe} />
       </div>
       <main className="flex-1 max-w-lg mx-auto w-full px-4 pb-24">
