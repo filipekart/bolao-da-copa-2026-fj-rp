@@ -61,6 +61,7 @@ export default function ChampionTab() {
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const { t } = useTranslation();
+  const tn = useTeamNameByCode();
 
   const isLocked = firstKickoff ? new Date() >= firstKickoff : false;
 
