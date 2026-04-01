@@ -4,6 +4,7 @@ import { Loader2, Trophy, Calendar, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 
 const R32_BRACKET = [
   { matchNum: 73, home: '2ºA', away: '2ºB', homeLabel: '2º Grupo A', awayLabel: '2º Grupo B' },
