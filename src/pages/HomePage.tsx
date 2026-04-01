@@ -392,9 +392,9 @@ export default function HomePage() {
       const results = await Promise.all(promises);
       const errors = results.filter(r => r.error);
       if (errors.length) {
-        toast.error(`${errors.length} palpite(s) com erro: ${errors[0].error!.message}`);
+        toast.error(t('home.errorCount', { count: errors.length, message: errors[0].error!.message }));
       } else {
-        toast.success(`Palpites do Grupo ${groupName} salvos!`);
+        toast.success(t('home.savedSuccess', { group: groupName }));
       }
 
       // Invalidate queries
