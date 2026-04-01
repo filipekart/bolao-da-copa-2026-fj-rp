@@ -159,7 +159,7 @@ export default function ChampionTab() {
                         }`}
                       >
                         {team.flag_url && <img src={team.flag_url} alt="" className="w-6 h-4 rounded-sm" />}
-                        <span className="text-sm text-foreground font-medium">{team.name}</span>
+                        <span className="text-sm text-foreground font-medium">{tn(team.name, team.fifa_code)}</span>
                         {isCurrent && <span className="text-[10px] text-accent ml-auto">{t('extras.current')}</span>}
                       </button>
                     );

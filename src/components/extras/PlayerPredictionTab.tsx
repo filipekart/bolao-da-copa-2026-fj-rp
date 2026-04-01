@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useState, ReactNode, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
+import { useTeamNameByCode } from '@/hooks/useTranslatedTeamName';
 
 interface Props {
   category: 'top_scorer' | 'mvp';
