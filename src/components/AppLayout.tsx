@@ -4,7 +4,6 @@ import { Home, History, Swords, Medal, User, Shield, Star, Trophy } from 'lucide
 import { useAuth } from '@/lib/auth';
 import { useMatchReminders } from '@/hooks/useMatchReminders';
 import { usePushSubscription } from '@/hooks/usePushSubscription';
-import { RulesModal } from '@/components/RulesModal';
 import { NotificationBanner } from '@/components/NotificationBanner';
 import { InstallBanner } from '@/components/InstallBanner';
 
@@ -34,13 +33,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen gradient-dark flex flex-col">
-      <div className="pointer-events-none fixed inset-x-0 top-[calc(env(safe-area-inset-top)+0.5rem)] z-50">
-        <div className="max-w-lg mx-auto w-full px-4 flex justify-end">
-          <div className="pointer-events-auto">
-            <RulesModal />
-          </div>
-        </div>
-      </div>
       <div className="max-w-lg mx-auto w-full px-4 pt-2">
         <InstallBanner />
         <NotificationBanner onAccept={subscribe} />
