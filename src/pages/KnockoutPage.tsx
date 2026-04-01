@@ -116,11 +116,13 @@ function BracketMatchCard({
   realMatch,
   t,
   lang,
+  tt,
 }: {
   entry: BracketEntry;
   realMatch?: any;
   t: any;
   lang: string;
+  tt: (teamId: string | null | undefined, fallbackName?: string) => string;
 }) {
   const hasRealMatch = realMatch && realMatch.home_team_name;
   const isFinished = realMatch?.status === 'FINISHED';
