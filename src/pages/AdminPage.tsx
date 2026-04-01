@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Shield, Users, Trophy, RefreshCw, Globe, Loader2, Check, X, Wallet, Copy, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 
 function UserApprovalSection() {
   const { data: users, isLoading } = usePendingUsers();
