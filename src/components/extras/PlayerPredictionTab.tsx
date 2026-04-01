@@ -96,8 +96,8 @@ export default function PlayerPredictionTab({ category, title, description, icon
   const selectedTeam = teams?.find(t => t.id === selectedTeamId);
 
   const filteredTeams = useMemo(
-    () => teams?.filter(t => t.name.toLowerCase().includes(teamSearch.toLowerCase())) ?? [],
-    [teams, teamSearch]
+    () => teams?.filter(t => tn(t.name, t.fifa_code).toLowerCase().includes(teamSearch.toLowerCase())) ?? [],
+    [teams, teamSearch, tn]
   );
 
   const filteredPlayers = useMemo(
