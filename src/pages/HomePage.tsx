@@ -176,6 +176,7 @@ function GroupCard({
   teamFlags: Map<string, string | null>;
   existingPredictionIds: Set<string>;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   const now = new Date();
