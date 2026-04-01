@@ -26,7 +26,11 @@ export function RulesModal() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <button className="text-muted-foreground hover:text-primary transition-colors p-2 -m-2 min-w-[44px] min-h-[44px] flex items-center justify-center" title="Regras">
+        <button
+          className="flex min-h-[48px] min-w-[48px] items-center justify-center rounded-full border border-border bg-card/95 p-2 text-destructive shadow-sm backdrop-blur transition-transform hover:scale-[1.02]"
+          title="Regras"
+          aria-label="Abrir regras"
+        >
           <HelpCircle className="w-6 h-6" />
         </button>
       </DialogTrigger>

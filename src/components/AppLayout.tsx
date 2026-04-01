@@ -34,11 +34,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen gradient-dark flex flex-col">
-      {/* Header with rules button */}
-      <div className="max-w-lg mx-auto w-full px-4 pt-2 flex justify-end">
-        <RulesModal />
+      <div className="pointer-events-none fixed inset-x-0 top-[calc(env(safe-area-inset-top)+0.5rem)] z-50">
+        <div className="max-w-lg mx-auto w-full px-4 flex justify-end">
+          <div className="pointer-events-auto">
+            <RulesModal />
+          </div>
+        </div>
       </div>
-      <div className="max-w-lg mx-auto w-full px-4">
+      <div className="max-w-lg mx-auto w-full px-4 pt-2">
         <InstallBanner />
         <NotificationBanner onAccept={subscribe} />
       </div>
