@@ -10,7 +10,7 @@ import {
 } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Shield, Users, Trophy, RefreshCw, Globe, Loader2, Check, X, Wallet, Copy } from 'lucide-react';
+import { Shield, Users, Trophy, RefreshCw, Globe, Loader2, Check, X, Wallet, Copy, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
 function UserApprovalSection() {
