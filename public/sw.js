@@ -21,8 +21,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: data.body,
-    icon: '/favicon.ico',
-    badge: '/favicon.ico',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
     tag: data.tag || 'match-reminder',
     data: {
       url: data.url || '/',
