@@ -36,8 +36,35 @@ function UserApprovalSection() {
           <p className="text-sm text-muted-foreground">Pendentes ({pending.length})</p>
           {pending.map(u => (
             <div key={u.id} className="glass rounded-xl p-3 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground">{u.display_name}</p>
+              <div className="flex-1 min-w-0">
+                {editingNameId === u.id ? (
+                  <div className="flex items-center gap-1">
+                    <Input
+                      value={newName}
+                      onChange={e => setNewName(e.target.value)}
+                      className="h-7 text-sm bg-secondary border-border"
+                      autoFocus
+                    />
+                    <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => {
+                      const trimmed = newName.trim();
+                      if (!trimmed) { toast.error('Nome não pode ser vazio'); return; }
+                      const nameRegex = /^[a-zA-ZÀ-ÿ0-9 ]+$/;
+                      if (!nameRegex.test(trimmed)) { toast.error('Nome não pode conter caracteres especiais'); return; }
+                      updateName.mutate({ userId: u.id, displayName: trimmed });
+                      setEditingNameId(null);
+                    }}><Check className="w-3.5 h-3.5 text-primary" /></Button>
+                    <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setEditingNameId(null)}>
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-medium text-foreground">{u.display_name}</p>
+                    <button onClick={() => { setEditingNameId(u.id); setNewName(u.display_name); }} className="text-muted-foreground hover:text-foreground">
+                      <Pencil className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   {new Date(u.created_at).toLocaleDateString('pt-BR')}
                 </p>
