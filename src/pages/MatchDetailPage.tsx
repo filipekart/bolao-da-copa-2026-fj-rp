@@ -112,7 +112,7 @@ export default function MatchDetailPage() {
             {match.away_team_flag_url && (
               <img src={match.away_team_flag_url} alt="" className="w-10 h-7 rounded object-cover" />
             )}
-            <span className="text-sm font-medium text-foreground text-center">{match.away_team_name}</span>
+            <span className="text-sm font-medium text-foreground text-center">{tt(match.away_team_id, match.away_team_name)}</span>
           </div>
         </div>
       </div>
