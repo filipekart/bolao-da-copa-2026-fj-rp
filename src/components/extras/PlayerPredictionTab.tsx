@@ -64,6 +64,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
   const { data: teams, isLoading: teamsLoading } = useTeams();
   const { data: firstKickoff, isLoading: kickoffLoading } = useFirstMatchKickoff();
   const { t } = useTranslation();
+  const tn = useTeamNameByCode();
 
   const { data: prediction, isLoading: predLoading } = useQuery({
     queryKey: ['extra-prediction', category, user?.id],
