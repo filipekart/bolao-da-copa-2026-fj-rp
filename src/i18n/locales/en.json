@@ -210,7 +210,9 @@
     "editResult": "Edit result",
     "nameEmpty": "Name cannot be empty",
     "nameInvalid": "Name cannot contain special characters",
-    "pixCopied": "PIX copied!"
+    "pixCopied": "PIX copied!",
+    "confirmDelete": "Delete?",
+    "userDeleted": "User deleted!"
   },
   "notifications": {
     "bannerTitle": "🔔 Enable notifications!",
