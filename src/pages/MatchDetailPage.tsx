@@ -4,24 +4,15 @@ import { useMatch } from '@/hooks/useMatches';
 import { useMatchPrediction, useSubmitPrediction } from '@/hooks/usePredictions';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Clock, MapPin, Lock, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-function formatDateTime(iso: string) {
+function formatDateTime(iso: string, lang: string) {
   const d = new Date(iso);
-  return d.toLocaleDateString('pt-BR', {
+  return d.toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', {
     day: '2-digit', month: 'long', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   });
 }
-
-const ruleLabels: Record<string, string> = {
-  EXACT_SCORE: '🎯 Placar exato! +25',
-  WINNER_AND_WINNER_GOALS: '✅ Vencedor + gols do vencedor! +18',
-  WINNER_AND_LOSER_GOALS: '✅ Vencedor + gols do perdedor! +12',
-  RESULT_ONLY: '👍 Resultado certo! +10',
-  DRAW_RESULT_ONLY: '👍 Empate certo! +10',
-  MISS: '❌ Errou',
-  PENDING: '⏳ Aguardando resultado',
-};
 
 export default function MatchDetailPage() {
   const { matchId } = useParams<{ matchId: string }>();
@@ -29,9 +20,21 @@ export default function MatchDetailPage() {
   const { data: match, isLoading: matchLoading } = useMatch(matchId!);
   const { data: prediction, isLoading: predLoading } = useMatchPrediction(matchId!);
   const submitPrediction = useSubmitPrediction();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.substring(0, 2) ?? 'pt';
 
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
+
+  const ruleLabels: Record<string, string> = {
+    EXACT_SCORE: t('bets.rules.EXACT_SCORE'),
+    WINNER_AND_WINNER_GOALS: t('bets.rules.WINNER_AND_WINNER_GOALS'),
+    WINNER_AND_LOSER_GOALS: t('bets.rules.WINNER_AND_LOSER_GOALS'),
+    RESULT_ONLY: t('bets.rules.RESULT_ONLY'),
+    DRAW_RESULT_ONLY: t('bets.rules.DRAW_RESULT_ONLY'),
+    MISS: t('bets.rules.MISS'),
+    PENDING: t('bets.rules.PENDING'),
+  };
 
   useEffect(() => {
     if (prediction) {
@@ -64,15 +67,15 @@ export default function MatchDetailPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground text-sm">
-        <ArrowLeft className="w-4 h-4" /> Voltar
+        <ArrowLeft className="w-4 h-4" /> {t('match.back')}
       </button>
 
       <div className="glass rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{match.stage.replace(/_/g, ' ')}</span>
+          <span>{t(`match.stages.${match.stage}`, match.stage.replace(/_/g, ' '))}</span>
           <div className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
-            {formatDateTime(match.kickoff_at)}
+            {formatDateTime(match.kickoff_at, lang)}
           </div>
         </div>
 
@@ -83,7 +86,6 @@ export default function MatchDetailPage() {
           </div>
         )}
 
-        {/* Teams & Score */}
         <div className="flex items-center justify-between py-4">
           <div className="flex flex-col items-center gap-2 flex-1">
             {match.home_team_flag_url && (
@@ -113,14 +115,13 @@ export default function MatchDetailPage() {
         </div>
       </div>
 
-      {/* Prediction Form */}
       <div className="glass rounded-2xl p-5 space-y-4">
-        <h2 className="text-lg font-display font-semibold text-foreground">Seu palpite</h2>
+        <h2 className="text-lg font-display font-semibold text-foreground">{t('match.yourPrediction')}</h2>
 
         {isLocked ? (
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <Lock className="w-4 h-4" />
-            <span>Palpites encerrados para esta partida</span>
+            <span>{t('match.predictionsLocked')}</span>
           </div>
         ) : null}
 
@@ -132,17 +133,13 @@ export default function MatchDetailPage() {
                 onClick={() => setHomeScore(Math.max(0, homeScore - 1))}
                 disabled={isLocked}
                 className="w-10 h-10 rounded-lg bg-secondary text-foreground font-bold text-lg disabled:opacity-50"
-              >
-                −
-              </button>
+              >−</button>
               <span className="w-10 text-center text-2xl font-display font-bold text-foreground">{homeScore}</span>
               <button
                 onClick={() => setHomeScore(homeScore + 1)}
                 disabled={isLocked}
                 className="w-10 h-10 rounded-lg bg-secondary text-foreground font-bold text-lg disabled:opacity-50"
-              >
-                +
-              </button>
+              >+</button>
             </div>
           </div>
 
@@ -155,17 +152,13 @@ export default function MatchDetailPage() {
                 onClick={() => setAwayScore(Math.max(0, awayScore - 1))}
                 disabled={isLocked}
                 className="w-10 h-10 rounded-lg bg-secondary text-foreground font-bold text-lg disabled:opacity-50"
-              >
-                −
-              </button>
+              >−</button>
               <span className="w-10 text-center text-2xl font-display font-bold text-foreground">{awayScore}</span>
               <button
                 onClick={() => setAwayScore(awayScore + 1)}
                 disabled={isLocked}
                 className="w-10 h-10 rounded-lg bg-secondary text-foreground font-bold text-lg disabled:opacity-50"
-              >
-                +
-              </button>
+              >+</button>
             </div>
           </div>
         </div>
@@ -176,14 +169,14 @@ export default function MatchDetailPage() {
             disabled={submitPrediction.isPending}
             className="w-full gradient-pitch text-primary-foreground font-semibold h-11"
           >
-            {submitPrediction.isPending ? 'Salvando...' : prediction ? 'Atualizar palpite' : 'Salvar palpite'}
+            {submitPrediction.isPending ? t('match.saving') : prediction ? t('match.updatePrediction') : t('match.savePrediction')}
           </Button>
         )}
 
         {prediction && (
           <div className="mt-3 p-3 rounded-lg bg-secondary text-sm">
             <p className="text-muted-foreground">
-              Palpite: <span className="text-foreground font-medium">{prediction.predicted_home_score} × {prediction.predicted_away_score}</span>
+              {t('match.prediction')}: <span className="text-foreground font-medium">{prediction.predicted_home_score} × {prediction.predicted_away_score}</span>
             </p>
             {prediction.rule_applied !== 'PENDING' && (
               <p className="mt-1 text-foreground font-medium">
@@ -191,7 +184,7 @@ export default function MatchDetailPage() {
               </p>
             )}
             {prediction.points_awarded > 0 && (
-              <p className="text-primary font-bold mt-1">+{prediction.points_awarded} pontos</p>
+              <p className="text-primary font-bold mt-1">+{prediction.points_awarded} {t('match.points')}</p>
             )}
           </div>
         )}

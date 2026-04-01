@@ -5,6 +5,7 @@ import { Loader2, Lock, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, ReactNode, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   category: 'top_scorer' | 'mvp';
@@ -61,6 +62,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
   const queryClient = useQueryClient();
   const { data: teams, isLoading: teamsLoading } = useTeams();
   const { data: firstKickoff, isLoading: kickoffLoading } = useFirstMatchKickoff();
+  const { t } = useTranslation();
 
   const { data: prediction, isLoading: predLoading } = useQuery({
     queryKey: ['extra-prediction', category, user?.id],
@@ -105,8 +107,8 @@ export default function PlayerPredictionTab({ category, title, description, icon
 
   const submitMutation = useMutation({
     mutationFn: async () => {
-      if (!playerName.trim()) throw new Error('Informe o nome do jogador');
-      if (!selectedTeamId) throw new Error('Selecione a seleção do jogador');
+      if (!playerName.trim()) throw new Error(t('extras.playerRequired'));
+      if (!selectedTeamId) throw new Error(t('extras.teamRequired'));
 
       const { error } = await supabase
         .from('extra_predictions')
@@ -124,7 +126,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['extra-prediction', category] });
-      toast.success(`Palpite de ${title} salvo!`);
+      toast.success(t('extras.predictionSaved', { title }));
     },
     onError: (err: Error) => toast.error(err.message),
   });
@@ -143,7 +145,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
         className="text-sm text-muted-foreground"
         dangerouslySetInnerHTML={{
           __html: description.replace(
-            /(\d+ pontos!)/,
+            /(\d+ pontos!|\d+ points!|\d+ puntos!)/i,
             '<span class="text-accent font-bold">$1</span>'
           ),
         }}
@@ -153,15 +155,14 @@ export default function PlayerPredictionTab({ category, title, description, icon
         <div className="glass rounded-xl p-4 flex items-center gap-3 border border-accent/30">
           <Lock className="w-5 h-5 text-accent shrink-0" />
           <p className="text-sm text-muted-foreground">
-            A Copa já começou. Não é mais possível alterar este palpite.
+            {t('extras.cupStarted')}
           </p>
         </div>
       )}
 
-      {/* Current prediction */}
       {prediction && (
         <div className="glass rounded-xl p-4 space-y-2">
-          <p className="text-xs text-muted-foreground font-medium">Seu palpite atual:</p>
+          <p className="text-xs text-muted-foreground font-medium">{t('extras.currentPrediction')}</p>
           <div className="flex items-center gap-3">
             {(prediction as any).teams?.flag_url && (
               <img src={(prediction as any).teams.flag_url} alt="" className="w-8 h-6 rounded-sm" />
@@ -179,12 +180,10 @@ export default function PlayerPredictionTab({ category, title, description, icon
         </div>
       )}
 
-      {/* Form */}
       {!isLocked && (
         <div className="space-y-3">
-          {/* Step 1: Team picker */}
           <div className="space-y-2">
-            <label className="text-sm text-foreground font-medium">1. Seleção</label>
+            <label className="text-sm text-foreground font-medium">{t('extras.selectTeam')}</label>
             {selectedTeam ? (
               <button
                 onClick={() => {
@@ -200,7 +199,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
                   <img src={selectedTeam.flag_url} alt="" className="w-6 h-4 rounded-sm" />
                 )}
                 <span className="text-sm text-foreground font-medium">{selectedTeam.name}</span>
-                <span className="text-[10px] text-muted-foreground ml-auto">trocar</span>
+                <span className="text-[10px] text-muted-foreground ml-auto">{t('extras.change')}</span>
               </button>
             ) : (
               <>
@@ -208,7 +207,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder="Buscar seleção..."
+                    placeholder={t('extras.searchTeam')}
                     value={teamSearch}
                     onChange={e => {
                       setTeamSearch(e.target.value);
@@ -245,17 +244,15 @@ export default function PlayerPredictionTab({ category, title, description, icon
             )}
           </div>
 
-          {/* Step 2: Player picker (only after team selected) */}
           {selectedTeamId && (
             <div className="space-y-2">
-              <label className="text-sm text-foreground font-medium">2. Jogador</label>
+              <label className="text-sm text-foreground font-medium">{t('extras.selectPlayer')}</label>
 
               {playersLoading ? (
                 <div className="flex justify-center py-4">
                   <Loader2 className="w-5 h-5 animate-spin text-primary" />
                 </div>
               ) : hasPlayers ? (
-                /* Players available — searchable list */
                 <>
                   {playerName ? (
                     <button
@@ -267,7 +264,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
                       className="w-full glass rounded-xl px-4 py-3 flex items-center gap-3 ring-1 ring-primary"
                     >
                       <span className="text-sm text-foreground font-medium">{playerName}</span>
-                      <span className="text-[10px] text-muted-foreground ml-auto">trocar</span>
+                      <span className="text-[10px] text-muted-foreground ml-auto">{t('extras.change')}</span>
                     </button>
                   ) : (
                     <>
@@ -275,7 +272,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <input
                           type="text"
-                          placeholder="Buscar jogador..."
+                          placeholder={t('extras.searchPlayer')}
                           value={playerSearch}
                           onChange={e => {
                             setPlayerSearch(e.target.value);
@@ -308,7 +305,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
                             ))
                           ) : (
                             <p className="text-xs text-muted-foreground text-center py-3">
-                              Nenhum jogador encontrado
+                              {t('extras.noPlayerFound')}
                             </p>
                           )}
                         </div>
@@ -317,17 +314,16 @@ export default function PlayerPredictionTab({ category, title, description, icon
                   )}
                 </>
               ) : (
-                /* No players yet — manual input */
                 <div className="space-y-1">
                   <input
                     type="text"
-                    placeholder="Digite o nome do jogador..."
+                    placeholder={t('extras.typePlayerName')}
                     value={playerName}
                     onChange={e => setPlayerName(e.target.value)}
                     className="w-full glass rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
                   />
                   <p className="text-[10px] text-muted-foreground">
-                    Elenco ainda não disponível — digite manualmente.
+                    {t('extras.squadNotAvailable')}
                   </p>
                 </div>
               )}
@@ -342,7 +338,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
             {submitMutation.isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              `Confirmar ${title}`
+              t('extras.confirm', { title })
             )}
           </Button>
         </div>

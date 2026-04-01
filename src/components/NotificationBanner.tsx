@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Bell, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface NotificationBannerProps {
   onAccept: () => void;
@@ -10,22 +11,19 @@ const DISMISSED_KEY = 'push_banner_dismissed';
 
 export function NotificationBanner({ onAccept }: NotificationBannerProps) {
   const [visible, setVisible] = useState(false);
+  const { t } = useTranslation();
 
-  useEffect(() => {
-    // Don't show if not supported, already granted/denied, or previously dismissed
+  useState(() => {
     if (!('Notification' in window) || !('PushManager' in window)) return;
     if (Notification.permission !== 'default') return;
     if (localStorage.getItem(DISMISSED_KEY) === '1') return;
-
-    // Don't show in iframe
     try {
       if (window.self !== window.top) return;
     } catch {
       return;
     }
-
     setVisible(true);
-  }, []);
+  });
 
   if (!visible) return null;
 
@@ -48,18 +46,17 @@ export function NotificationBanner({ onAccept }: NotificationBannerProps) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm text-foreground">
-              🔔 Ative as notificações!
+              {t('notifications.bannerTitle')}
             </p>
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Receba alertas antes dos jogos para não esquecer seus palpites. 
-              Também avisamos se você não escolheu Campeão, Artilheiro ou MVP!
+              {t('notifications.bannerDescription')}
             </p>
             <div className="flex gap-2 mt-3">
               <Button size="sm" onClick={handleAccept} className="text-xs h-8">
-                Ativar notificações
+                {t('notifications.activate')}
               </Button>
               <Button size="sm" variant="ghost" onClick={handleDismiss} className="text-xs h-8 text-muted-foreground">
-                Agora não
+                {t('notifications.notNow')}
               </Button>
             </div>
           </div>
