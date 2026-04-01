@@ -5,6 +5,7 @@ import { useMatchPrediction, useSubmitPrediction } from '@/hooks/usePredictions'
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Clock, MapPin, Lock, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 
 function formatDateTime(iso: string, lang: string) {
   const d = new Date(iso);
