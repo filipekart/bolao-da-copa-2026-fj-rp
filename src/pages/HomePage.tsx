@@ -290,6 +290,8 @@ export default function HomePage() {
   const queryClient = useQueryClient();
   const [scores, setScores] = useState<Scores>({});
   const [saving, setSaving] = useState<string | null>(null);
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.substring(0, 2) || 'pt';
 
   // Fetch user's existing predictions
   const { data: existingPredictions } = useQuery({
