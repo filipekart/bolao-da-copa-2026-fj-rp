@@ -104,6 +104,7 @@ function PredictedStandingsTable({
   teamNames: Map<string, string>;
   teamFlags: Map<string, string | null>;
 }) {
+  const { t } = useTranslation();
   if (!standings.length) return null;
 
   return (
