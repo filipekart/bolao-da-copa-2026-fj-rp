@@ -13,8 +13,9 @@ import { translateTeamName } from '@/lib/teamTranslations';
 
 type Scores = Record<string, { home: number; away: number }>;
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('pt-BR', {
+function formatDate(iso: string, lang = 'pt') {
+  const locale = lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US';
+  return new Date(iso).toLocaleDateString(locale, {
     day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
   });
 }
