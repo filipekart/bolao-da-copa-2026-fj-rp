@@ -101,7 +101,7 @@
       "WINNER_AND_WINNER_GOALS": "✅ Ganador + goles del ganador +18",
       "WINNER_AND_LOSER_GOALS": "✅ Ganador + goles del perdedor +12",
       "RESULT_ONLY": "👍 Resultado correcto +10",
-      "DRAW_RESULT_ONLY": "👍 Empate correcto +10",
+      "DRAW_RESULT_ONLY": "👍 Empate correcto +16",
       "MISS": "❌ Falló",
       "PENDING": "⏳ Esperando resultado"
     }
