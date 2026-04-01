@@ -7,10 +7,11 @@ import {
   useRecalculateScores,
   useUpdateUserName,
   useFetchFifaResults,
+  useDeleteUser,
 } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Shield, Users, Trophy, RefreshCw, Globe, Loader2, Check, X, Wallet, Copy, Pencil } from 'lucide-react';
+import { Shield, Users, Trophy, RefreshCw, Globe, Loader2, Check, X, Wallet, Copy, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
@@ -18,9 +19,11 @@ import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 function UserApprovalSection() {
   const { data: users, isLoading } = usePendingUsers();
   const approveUser = useApproveUser();
+  const deleteUser = useDeleteUser();
   const updateName = useUpdateUserName();
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const { t } = useTranslation();
 
   if (isLoading) return <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />;
@@ -72,7 +75,7 @@ function UserApprovalSection() {
                   {new Date(u.created_at).toLocaleDateString('pt-BR')}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 <Button
                   size="sm"
                   onClick={() => approveUser.mutate({ userId: u.id, approved: true })}
@@ -80,6 +83,29 @@ function UserApprovalSection() {
                 >
                   <Check className="w-4 h-4" />
                 </Button>
+                {deletingId === u.id ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-destructive">{t('admin.confirmDelete')}</span>
+                    <Button size="sm" variant="ghost" className="h-7 px-1.5 text-destructive" onClick={() => {
+                      deleteUser.mutate(u.id);
+                      setDeletingId(null);
+                    }}>
+                      <Check className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-7 px-1.5" onClick={() => setDeletingId(null)}>
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setDeletingId(u.id)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </div>
           ))}
@@ -137,14 +163,39 @@ function UserApprovalSection() {
                   </div>
                 )}
               </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => approveUser.mutate({ userId: u.id, approved: false })}
-                className="text-destructive hover:text-destructive shrink-0"
-              >
-                <X className="w-4 h-4" />
-              </Button>
+              <div className="flex gap-1 shrink-0">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => approveUser.mutate({ userId: u.id, approved: false })}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+                {deletingId === u.id ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-destructive">{t('admin.confirmDelete')}</span>
+                    <Button size="sm" variant="ghost" className="h-7 px-1.5 text-destructive" onClick={() => {
+                      deleteUser.mutate(u.id);
+                      setDeletingId(null);
+                    }}>
+                      <Check className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-7 px-1.5" onClick={() => setDeletingId(null)}>
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setDeletingId(u.id)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
             </div>
           ))}
         </div>

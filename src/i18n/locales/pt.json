@@ -210,7 +210,9 @@
     "editResult": "Editar resultado",
     "nameEmpty": "Nome não pode ser vazio",
     "nameInvalid": "Nome não pode conter caracteres especiais",
-    "pixCopied": "PIX copiado!"
+    "pixCopied": "PIX copiado!",
+    "confirmDelete": "Excluir?",
+    "userDeleted": "Usuário excluído!"
   },
   "notifications": {
     "bannerTitle": "🔔 Ative as notificações!",
