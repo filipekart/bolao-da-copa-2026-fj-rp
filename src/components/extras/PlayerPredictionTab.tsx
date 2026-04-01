@@ -237,7 +237,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
                         {team.flag_url && (
                           <img src={team.flag_url} alt="" className="w-6 h-4 rounded-sm" />
                         )}
-                        <span className="text-sm text-foreground">{team.name}</span>
+                        <span className="text-sm text-foreground">{tn(team.name, team.fifa_code)}</span>
                       </button>
                     ))}
                   </div>
