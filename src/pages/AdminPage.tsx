@@ -229,7 +229,7 @@ function MatchResultSection() {
                 )}
 
                 <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-                  <span className="text-sm text-foreground truncate">{m.away_team_name}</span>
+                  <span className="text-sm text-foreground truncate">{tt(m.away_team_id, m.away_team_name)}</span>
                   {m.away_team_flag_url && <img src={m.away_team_flag_url} alt="" className="w-5 h-4 rounded-sm" />}
                 </div>
               </div>
