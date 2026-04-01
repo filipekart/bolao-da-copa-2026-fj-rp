@@ -159,7 +159,7 @@ export default function AuthPage() {
                         id="name"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
-                        placeholder="Seu nome"
+                        placeholder="Nome e Sobrenome"
                         className="pl-10 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                       />
                     </div>
