@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { type MatchWithTeams } from '@/hooks/useMatches';
 import { Clock, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 
 function formatDate(iso: string, lang: string) {
   const d = new Date(iso);
