@@ -54,7 +54,7 @@ export function MatchCard({ match }: { match: MatchWithTeams }) {
           {match.home_team_flag_url && (
             <img src={match.home_team_flag_url} alt="" className="w-6 h-4 rounded-sm object-cover" />
           )}
-          <span className="text-sm font-medium text-foreground truncate">{match.home_team_name}</span>
+          <span className="text-sm font-medium text-foreground truncate">{tt(match.home_team_id, match.home_team_name)}</span>
         </div>
 
         <div className="px-3 flex items-center gap-2">
