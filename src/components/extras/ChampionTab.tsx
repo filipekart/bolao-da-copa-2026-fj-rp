@@ -91,12 +91,12 @@ export default function ChampionTab() {
     );
   }
 
-  const filteredTeams = teams?.filter(t => t.name.toLowerCase().includes(search.toLowerCase())) ?? [];
+  const filteredTeams = teams?.filter(tm => tm.name.toLowerCase().includes(search.toLowerCase())) ?? [];
   const groupedTeams = new Map<string, typeof filteredTeams>();
-  filteredTeams.forEach(t => {
-    const g = t.group_name || t('extras.noGroup');
+  filteredTeams.forEach(tm => {
+    const g = tm.group_name || t('extras.noGroup');
     const arr = groupedTeams.get(g) || [];
-    arr.push(t);
+    arr.push(tm);
     groupedTeams.set(g, arr);
   });
   const sortedGroups = Array.from(groupedTeams.entries()).sort(([a], [b]) => a.localeCompare(b));
