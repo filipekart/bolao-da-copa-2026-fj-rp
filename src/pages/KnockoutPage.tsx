@@ -1,6 +1,7 @@
 import { useGroupStandings, GroupStanding } from '@/hooks/useGroupStandings';
 import { useMatches } from '@/hooks/useMatches';
-import { Loader2, Trophy, Calendar } from 'lucide-react';
+import { Loader2, Trophy, Calendar, Info } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useState } from 'react';
 
 // FIFA official R32 bracket (match numbers 73-88)
@@ -250,6 +251,14 @@ export default function KnockoutPage() {
         </div>
       ) : (
         <div className="space-y-6">
+          {R32_BRACKET.some(e => !matchByNumber.get(e.matchNum)?.home_team_name) && (
+            <Alert className="border-accent/50 bg-accent/10">
+              <Info className="h-4 w-4 text-accent" />
+              <AlertDescription className="text-sm text-muted-foreground">
+                Os palpites da 2ª fase serão liberados assim que os confrontos oficiais forem definidos.
+              </AlertDescription>
+            </Alert>
+          )}
           {KNOCKOUT_STAGES.map(stage => (
             <div key={stage.key} className="space-y-2">
               <h2 className="text-sm font-display font-semibold text-foreground">{stage.label}</h2>
