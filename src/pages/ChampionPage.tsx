@@ -62,6 +62,7 @@ export default function ChampionPage() {
   const queryClient = useQueryClient();
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const tn = useTeamNameByCode();
 
   const isLocked = firstKickoff ? new Date() >= firstKickoff : false;
 
