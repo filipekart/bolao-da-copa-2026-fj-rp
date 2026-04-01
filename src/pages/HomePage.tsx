@@ -404,7 +404,7 @@ export default function HomePage() {
       // Auto-derive knockout predictions if all groups have predictions
       await deriveAndSaveKnockoutPredictions();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao salvar');
+      toast.error(err instanceof Error ? err.message : t('home.saveError'));
     } finally {
       setSaving(null);
     }
