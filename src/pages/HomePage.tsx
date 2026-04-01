@@ -8,6 +8,8 @@ import { calculatePredictedStandings, deriveQualifiedTeams, PredictedMatch } fro
 import { Button } from '@/components/ui/button';
 import { Trophy, Loader2, Check, Lock, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { translateTeamName } from '@/lib/teamTranslations';
 
 type Scores = Record<string, { home: number; away: number }>;
 
