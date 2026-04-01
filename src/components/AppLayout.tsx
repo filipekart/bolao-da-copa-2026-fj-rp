@@ -35,7 +35,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen gradient-dark flex flex-col">
       {/* Header with rules button */}
-      <div className="max-w-lg mx-auto w-full px-4 pt-3 flex justify-end">
+      <div className="max-w-lg mx-auto w-full px-4 pt-2 flex justify-end">
         <RulesModal />
       </div>
       <div className="max-w-lg mx-auto w-full px-4">
