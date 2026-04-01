@@ -5,6 +5,7 @@ import { Loader2, Trophy, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTeamNameByCode } from '@/hooks/useTranslatedTeamName';
 
 function useTeams() {
   return useQuery({
