@@ -25,7 +25,7 @@ function useExtrasRevealed() {
   });
 }
 
-const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points'; t: any; extrasRevealed: boolean }>(({ ranking, userId, showField, t, extrasRevealed }, ref) => {
+const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points' | 'round_points'; t: any; extrasRevealed: boolean }>(({ ranking, userId, showField, t, extrasRevealed }, ref) => {
   const [search, setSearch] = useState('');
   const highlightRef = useRef<HTMLDivElement>(null);
   const myRef = useRef<HTMLDivElement>(null);
