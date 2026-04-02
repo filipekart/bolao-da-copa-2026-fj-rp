@@ -159,7 +159,8 @@
     "groupStage": "Phase de groupes",
     "matches": "Matchs",
     "exact": "Exact",
-    "you": "(vous)"
+    "you": "(vous)",
+    "searchPlaceholder": "Rechercher un participant..."
   },
   "profile": {
     "title": "Profil",
