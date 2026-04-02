@@ -2,13 +2,14 @@ import { forwardRef, useState, useRef, useEffect } from 'react';
 import { useRanking } from '@/hooks/useRanking';
 import { useGroupRanking } from '@/hooks/useGroupRanking';
 import { useAuth } from '@/lib/auth';
-import { Loader2, Trophy, Medal, Search, X } from 'lucide-react';
+import { Loader2, Trophy, Medal, Search, X, MapPin } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
 
 const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points'; t: any }>(({ ranking, userId, showField, t }, ref) => {
   const [search, setSearch] = useState('');
   const highlightRef = useRef<HTMLDivElement>(null);
+  const myRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (search && highlightRef.current) {
@@ -33,18 +34,33 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
 
   return (
     <div className="space-y-2">
-      <div className="relative mb-3">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder={t('ranking.searchPlaceholder')}
-          className="w-full pl-9 pr-8 py-2 rounded-lg bg-secondary text-foreground text-sm border border-border focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-        {search && (
-          <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-            <X className="w-4 h-4" />
+      <div className="flex gap-2 mb-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder={t('ranking.searchPlaceholder')}
+            className="w-full pl-9 pr-8 py-2 rounded-lg bg-secondary text-foreground text-sm border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        {userId && (
+          <button
+            onClick={() => {
+              setSearch('');
+              setTimeout(() => myRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+            }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
+            title={t('ranking.findMe')}
+          >
+            <MapPin className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('ranking.findMe')}</span>
           </button>
         )}
       </div>
@@ -57,7 +73,7 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
         return (
           <div
             key={entry.user_id}
-            ref={isHighlighted ? highlightRef : undefined}
+            ref={isHighlighted ? highlightRef : isMe ? myRef : undefined}
             className={`glass rounded-xl p-4 flex items-center gap-3 transition-all ${isMe ? 'ring-1 ring-primary' : ''} ${isHighlighted ? 'ring-2 ring-accent shadow-lg' : ''} ${searchLower && !nameMatch ? 'opacity-40' : ''}`}
           >
             <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-sm ${

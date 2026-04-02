@@ -160,7 +160,8 @@
     "matches": "Matches",
     "exact": "Exact",
     "you": "(you)",
-    "searchPlaceholder": "Search participant..."
+    "searchPlaceholder": "Search participant...",
+    "findMe": "My position"
   },
   "profile": {
     "title": "Profile",
