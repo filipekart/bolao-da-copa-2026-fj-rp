@@ -1,12 +1,21 @@
-import { forwardRef } from 'react';
+import { forwardRef, useState, useRef, useEffect } from 'react';
 import { useRanking } from '@/hooks/useRanking';
 import { useGroupRanking } from '@/hooks/useGroupRanking';
 import { useAuth } from '@/lib/auth';
-import { Loader2, Trophy, Medal } from 'lucide-react';
+import { Loader2, Trophy, Medal, Search, X } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
 
 const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points'; t: any }>(({ ranking, userId, showField, t }, ref) => {
+  const [search, setSearch] = useState('');
+  const highlightRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (search && highlightRef.current) {
+      highlightRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [search]);
+
   if (!ranking?.length) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -17,17 +26,39 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
   }
 
   const sorted = [...ranking].sort((a, b) => (b[showField] ?? 0) - (a[showField] ?? 0));
+  const searchLower = search.toLowerCase().trim();
+  const matchedId = searchLower
+    ? sorted.find(e => e.display_name?.toLowerCase().includes(searchLower))?.user_id
+    : null;
 
   return (
     <div className="space-y-2">
+      <div className="relative mb-3">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder={t('ranking.searchPlaceholder')}
+          className="w-full pl-9 pr-8 py-2 rounded-lg bg-secondary text-foreground text-sm border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+        {search && (
+          <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
       {sorted.map((entry, idx) => {
         const isMe = entry.user_id === userId;
+        const isHighlighted = entry.user_id === matchedId;
         const position = idx + 1;
         const points = entry[showField] ?? 0;
+        const nameMatch = searchLower && entry.display_name?.toLowerCase().includes(searchLower);
         return (
           <div
             key={entry.user_id}
-            className={`glass rounded-xl p-4 flex items-center gap-3 ${isMe ? 'ring-1 ring-primary' : ''}`}
+            ref={isHighlighted ? highlightRef : undefined}
+            className={`glass rounded-xl p-4 flex items-center gap-3 transition-all ${isMe ? 'ring-1 ring-primary' : ''} ${isHighlighted ? 'ring-2 ring-accent shadow-lg' : ''} ${searchLower && !nameMatch ? 'opacity-40' : ''}`}
           >
             <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-sm ${
               position === 1 ? 'gradient-gold text-accent-foreground' :

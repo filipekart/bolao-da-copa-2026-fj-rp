@@ -159,7 +159,8 @@
     "groupStage": "Group Stage",
     "matches": "Matches",
     "exact": "Exact",
-    "you": "(you)"
+    "you": "(you)",
+    "searchPlaceholder": "Search participant..."
   },
   "profile": {
     "title": "Profile",
