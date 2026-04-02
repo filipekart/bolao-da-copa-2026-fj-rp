@@ -2,11 +2,29 @@ import { forwardRef, useState, useRef, useEffect } from 'react';
 import { useRanking } from '@/hooks/useRanking';
 import { useGroupRanking } from '@/hooks/useGroupRanking';
 import { useAuth } from '@/lib/auth';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Trophy, Medal, Search, X, MapPin } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
 
-const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points'; t: any }>(({ ranking, userId, showField, t }, ref) => {
+function useExtrasRevealed() {
+  return useQuery({
+    queryKey: ['first-match-kickoff'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('matches')
+        .select('kickoff_at')
+        .order('kickoff_at', { ascending: true })
+        .limit(1)
+        .single();
+      return data?.kickoff_at ?? null;
+    },
+    select: (kickoff) => kickoff ? new Date(kickoff) <= new Date() : false,
+  });
+}
+
+const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points'; t: any; extrasRevealed: boolean }>(({ ranking, userId, showField, t, extrasRevealed }, ref) => {
   const [search, setSearch] = useState('');
   const highlightRef = useRef<HTMLDivElement>(null);
   const myRef = useRef<HTMLDivElement>(null);
