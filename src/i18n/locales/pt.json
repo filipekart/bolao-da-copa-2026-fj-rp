@@ -159,7 +159,8 @@
     "groupStage": "Fase de Grupos",
     "matches": "Jogos",
     "exact": "Exatos",
-    "you": "(você)"
+    "you": "(você)",
+    "searchPlaceholder": "Buscar participante..."
   },
   "profile": {
     "title": "Perfil",
