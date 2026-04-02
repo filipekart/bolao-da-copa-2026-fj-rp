@@ -2,11 +2,29 @@ import { forwardRef, useState, useRef, useEffect } from 'react';
 import { useRanking } from '@/hooks/useRanking';
 import { useGroupRanking } from '@/hooks/useGroupRanking';
 import { useAuth } from '@/lib/auth';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Trophy, Medal, Search, X, MapPin } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
 
-const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points'; t: any }>(({ ranking, userId, showField, t }, ref) => {
+function useExtrasRevealed() {
+  return useQuery({
+    queryKey: ['first-match-kickoff'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('matches')
+        .select('kickoff_at')
+        .order('kickoff_at', { ascending: true })
+        .limit(1)
+        .single();
+      return data?.kickoff_at ?? null;
+    },
+    select: (kickoff) => kickoff ? new Date(kickoff) <= new Date() : false,
+  });
+}
+
+const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points'; t: any; extrasRevealed: boolean }>(({ ranking, userId, showField, t, extrasRevealed }, ref) => {
   const [search, setSearch] = useState('');
   const highlightRef = useRef<HTMLDivElement>(null);
   const myRef = useRef<HTMLDivElement>(null);
@@ -93,18 +111,18 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
               <div className="flex gap-3 text-xs text-muted-foreground mt-0.5 items-center flex-wrap">
                 <span>{t('ranking.matches')}: {showField === 'points_total' ? entry.points_matches : points}</span>
                 <span>{t('ranking.exact')}: {entry.exact_hits ?? 0}</span>
-                {entry.champion_flag_url && (
+                {(extrasRevealed || isMe) && entry.champion_flag_url && (
                   <span className="flex items-center gap-1" title={`${t('extras.champion')}: ${entry.champion_team_name}`}>
                     🏆 <img src={entry.champion_flag_url} alt={entry.champion_team_name ?? ''} className="w-4 h-3 rounded-sm" />
                   </span>
                 )}
-                {entry.top_scorer_name && (
+                {(extrasRevealed || isMe) && entry.top_scorer_name && (
                   <span className="flex items-center gap-1" title={`${t('extras.topScorer')}: ${entry.top_scorer_name}`}>
                     ⚽ {entry.top_scorer_flag_url && <img src={entry.top_scorer_flag_url} alt="" className="w-4 h-3 rounded-sm" />}
                     <span className="truncate max-w-[60px]">{entry.top_scorer_name}</span>
                   </span>
                 )}
-                {entry.mvp_name && (
+                {(extrasRevealed || isMe) && entry.mvp_name && (
                   <span className="flex items-center gap-1" title={`${t('extras.mvp')}: ${entry.mvp_name}`}>
                     ⭐ {entry.mvp_flag_url && <img src={entry.mvp_flag_url} alt="" className="w-4 h-3 rounded-sm" />}
                     <span className="truncate max-w-[60px]">{entry.mvp_name}</span>
@@ -130,6 +148,7 @@ export default function RankingPage() {
   const { data: groupRanking, isLoading: groupLoading } = useGroupRanking();
   const { user } = useAuth();
   const { t } = useTranslation();
+  const { data: extrasRevealed = false } = useExtrasRevealed();
 
   const mergedGroupRanking = groupRanking?.map(gr => {
     const general = ranking?.find(r => r.user_id === gr.user_id);
@@ -166,10 +185,10 @@ export default function RankingPage() {
           <TabsTrigger value="grupos">{t('ranking.groupStage')}</TabsTrigger>
         </TabsList>
         <TabsContent value="geral" className="mt-4">
-          <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} />
+          <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} extrasRevealed={extrasRevealed} />
         </TabsContent>
         <TabsContent value="grupos" className="mt-4">
-          <RankingList ranking={mergedGroupRanking} userId={user?.id} showField="group_points" t={t} />
+          <RankingList ranking={mergedGroupRanking} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} />
         </TabsContent>
       </Tabs>
     </div>
