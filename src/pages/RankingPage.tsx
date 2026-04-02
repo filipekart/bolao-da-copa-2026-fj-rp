@@ -122,7 +122,7 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
                     <span className="truncate max-w-[60px]">{entry.top_scorer_name}</span>
                   </span>
                 )}
-                {entry.mvp_name && (
+                {(extrasRevealed || isMe) && entry.mvp_name && (
                   <span className="flex items-center gap-1" title={`${t('extras.mvp')}: ${entry.mvp_name}`}>
                     ⭐ {entry.mvp_flag_url && <img src={entry.mvp_flag_url} alt="" className="w-4 h-3 rounded-sm" />}
                     <span className="truncate max-w-[60px]">{entry.mvp_name}</span>
