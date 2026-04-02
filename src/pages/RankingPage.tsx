@@ -34,18 +34,33 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
 
   return (
     <div className="space-y-2">
-      <div className="relative mb-3">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder={t('ranking.searchPlaceholder')}
-          className="w-full pl-9 pr-8 py-2 rounded-lg bg-secondary text-foreground text-sm border border-border focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-        {search && (
-          <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-            <X className="w-4 h-4" />
+      <div className="flex gap-2 mb-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder={t('ranking.searchPlaceholder')}
+            className="w-full pl-9 pr-8 py-2 rounded-lg bg-secondary text-foreground text-sm border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        {userId && (
+          <button
+            onClick={() => {
+              setSearch('');
+              setTimeout(() => myRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+            }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
+            title={t('ranking.findMe')}
+          >
+            <MapPin className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('ranking.findMe')}</span>
           </button>
         )}
       </div>
