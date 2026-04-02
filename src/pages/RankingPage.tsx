@@ -147,6 +147,11 @@ RankingList.displayName = 'RankingList';
 export default function RankingPage() {
   const { data: ranking, isLoading } = useRanking();
   const { data: groupRanking, isLoading: groupLoading } = useGroupRanking();
+  const [activeTab, setActiveTab] = useState('geral');
+  const { data: round1, isLoading: r1Loading } = useRoundRanking('round1', activeTab === 'round1');
+  const { data: round2, isLoading: r2Loading } = useRoundRanking('round2', activeTab === 'round2');
+  const { data: round3, isLoading: r3Loading } = useRoundRanking('round3', activeTab === 'round3');
+  const { data: knockout, isLoading: koLoading } = useRoundRanking('knockout', activeTab === 'knockout');
   const { user } = useAuth();
   const { t } = useTranslation();
   const { data: extrasRevealed = false } = useExtrasRevealed();
@@ -164,6 +169,20 @@ export default function RankingPage() {
     };
   });
 
+  const mergeExtras = (entries: any[] | undefined) =>
+    entries?.map(e => {
+      const general = ranking?.find(r => r.user_id === e.user_id);
+      return {
+        ...e,
+        champion_team_name: general?.champion_team_name,
+        champion_flag_url: general?.champion_flag_url,
+        top_scorer_name: general?.top_scorer_name,
+        top_scorer_flag_url: general?.top_scorer_flag_url,
+        mvp_name: general?.mvp_name,
+        mvp_flag_url: general?.mvp_flag_url,
+      };
+    });
+
   const loading = isLoading || groupLoading;
 
   if (loading) {
@@ -180,16 +199,36 @@ export default function RankingPage() {
         <Medal className="w-5 h-5 text-accent" /> {t('ranking.title')}
       </h1>
 
-      <Tabs defaultValue="geral" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-secondary">
-          <TabsTrigger value="geral">{t('ranking.general')}</TabsTrigger>
-          <TabsTrigger value="grupos">{t('ranking.groupStage')}</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="flex w-full overflow-x-auto bg-secondary gap-1 p-1">
+          <TabsTrigger value="geral" className="flex-shrink-0 text-xs">{t('ranking.general')}</TabsTrigger>
+          <TabsTrigger value="grupos" className="flex-shrink-0 text-xs">{t('ranking.groupStage')}</TabsTrigger>
+          <TabsTrigger value="round1" className="flex-shrink-0 text-xs">{t('ranking.round1')}</TabsTrigger>
+          <TabsTrigger value="round2" className="flex-shrink-0 text-xs">{t('ranking.round2')}</TabsTrigger>
+          <TabsTrigger value="round3" className="flex-shrink-0 text-xs">{t('ranking.round3')}</TabsTrigger>
+          <TabsTrigger value="knockout" className="flex-shrink-0 text-xs">{t('ranking.knockout')}</TabsTrigger>
         </TabsList>
         <TabsContent value="geral" className="mt-4">
           <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} extrasRevealed={extrasRevealed} />
         </TabsContent>
         <TabsContent value="grupos" className="mt-4">
           <RankingList ranking={mergedGroupRanking} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} />
+        </TabsContent>
+        <TabsContent value="round1" className="mt-4">
+          {r1Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
+            <RankingList ranking={mergeExtras(round1)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} />}
+        </TabsContent>
+        <TabsContent value="round2" className="mt-4">
+          {r2Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
+            <RankingList ranking={mergeExtras(round2)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} />}
+        </TabsContent>
+        <TabsContent value="round3" className="mt-4">
+          {r3Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
+            <RankingList ranking={mergeExtras(round3)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} />}
+        </TabsContent>
+        <TabsContent value="knockout" className="mt-4">
+          {koLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
+            <RankingList ranking={mergeExtras(knockout)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} />}
         </TabsContent>
       </Tabs>
     </div>
