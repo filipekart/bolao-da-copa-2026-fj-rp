@@ -2,7 +2,7 @@ import { forwardRef, useState, useRef, useEffect } from 'react';
 import { useRanking } from '@/hooks/useRanking';
 import { useGroupRanking } from '@/hooks/useGroupRanking';
 import { useAuth } from '@/lib/auth';
-import { Loader2, Trophy, Medal, Search, X } from 'lucide-react';
+import { Loader2, Trophy, Medal, Search, X, MapPin } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
 
