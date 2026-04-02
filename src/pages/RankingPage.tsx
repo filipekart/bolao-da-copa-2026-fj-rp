@@ -116,7 +116,7 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
                     🏆 <img src={entry.champion_flag_url} alt={entry.champion_team_name ?? ''} className="w-4 h-3 rounded-sm" />
                   </span>
                 )}
-                {entry.top_scorer_name && (
+                {(extrasRevealed || isMe) && entry.top_scorer_name && (
                   <span className="flex items-center gap-1" title={`${t('extras.topScorer')}: ${entry.top_scorer_name}`}>
                     ⚽ {entry.top_scorer_flag_url && <img src={entry.top_scorer_flag_url} alt="" className="w-4 h-3 rounded-sm" />}
                     <span className="truncate max-w-[60px]">{entry.top_scorer_name}</span>
