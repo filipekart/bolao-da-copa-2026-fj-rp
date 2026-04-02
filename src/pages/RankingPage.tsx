@@ -1,6 +1,7 @@
 import { forwardRef, useState, useRef, useEffect } from 'react';
 import { useRanking } from '@/hooks/useRanking';
 import { useGroupRanking } from '@/hooks/useGroupRanking';
+import { useRoundRanking } from '@/hooks/useRoundRanking';
 import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
