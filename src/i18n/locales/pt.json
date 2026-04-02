@@ -161,7 +161,11 @@
     "exact": "Exatos",
     "you": "(você)",
     "searchPlaceholder": "Buscar participante...",
-    "findMe": "Minha posição"
+    "findMe": "Minha posição",
+    "round1": "Rodada 1",
+    "round2": "Rodada 2",
+    "round3": "Rodada 3",
+    "knockout": "2ª Fase"
   },
   "profile": {
     "title": "Perfil",
