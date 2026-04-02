@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points'; t: any }>(({ ranking, userId, showField, t }, ref) => {
   const [search, setSearch] = useState('');
   const highlightRef = useRef<HTMLDivElement>(null);
+  const myRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (search && highlightRef.current) {
