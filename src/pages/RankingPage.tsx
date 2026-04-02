@@ -73,7 +73,7 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
         return (
           <div
             key={entry.user_id}
-            ref={isHighlighted ? highlightRef : undefined}
+            ref={isHighlighted ? highlightRef : isMe ? myRef : undefined}
             className={`glass rounded-xl p-4 flex items-center gap-3 transition-all ${isMe ? 'ring-1 ring-primary' : ''} ${isHighlighted ? 'ring-2 ring-accent shadow-lg' : ''} ${searchLower && !nameMatch ? 'opacity-40' : ''}`}
           >
             <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-sm ${
