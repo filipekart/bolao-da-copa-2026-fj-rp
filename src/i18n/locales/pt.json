@@ -160,7 +160,8 @@
     "matches": "Jogos",
     "exact": "Exatos",
     "you": "(você)",
-    "searchPlaceholder": "Buscar participante..."
+    "searchPlaceholder": "Buscar participante...",
+    "findMe": "Minha posição"
   },
   "profile": {
     "title": "Perfil",
