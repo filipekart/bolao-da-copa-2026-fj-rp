@@ -161,7 +161,11 @@
     "exact": "Exact",
     "you": "(you)",
     "searchPlaceholder": "Search participant...",
-    "findMe": "My position"
+    "findMe": "My position",
+    "round1": "Round 1",
+    "round2": "Round 2",
+    "round3": "Round 3",
+    "knockout": "Knockout"
   },
   "profile": {
     "title": "Profile",

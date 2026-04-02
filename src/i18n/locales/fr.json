@@ -161,7 +161,11 @@
     "exact": "Exact",
     "you": "(vous)",
     "searchPlaceholder": "Rechercher un participant...",
-    "findMe": "Ma position"
+    "findMe": "Ma position",
+    "round1": "Journée 1",
+    "round2": "Journée 2",
+    "round3": "Journée 3",
+    "knockout": "Élimin."
   },
   "profile": {
     "title": "Profil",
