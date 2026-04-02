@@ -148,6 +148,7 @@ export default function RankingPage() {
   const { data: groupRanking, isLoading: groupLoading } = useGroupRanking();
   const { user } = useAuth();
   const { t } = useTranslation();
+  const { data: extrasRevealed = false } = useExtrasRevealed();
 
   const mergedGroupRanking = groupRanking?.map(gr => {
     const general = ranking?.find(r => r.user_id === gr.user_id);
@@ -184,10 +185,10 @@ export default function RankingPage() {
           <TabsTrigger value="grupos">{t('ranking.groupStage')}</TabsTrigger>
         </TabsList>
         <TabsContent value="geral" className="mt-4">
-          <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} />
+          <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} extrasRevealed={extrasRevealed} />
         </TabsContent>
         <TabsContent value="grupos" className="mt-4">
-          <RankingList ranking={mergedGroupRanking} userId={user?.id} showField="group_points" t={t} />
+          <RankingList ranking={mergedGroupRanking} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} />
         </TabsContent>
       </Tabs>
     </div>
