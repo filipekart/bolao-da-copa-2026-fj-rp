@@ -110,6 +110,43 @@ export default function ProfilePage() {
         <LanguageSelector variant="full" />
       </div>
 
+      {/* Managed Profiles Selector */}
+      {managedProfiles.length > 0 && (
+        <div className="glass rounded-2xl p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-accent" />
+            <h2 className="text-sm font-display font-bold text-foreground">{t('profile.managedProfiles')}</h2>
+          </div>
+          <div className="space-y-1.5">
+            <button
+              onClick={() => setActiveUserId(user!.id)}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${
+                !isActingAsOther ? 'ring-2 ring-primary bg-primary/10' : 'glass hover:ring-1 hover:ring-primary'
+              }`}
+            >
+              <User className="w-4 h-4 text-foreground" />
+              <span className="text-sm text-foreground font-medium">
+                {user?.user_metadata?.display_name ?? user?.email?.split('@')[0]}
+              </span>
+              {!isActingAsOther && <span className="text-[10px] text-primary ml-auto">{t('ranking.you')}</span>}
+            </button>
+            {managedProfiles.map(mp => (
+              <button
+                key={mp.managed_id}
+                onClick={() => setActiveUserId(mp.managed_id)}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${
+                  activeUserId === mp.managed_id ? 'ring-2 ring-primary bg-primary/10' : 'glass hover:ring-1 hover:ring-primary'
+                }`}
+              >
+                <User className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-foreground font-medium">{mp.display_name}</span>
+                {activeUserId === mp.managed_id && <span className="text-[10px] text-primary ml-auto">●</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Regras de Pontuação */}
       <Collapsible>
         <div className="glass rounded-2xl p-5">
