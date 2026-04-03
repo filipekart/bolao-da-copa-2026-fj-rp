@@ -6,8 +6,9 @@ import { toast } from 'sonner';
 
 export function useMyPredictions() {
   const { user } = useAuth();
+  const { activeUserId } = useActiveProfile();
   return useQuery({
-    queryKey: ['my-predictions', user?.id],
+    queryKey: ['my-predictions', activeUserId],
     queryFn: async () => {
       // Get predictions
       const { data: predictions, error } = await supabase
