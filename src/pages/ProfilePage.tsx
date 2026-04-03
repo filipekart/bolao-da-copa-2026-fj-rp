@@ -14,6 +14,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 
 export default function ProfilePage() {
   const { user, signOut } = useAuth();
+  const { activeUserId, setActiveUserId, isActingAsOther, activeDisplayName, managedProfiles } = useActiveProfile();
   const queryClient = useQueryClient();
   const [pixKey, setPixKey] = useState('');
   const { subscribe } = usePushSubscription();
