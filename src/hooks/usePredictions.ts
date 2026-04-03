@@ -42,7 +42,7 @@ export function useMyPredictions() {
         match: matchMap.get(p.match_id) ?? null,
       }));
     },
-    enabled: !!user,
+    enabled: !!user && !!activeUserId,
   });
 }
 
