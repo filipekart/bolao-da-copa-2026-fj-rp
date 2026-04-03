@@ -299,6 +299,7 @@ function GroupCard({
 
 export default function HomePage() {
   const { user } = useAuth();
+  const { activeUserId, isActingAsOther } = useActiveProfile();
   const { data: matches, isLoading: matchesLoading } = useMatches('GROUP_STAGE');
   const { data: teams, isLoading: teamsLoading } = useTeams();
   const queryClient = useQueryClient();
