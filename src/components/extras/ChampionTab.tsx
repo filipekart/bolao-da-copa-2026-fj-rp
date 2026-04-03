@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/auth';
+import { useActiveProfile } from '@/lib/activeProfile';
 import { Loader2, Trophy, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
