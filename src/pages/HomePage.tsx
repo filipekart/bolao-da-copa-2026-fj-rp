@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useMatches, MatchWithTeams } from '@/hooks/useMatches';
 import { useTeams } from '@/hooks/useTeams';
 import { useAuth } from '@/lib/auth';
+import { useActiveProfile } from '@/lib/activeProfile';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { calculatePredictedStandings, deriveQualifiedTeams, PredictedMatch } from '@/lib/standings';
