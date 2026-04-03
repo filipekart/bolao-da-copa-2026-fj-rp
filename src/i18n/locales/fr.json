@@ -222,7 +222,17 @@
     "nameInvalid": "Le nom ne peut pas contenir de caractères spéciaux",
     "pixCopied": "PIX copié !",
     "confirmDelete": "Supprimer ?",
-    "userDeleted": "Utilisateur supprimé !"
+    "userDeleted": "Utilisateur supprimé !",
+    "multiProfiles": "Multi-profils",
+    "manager": "Gérant",
+    "managed": "Géré",
+    "linkProfile": "Lier",
+    "unlinkProfile": "Délier",
+    "confirmUnlink": "Supprimer le lien ?",
+    "noLinks": "Aucun lien enregistré.",
+    "selectUser": "Sélectionner un utilisateur",
+    "linkCreated": "Lien créé !",
+    "linkRemoved": "Lien supprimé !"
   },
   "notifications": {
     "bannerTitle": "🔔 Activez les notifications !",

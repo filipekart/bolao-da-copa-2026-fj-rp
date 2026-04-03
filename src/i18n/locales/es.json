@@ -222,7 +222,17 @@
     "nameInvalid": "El nombre no puede contener caracteres especiales",
     "pixCopied": "¡PIX copiado!",
     "confirmDelete": "¿Eliminar?",
-    "userDeleted": "¡Usuario eliminado!"
+    "userDeleted": "¡Usuario eliminado!",
+    "multiProfiles": "Multi-perfiles",
+    "manager": "Gerente",
+    "managed": "Gestionado",
+    "linkProfile": "Vincular",
+    "unlinkProfile": "Desvincular",
+    "confirmUnlink": "¿Eliminar vínculo?",
+    "noLinks": "Ningún vínculo registrado.",
+    "selectUser": "Seleccionar usuario",
+    "linkCreated": "¡Vínculo creado!",
+    "linkRemoved": "¡Vínculo eliminado!"
   },
   "notifications": {
     "bannerTitle": "🔔 ¡Activa las notificaciones!",
