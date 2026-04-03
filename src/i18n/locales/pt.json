@@ -197,7 +197,11 @@
     "notificationsActivated": "Notificações ativadas!",
     "notificationsDenied": "Notificações bloqueadas pelo navegador. Desbloqueie nas configurações do navegador.",
     "signOut": "Sair da conta",
-    "pts": "pts"
+    "pts": "pts",
+    "managedProfiles": "Perfis gerenciados",
+    "switchProfile": "Trocar perfil",
+    "actingAs": "Apostando como: {{name}}",
+    "backToMyProfile": "Voltar ao meu perfil"
   },
   "admin": {
     "title": "Painel Admin",
