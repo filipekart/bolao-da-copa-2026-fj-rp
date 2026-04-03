@@ -21,8 +21,9 @@ function useTeams() {
 
 function useChampionPrediction() {
   const { user } = useAuth();
+  const { activeUserId } = useActiveProfile();
   return useQuery({
-    queryKey: ['champion-prediction', user?.id],
+    queryKey: ['champion-prediction', activeUserId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('knockout_predictions')
