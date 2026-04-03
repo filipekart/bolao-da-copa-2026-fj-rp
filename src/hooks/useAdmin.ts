@@ -233,20 +233,3 @@ export function useDeleteManagedProfile() {
     onError: (e: Error) => toast.error(e.message),
   });
 }
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (userId: string) => {
-      const { data, error } = await supabase.functions.invoke('delete-user', {
-        body: { user_id: userId },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pending-users'] });
-      toast.success('Usuário excluído!');
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-}
