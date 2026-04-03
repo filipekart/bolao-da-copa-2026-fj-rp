@@ -421,6 +421,7 @@ export default function HomePage() {
             p_match_id: m.id,
             p_predicted_home_score: s.home,
             p_predicted_away_score: s.away,
+            ...(isActingAsOther ? { p_acting_as: activeUserId } : {}),
           });
         });
 
