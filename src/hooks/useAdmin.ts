@@ -167,3 +167,69 @@ export function useDeleteUser() {
     onError: (e: Error) => toast.error(e.message),
   });
 }
+
+export interface ManagedProfileAdmin {
+  id: string;
+  manager_id: string;
+  managed_id: string;
+  manager_name: string;
+  managed_name: string;
+}
+
+export function useManagedProfilesAdmin() {
+  return useQuery({
+    queryKey: ['managed-profiles-admin'],
+    queryFn: async () => {
+      const { data: links, error } = await supabase
+        .from('managed_profiles')
+        .select('id, manager_id, managed_id')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (!links?.length) return [] as ManagedProfileAdmin[];
+
+      const { data: profiles } = await supabase.rpc('get_public_profiles');
+      const nameMap = new Map((profiles ?? []).map(p => [p.id, p.display_name]));
+
+      return links.map(l => ({
+        ...l,
+        manager_name: nameMap.get(l.manager_id) ?? '?',
+        managed_name: nameMap.get(l.managed_id) ?? '?',
+      })) as ManagedProfileAdmin[];
+    },
+  });
+}
+
+export function useCreateManagedProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ managerId, managedId }: { managerId: string; managedId: string }) => {
+      const { error } = await supabase
+        .from('managed_profiles')
+        .insert({ manager_id: managerId, managed_id: managedId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['managed-profiles-admin'] });
+      toast.success('Vínculo criado!');
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteManagedProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('managed_profiles')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['managed-profiles-admin'] });
+      toast.success('Vínculo removido!');
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}

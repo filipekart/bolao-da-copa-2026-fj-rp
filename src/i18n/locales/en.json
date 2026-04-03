@@ -222,7 +222,17 @@
     "nameInvalid": "Name cannot contain special characters",
     "pixCopied": "PIX copied!",
     "confirmDelete": "Delete?",
-    "userDeleted": "User deleted!"
+    "userDeleted": "User deleted!",
+    "multiProfiles": "Multi-profiles",
+    "manager": "Manager",
+    "managed": "Managed",
+    "linkProfile": "Link",
+    "unlinkProfile": "Unlink",
+    "confirmUnlink": "Remove link?",
+    "noLinks": "No links registered.",
+    "selectUser": "Select user",
+    "linkCreated": "Link created!",
+    "linkRemoved": "Link removed!"
   },
   "notifications": {
     "bannerTitle": "🔔 Enable notifications!",
