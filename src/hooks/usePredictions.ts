@@ -61,7 +61,7 @@ export function useMatchPrediction(matchId: string) {
       if (error) throw error;
       return data;
     },
-    enabled: !!user && !!matchId,
+    enabled: !!user && !!matchId && !!activeUserId,
   });
 }
 
