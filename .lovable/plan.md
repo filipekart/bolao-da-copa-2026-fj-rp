@@ -1,64 +1,29 @@
 
-
-## Plano: Perfil familiar — Rafael Pasqua gerencia Roberta, Pedro e Manuela
+## Plano: Gerenciar multi-perfis na aba Admin
 
 ### Visão geral
-Permitir que Rafael Pasqua faça login e alterne entre seus perfis familiares (Roberta, Pedro, Manuela) para fazer palpites em nome de cada um.
+Adicionar uma nova seção/aba "Multi-perfis" no painel Admin para criar, visualizar e remover vínculos de gerenciamento entre perfis (tabela `managed_profiles`).
 
 ### Alterações
 
-**1. Nova tabela `managed_profiles` (migração SQL)**
-```sql
-CREATE TABLE public.managed_profiles (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  manager_id uuid NOT NULL,
-  managed_id uuid NOT NULL,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE(manager_id, managed_id)
-);
-ALTER TABLE public.managed_profiles ENABLE ROW LEVEL SECURITY;
+**1. Nova aba "Multi-perfis" no `AdminPage.tsx`**
+- Adicionar terceira aba ao seletor existente (`users | matches | profiles`)
+- Listar todos os vínculos atuais (manager → managed) com nomes
+- Botão para remover vínculos existentes (com confirmação)
+- Formulário para criar novos vínculos:
+  - Dropdown "Gerente" com lista de usuários aprovados
+  - Dropdown "Gerenciado" com lista de usuários aprovados (excluindo o gerente selecionado)
+  - Botão "Vincular"
 
-CREATE POLICY "admins manage" ON public.managed_profiles FOR ALL TO authenticated
-  USING (has_role(auth.uid(), 'admin'::app_role))
-  WITH CHECK (has_role(auth.uid(), 'admin'::app_role));
+**2. Novos hooks em `useAdmin.ts`**
+- `useManagedProfilesAdmin()`: lista todos os vínculos com nomes (join com profiles)
+- `useCreateManagedProfile()`: insere novo vínculo
+- `useDeleteManagedProfile()`: remove vínculo por ID
 
-CREATE POLICY "managers read own" ON public.managed_profiles FOR SELECT TO authenticated
-  USING (auth.uid() = manager_id);
-```
-
-**2. Inserir vínculos (via insert tool)**
-- Buscar user_ids de Rafael, Roberta, Pedro e Manuela na tabela `profiles`
-- Inserir 3 registros: Rafael → Roberta, Rafael → Pedro, Rafael → Manuela
-
-**3. Modificar RPC `submit_match_prediction` (migração SQL)**
-- Adicionar parâmetro opcional `p_acting_as uuid DEFAULT NULL`
-- Se informado, validar que existe vínculo em `managed_profiles`
-- Usar `p_acting_as` como user_id
-
-**4. Novo contexto `ActiveProfileContext` (`src/lib/activeProfile.tsx`)**
-- Estado global `activeUserId` (padrão: usuário logado)
-- Hook `useActiveProfile()` retorna `{ activeUserId, setActiveUserId, isActingAsOther }`
-- Envolver no `App.tsx` dentro do `AuthProvider`
-
-**5. Seletor de perfil na aba Perfil (`src/pages/ProfilePage.tsx`)**
-- Dropdown com seta mostrando perfis gerenciados
-- Query em `managed_profiles` + `profiles` para obter nomes
-- Ao trocar, atualiza o contexto global
-
-**6. Indicador global no `AppLayout.tsx`**
-- Banner sutil no topo quando operando como outro perfil (ex: "Apostando como: Roberta Pasqua")
-- Botão para voltar ao perfil próprio
-
-**7. Atualizar hooks para usar perfil ativo**
-- `usePredictions.ts`, `useSubmitPrediction`: usar `activeUserId`
-- `HomePage.tsx`, `MyBetsPage.tsx`, `ExtrasPage.tsx`, `ChampionPage.tsx`: usar `activeUserId`
-- RPC de submit passa `p_acting_as` quando for perfil gerenciado
-
-**8. Traduções (pt, en, es, fr)**
-- Chaves: `profile.managedProfiles`, `profile.switchProfile`, `profile.actingAs`, `profile.backToMyProfile`
+**3. Traduções (pt, en, es, fr)**
+- Chaves: `admin.multiProfiles`, `admin.manager`, `admin.managed`, `admin.linkProfile`, `admin.unlinkProfile`, `admin.confirmUnlink`
 
 ### Detalhes técnicos
-- A RPC `submit_match_prediction` é `SECURITY DEFINER`, então contorna RLS de forma segura ao inserir como outro user
-- Para extras/campeão, as tabelas usam `auth.uid() = user_id` nas policies — será necessário criar RPCs similares ou ajustar para aceitar `p_acting_as`
-- As queries de leitura (palpites do perfil ativo) precisarão de uma policy ou RPC que permita o manager ler os dados do managed
-
+- As políticas RLS já permitem que admins façam CRUD completo em `managed_profiles` (policy "admins manage")
+- O admin pode usar `supabase.from('managed_profiles')` diretamente para todas as operações
+- Para mostrar nomes, faz join com `profiles` ou usa a RPC `get_public_profiles()`
