@@ -310,16 +310,16 @@ export default function HomePage() {
 
   // Fetch user's existing predictions
   const { data: existingPredictions } = useQuery({
-    queryKey: ['all-predictions', user?.id],
+    queryKey: ['all-predictions', activeUserId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('match_predictions')
         .select('match_id, predicted_home_score, predicted_away_score')
-        .eq('user_id', user!.id);
+        .eq('user_id', activeUserId);
       if (error) throw error;
       return data;
     },
-    enabled: !!user,
+    enabled: !!user && !!activeUserId,
   });
 
   // Initialize scores from existing predictions
