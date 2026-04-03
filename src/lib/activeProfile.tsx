@@ -42,7 +42,7 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
       const relevantProfiles = (profiles ?? []).filter(p => managedIds.includes(p.id));
 
       return links.map(l => {
-        const prof = profiles?.find(p => p.id === l.managed_id);
+        const prof = relevantProfiles?.find(p => p.id === l.managed_id);
         return {
           id: l.id,
           managed_id: l.managed_id,
