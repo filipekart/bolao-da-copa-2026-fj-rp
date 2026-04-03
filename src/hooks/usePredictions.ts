@@ -48,8 +48,9 @@ export function useMyPredictions() {
 
 export function useMatchPrediction(matchId: string) {
   const { user } = useAuth();
+  const { activeUserId } = useActiveProfile();
   return useQuery({
-    queryKey: ['prediction', matchId, user?.id],
+    queryKey: ['prediction', matchId, activeUserId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('match_predictions')
