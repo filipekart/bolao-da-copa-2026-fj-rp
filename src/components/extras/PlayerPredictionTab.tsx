@@ -74,7 +74,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
       const { data, error } = await supabase
         .from('extra_predictions')
         .select('*, teams(name, flag_url, fifa_code)')
-        .eq('user_id', user!.id)
+        .eq('user_id', activeUserId)
         .eq('category', category)
         .maybeSingle();
       if (error) throw error;
