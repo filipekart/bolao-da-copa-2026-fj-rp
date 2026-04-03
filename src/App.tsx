@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth";
+import { ActiveProfileProvider } from "@/lib/activeProfile";
 import { AppLayout } from "@/components/AppLayout";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
@@ -56,6 +57,7 @@ function ProtectedRoutes() {
   }
 
   return (
+    <ActiveProfileProvider>
     <AppLayout>
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -69,6 +71,7 @@ function ProtectedRoutes() {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
+    </ActiveProfileProvider>
   );
 }
 

@@ -224,6 +224,27 @@ export type Database = {
           },
         ]
       }
+      managed_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          managed_id: string
+          manager_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          managed_id: string
+          manager_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          managed_id?: string
+          manager_id?: string
+        }
+        Relationships: []
+      }
       match_predictions: {
         Row: {
           created_at: string
@@ -695,32 +716,60 @@ export type Database = {
       }
       refresh_leaderboard: { Args: never; Returns: undefined }
       score_finished_matches: { Args: never; Returns: undefined }
-      submit_match_prediction: {
-        Args: {
-          p_match_id: string
-          p_predicted_away_score: number
-          p_predicted_home_score: number
-        }
-        Returns: {
-          created_at: string
-          id: string
-          match_id: string
-          points_awarded: number
-          predicted_away_score: number
-          predicted_home_score: number
-          rule_applied: Database["public"]["Enums"]["prediction_rule"]
-          scored_at: string | null
-          submitted_at: string
-          updated_at: string
-          user_id: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "match_predictions"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+      submit_match_prediction:
+        | {
+            Args: {
+              p_match_id: string
+              p_predicted_away_score: number
+              p_predicted_home_score: number
+            }
+            Returns: {
+              created_at: string
+              id: string
+              match_id: string
+              points_awarded: number
+              predicted_away_score: number
+              predicted_home_score: number
+              rule_applied: Database["public"]["Enums"]["prediction_rule"]
+              scored_at: string | null
+              submitted_at: string
+              updated_at: string
+              user_id: string
+            }
+            SetofOptions: {
+              from: "*"
+              to: "match_predictions"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: {
+              p_acting_as?: string
+              p_match_id: string
+              p_predicted_away_score: number
+              p_predicted_home_score: number
+            }
+            Returns: {
+              created_at: string
+              id: string
+              match_id: string
+              points_awarded: number
+              predicted_away_score: number
+              predicted_home_score: number
+              rule_applied: Database["public"]["Enums"]["prediction_rule"]
+              scored_at: string | null
+              submitted_at: string
+              updated_at: string
+              user_id: string
+            }
+            SetofOptions: {
+              from: "*"
+              to: "match_predictions"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
     }
     Enums: {
       app_role: "admin" | "user"

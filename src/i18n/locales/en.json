@@ -197,7 +197,11 @@
     "notificationsActivated": "Notifications enabled!",
     "notificationsDenied": "Notifications blocked by the browser. Unblock in browser settings.",
     "signOut": "Sign out",
-    "pts": "pts"
+    "pts": "pts",
+    "managedProfiles": "Managed profiles",
+    "switchProfile": "Switch profile",
+    "actingAs": "Betting as: {{name}}",
+    "backToMyProfile": "Back to my profile"
   },
   "admin": {
     "title": "Admin Panel",

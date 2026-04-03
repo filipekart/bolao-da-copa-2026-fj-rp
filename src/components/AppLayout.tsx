@@ -7,12 +7,15 @@ import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { NotificationBanner } from '@/components/NotificationBanner';
 import { InstallBanner } from '@/components/InstallBanner';
 import { useTranslation } from 'react-i18next';
+import { useActiveProfile } from '@/lib/activeProfile';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin } = useAuth();
   const { t } = useTranslation();
+  const { isActingAsOther, activeDisplayName, setActiveUserId, activeUserId } = useActiveProfile();
+  const { user } = useAuth();
   useMatchReminders();
   const { subscribe } = usePushSubscription();
 
@@ -37,6 +40,19 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div className="max-w-lg mx-auto w-full px-4 pt-12">
         <InstallBanner />
         <NotificationBanner onAccept={subscribe} />
+        {isActingAsOther && activeDisplayName && (
+          <div className="flex items-center justify-between gap-2 px-4 py-2 rounded-xl bg-accent/20 border border-accent/30 mt-2">
+            <span className="text-xs text-accent font-medium">
+              {t('profile.actingAs', { name: activeDisplayName })}
+            </span>
+            <button
+              onClick={() => setActiveUserId(user?.id ?? '')}
+              className="text-[10px] text-accent underline font-medium"
+            >
+              {t('profile.backToMyProfile')}
+            </button>
+          </div>
+        )}
       </div>
       <main className="flex-1 max-w-lg mx-auto w-full px-4 pb-24">
         {children}

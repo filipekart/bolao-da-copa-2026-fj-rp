@@ -1,18 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/auth';
+import { useActiveProfile } from '@/lib/activeProfile';
 import { toast } from 'sonner';
 
 export function useMyPredictions() {
   const { user } = useAuth();
+  const { activeUserId } = useActiveProfile();
   return useQuery({
-    queryKey: ['my-predictions', user?.id],
+    queryKey: ['my-predictions', activeUserId],
     queryFn: async () => {
       // Get predictions
       const { data: predictions, error } = await supabase
         .from('match_predictions')
         .select('*')
-        .eq('user_id', user!.id)
+        .eq('user_id', activeUserId)
         .order('submitted_at', { ascending: false });
       if (error) throw error;
 
@@ -40,30 +42,33 @@ export function useMyPredictions() {
         match: matchMap.get(p.match_id) ?? null,
       }));
     },
-    enabled: !!user,
+    enabled: !!user && !!activeUserId,
   });
 }
 
 export function useMatchPrediction(matchId: string) {
   const { user } = useAuth();
+  const { activeUserId } = useActiveProfile();
   return useQuery({
-    queryKey: ['prediction', matchId, user?.id],
+    queryKey: ['prediction', matchId, activeUserId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('match_predictions')
         .select('*')
-        .eq('user_id', user!.id)
+        .eq('user_id', activeUserId)
         .eq('match_id', matchId)
         .maybeSingle();
       if (error) throw error;
       return data;
     },
-    enabled: !!user && !!matchId,
+    enabled: !!user && !!matchId && !!activeUserId,
   });
 }
 
 export function useSubmitPrediction() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { activeUserId, isActingAsOther } = useActiveProfile();
   return useMutation({
     mutationFn: async ({
       matchId,
@@ -78,6 +83,7 @@ export function useSubmitPrediction() {
         p_match_id: matchId,
         p_predicted_home_score: homeScore,
         p_predicted_away_score: awayScore,
+        ...(isActingAsOther ? { p_acting_as: activeUserId } : {}),
       });
       if (error) throw error;
       return data;
@@ -85,6 +91,7 @@ export function useSubmitPrediction() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['prediction', variables.matchId] });
       queryClient.invalidateQueries({ queryKey: ['my-predictions'] });
+      queryClient.invalidateQueries({ queryKey: ['all-predictions'] });
       toast.success('Palpite salvo!');
     },
     onError: (error: Error) => {

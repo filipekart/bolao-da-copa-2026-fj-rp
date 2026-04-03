@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useMatches, MatchWithTeams } from '@/hooks/useMatches';
 import { useTeams } from '@/hooks/useTeams';
 import { useAuth } from '@/lib/auth';
+import { useActiveProfile } from '@/lib/activeProfile';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { calculatePredictedStandings, deriveQualifiedTeams, PredictedMatch } from '@/lib/standings';
@@ -298,6 +299,7 @@ function GroupCard({
 
 export default function HomePage() {
   const { user } = useAuth();
+  const { activeUserId, isActingAsOther } = useActiveProfile();
   const { data: matches, isLoading: matchesLoading } = useMatches('GROUP_STAGE');
   const { data: teams, isLoading: teamsLoading } = useTeams();
   const queryClient = useQueryClient();
@@ -308,16 +310,16 @@ export default function HomePage() {
 
   // Fetch user's existing predictions
   const { data: existingPredictions } = useQuery({
-    queryKey: ['all-predictions', user?.id],
+    queryKey: ['all-predictions', activeUserId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('match_predictions')
         .select('match_id, predicted_home_score, predicted_away_score')
-        .eq('user_id', user!.id);
+        .eq('user_id', activeUserId);
       if (error) throw error;
       return data;
     },
-    enabled: !!user,
+    enabled: !!user && !!activeUserId,
   });
 
   // Initialize scores from existing predictions
@@ -419,6 +421,7 @@ export default function HomePage() {
             p_match_id: m.id,
             p_predicted_home_score: s.home,
             p_predicted_away_score: s.away,
+            ...(isActingAsOther ? { p_acting_as: activeUserId } : {}),
           });
         });
 
@@ -473,12 +476,12 @@ export default function HomePage() {
     await supabase
       .from('knockout_predictions')
       .delete()
-      .eq('user_id', user.id)
+      .eq('user_id', activeUserId)
       .eq('stage', 'ROUND_OF_32' as any);
 
     // Insert new R32 predictions
     const inserts = qualifiedTeamIds.map(teamId => ({
-      user_id: user.id,
+      user_id: activeUserId,
       stage: 'ROUND_OF_32' as any,
       team_id: teamId,
     }));

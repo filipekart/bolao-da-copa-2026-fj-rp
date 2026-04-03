@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/auth';
+import { useActiveProfile } from '@/lib/activeProfile';
 import { Loader2, Lock, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, ReactNode, useMemo } from 'react';
@@ -60,6 +61,7 @@ function useFirstMatchKickoff() {
 
 export default function PlayerPredictionTab({ category, title, description, icon }: Props) {
   const { user } = useAuth();
+  const { activeUserId } = useActiveProfile();
   const queryClient = useQueryClient();
   const { data: teams, isLoading: teamsLoading } = useTeams();
   const { data: firstKickoff, isLoading: kickoffLoading } = useFirstMatchKickoff();
@@ -67,12 +69,12 @@ export default function PlayerPredictionTab({ category, title, description, icon
   const tn = useTeamNameByCode();
 
   const { data: prediction, isLoading: predLoading } = useQuery({
-    queryKey: ['extra-prediction', category, user?.id],
+    queryKey: ['extra-prediction', category, activeUserId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('extra_predictions')
         .select('*, teams(name, flag_url, fifa_code)')
-        .eq('user_id', user!.id)
+        .eq('user_id', activeUserId)
         .eq('category', category)
         .maybeSingle();
       if (error) throw error;
@@ -116,7 +118,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
         .from('extra_predictions')
         .upsert(
           {
-            user_id: user!.id,
+            user_id: activeUserId,
             category,
             player_name: playerName.trim(),
             team_id: selectedTeamId,

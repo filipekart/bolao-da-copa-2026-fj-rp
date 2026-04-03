@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/auth';
+import { useActiveProfile } from '@/lib/activeProfile';
 import { Loader2, Trophy, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -20,13 +21,14 @@ function useTeams() {
 
 function useChampionPrediction() {
   const { user } = useAuth();
+  const { activeUserId } = useActiveProfile();
   return useQuery({
-    queryKey: ['champion-prediction', user?.id],
+    queryKey: ['champion-prediction', activeUserId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('knockout_predictions')
         .select('*, teams(name, flag_url, fifa_code)')
-        .eq('user_id', user!.id)
+        .eq('user_id', activeUserId)
         .eq('stage', 'CHAMPION')
         .maybeSingle();
       if (error) throw error;
@@ -54,6 +56,7 @@ function useFirstMatchKickoff() {
 
 export default function ChampionTab() {
   const { user } = useAuth();
+  const { activeUserId } = useActiveProfile();
   const { data: teams, isLoading: teamsLoading } = useTeams();
   const { data: prediction, isLoading: predLoading } = useChampionPrediction();
   const { data: firstKickoff, isLoading: kickoffLoading } = useFirstMatchKickoff();
@@ -70,11 +73,11 @@ export default function ChampionTab() {
       await supabase
         .from('knockout_predictions')
         .delete()
-        .eq('user_id', user!.id)
+        .eq('user_id', activeUserId)
         .eq('stage', 'CHAMPION');
       const { error } = await supabase
         .from('knockout_predictions')
-        .insert({ user_id: user!.id, team_id: teamId, stage: 'CHAMPION' as const });
+        .insert({ user_id: activeUserId, team_id: teamId, stage: 'CHAMPION' as const });
       if (error) throw error;
     },
     onSuccess: () => {
