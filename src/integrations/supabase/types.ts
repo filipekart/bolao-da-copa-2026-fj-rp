@@ -716,6 +716,19 @@ export type Database = {
       }
       refresh_leaderboard: { Args: never; Returns: undefined }
       score_finished_matches: { Args: never; Returns: undefined }
+      submit_champion_prediction: {
+        Args: { p_acting_as?: string; p_team_id: string }
+        Returns: undefined
+      }
+      submit_extra_prediction: {
+        Args: {
+          p_acting_as?: string
+          p_category: string
+          p_player_name: string
+          p_team_id: string
+        }
+        Returns: undefined
+      }
       submit_match_prediction:
         | {
             Args: {
