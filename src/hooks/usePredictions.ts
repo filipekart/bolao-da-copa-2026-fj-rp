@@ -55,7 +55,7 @@ export function useMatchPrediction(matchId: string) {
       const { data, error } = await supabase
         .from('match_predictions')
         .select('*')
-        .eq('user_id', user!.id)
+        .eq('user_id', activeUserId)
         .eq('match_id', matchId)
         .maybeSingle();
       if (error) throw error;
