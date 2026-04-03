@@ -67,6 +67,8 @@ export function useMatchPrediction(matchId: string) {
 
 export function useSubmitPrediction() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { activeUserId, isActingAsOther } = useActiveProfile();
   return useMutation({
     mutationFn: async ({
       matchId,
@@ -81,6 +83,7 @@ export function useSubmitPrediction() {
         p_match_id: matchId,
         p_predicted_home_score: homeScore,
         p_predicted_away_score: awayScore,
+        ...(isActingAsOther ? { p_acting_as: activeUserId } : {}),
       });
       if (error) throw error;
       return data;
@@ -88,6 +91,7 @@ export function useSubmitPrediction() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['prediction', variables.matchId] });
       queryClient.invalidateQueries({ queryKey: ['my-predictions'] });
+      queryClient.invalidateQueries({ queryKey: ['all-predictions'] });
       toast.success('Palpite salvo!');
     },
     onError: (error: Error) => {
