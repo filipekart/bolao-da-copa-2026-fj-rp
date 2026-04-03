@@ -56,6 +56,7 @@ function useFirstMatchKickoff() {
 
 export default function ChampionTab() {
   const { user } = useAuth();
+  const { activeUserId } = useActiveProfile();
   const { data: teams, isLoading: teamsLoading } = useTeams();
   const { data: prediction, isLoading: predLoading } = useChampionPrediction();
   const { data: firstKickoff, isLoading: kickoffLoading } = useFirstMatchKickoff();
