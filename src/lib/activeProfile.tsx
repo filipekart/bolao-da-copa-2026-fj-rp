@@ -37,11 +37,9 @@ export function ActiveProfileProvider({ children }: { children: ReactNode }) {
       if (!links?.length) return [];
 
       const managedIds = links.map(l => l.managed_id);
-      const { data: profiles, error: profErr } = await supabase
-        .from('profiles')
-        .select('id, display_name')
-        .in('id', managedIds);
+      const { data: profiles, error: profErr } = await supabase.rpc('get_public_profiles');
       if (profErr) throw profErr;
+      const relevantProfiles = (profiles ?? []).filter(p => managedIds.includes(p.id));
 
       return links.map(l => {
         const prof = profiles?.find(p => p.id === l.managed_id);
