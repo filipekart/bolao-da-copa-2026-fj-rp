@@ -14,6 +14,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const { isAdmin } = useAuth();
   const { t } = useTranslation();
+  const { isActingAsOther, activeDisplayName, setActiveUserId, activeUserId } = useActiveProfile();
+  const { user } = useAuth();
   useMatchReminders();
   const { subscribe } = usePushSubscription();
 
