@@ -118,7 +118,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
         .from('extra_predictions')
         .upsert(
           {
-            user_id: user!.id,
+            user_id: activeUserId,
             category,
             player_name: playerName.trim(),
             team_id: selectedTeamId,

@@ -73,11 +73,11 @@ export default function ChampionTab() {
       await supabase
         .from('knockout_predictions')
         .delete()
-        .eq('user_id', user!.id)
+        .eq('user_id', activeUserId)
         .eq('stage', 'CHAMPION');
       const { error } = await supabase
         .from('knockout_predictions')
-        .insert({ user_id: user!.id, team_id: teamId, stage: 'CHAMPION' as const });
+        .insert({ user_id: activeUserId, team_id: teamId, stage: 'CHAMPION' as const });
       if (error) throw error;
     },
     onSuccess: () => {

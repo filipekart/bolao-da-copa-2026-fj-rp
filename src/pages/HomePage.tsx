@@ -476,12 +476,12 @@ export default function HomePage() {
     await supabase
       .from('knockout_predictions')
       .delete()
-      .eq('user_id', user.id)
+      .eq('user_id', activeUserId)
       .eq('stage', 'ROUND_OF_32' as any);
 
     // Insert new R32 predictions
     const inserts = qualifiedTeamIds.map(teamId => ({
-      user_id: user.id,
+      user_id: activeUserId,
       stage: 'ROUND_OF_32' as any,
       team_id: teamId,
     }));
