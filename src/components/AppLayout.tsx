@@ -7,6 +7,7 @@ import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { NotificationBanner } from '@/components/NotificationBanner';
 import { InstallBanner } from '@/components/InstallBanner';
 import { useTranslation } from 'react-i18next';
+import { useActiveProfile } from '@/lib/activeProfile';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
