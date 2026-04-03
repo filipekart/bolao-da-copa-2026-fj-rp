@@ -70,14 +70,10 @@ export default function ChampionTab() {
 
   const submitMutation = useMutation({
     mutationFn: async (teamId: string) => {
-      await supabase
-        .from('knockout_predictions')
-        .delete()
-        .eq('user_id', activeUserId)
-        .eq('stage', 'CHAMPION');
-      const { error } = await supabase
-        .from('knockout_predictions')
-        .insert({ user_id: activeUserId, team_id: teamId, stage: 'CHAMPION' as const });
+      const { error } = await supabase.rpc('submit_champion_prediction', {
+        p_team_id: teamId,
+        p_acting_as: activeUserId !== user?.id ? activeUserId : undefined,
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => {
