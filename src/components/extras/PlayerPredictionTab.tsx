@@ -114,18 +114,12 @@ export default function PlayerPredictionTab({ category, title, description, icon
       if (!playerName.trim()) throw new Error(t('extras.playerRequired'));
       if (!selectedTeamId) throw new Error(t('extras.teamRequired'));
 
-      const { error } = await supabase
-        .from('extra_predictions')
-        .upsert(
-          {
-            user_id: activeUserId,
-            category,
-            player_name: playerName.trim(),
-            team_id: selectedTeamId,
-            submitted_at: new Date().toISOString(),
-          },
-          { onConflict: 'user_id,category' }
-        );
+      const { error } = await supabase.rpc('submit_extra_prediction', {
+        p_category: category,
+        p_player_name: playerName.trim(),
+        p_team_id: selectedTeamId,
+        p_acting_as: activeUserId !== user?.id ? activeUserId : undefined,
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => {
