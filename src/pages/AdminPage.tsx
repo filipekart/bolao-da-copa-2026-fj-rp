@@ -307,7 +307,170 @@ function MatchResultSection() {
   );
 }
 
+function MultiProfileSection() {
+  const { data: links, isLoading } = useManagedProfilesAdmin();
+  const createLink = useCreateManagedProfile();
+  const deleteLink = useDeleteManagedProfile();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [managerId, setManagerId] = useState('');
+  const [managedId, setManagedId] = useState('');
+  const { t } = useTranslation();
+
+  const { data: allProfiles } = useQuery({
+    queryKey: ['public-profiles'],
+    queryFn: async () => {
+      const { data } = await supabase.rpc('get_public_profiles');
+      return (data ?? []).filter(p => p.approved).sort((a, b) => a.display_name.localeCompare(b.display_name));
+    },
+  });
+
+  if (isLoading) return <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />;
+
+  const handleCreate = () => {
+    if (!managerId || !managedId || managerId === managedId) return;
+    createLink.mutate({ managerId, managedId });
+    setManagerId('');
+    setManagedId('');
+  };
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-display font-semibold text-foreground flex items-center gap-2">
+        <Link2 className="w-5 h-5 text-primary" /> {t('admin.multiProfiles')}
+      </h2>
+
+      <div className="glass rounded-xl p-4 space-y-3">
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">{t('admin.manager')}</label>
+            <Select value={managerId} onValueChange={setManagerId}>
+              <SelectTrigger className="h-9 text-sm bg-secondary border-border">
+                <SelectValue placeholder={t('admin.selectUser')} />
+              </SelectTrigger>
+              <SelectContent>
+                {allProfiles?.map(p => (
+                  <SelectItem key={p.id} value={p.id}>{p.display_name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">{t('admin.managed')}</label>
+            <Select value={managedId} onValueChange={setManagedId}>
+              <SelectTrigger className="h-9 text-sm bg-secondary border-border">
+                <SelectValue placeholder={t('admin.selectUser')} />
+              </SelectTrigger>
+              <SelectContent>
+                {allProfiles?.filter(p => p.id !== managerId).map(p => (
+                  <SelectItem key={p.id} value={p.id}>{p.display_name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <Button
+          size="sm"
+          onClick={handleCreate}
+          disabled={!managerId || !managedId || managerId === managedId || createLink.isPending}
+          className="w-full gradient-pitch text-primary-foreground"
+        >
+          {createLink.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Link2 className="w-4 h-4 mr-1" />}
+          {t('admin.linkProfile')}
+        </Button>
+      </div>
+
+      {links && links.length > 0 ? (
+        <div className="space-y-2">
+          {links.map(l => (
+            <div key={l.id} className="glass rounded-xl p-3 flex items-center justify-between">
+              <div className="text-sm text-foreground">
+                <span className="font-medium">{l.manager_name}</span>
+                <span className="text-muted-foreground mx-2">→</span>
+                <span>{l.managed_name}</span>
+              </div>
+              {deletingId === l.id ? (
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] text-destructive">{t('admin.confirmUnlink')}</span>
+                  <Button size="sm" variant="ghost" className="h-7 px-1.5 text-destructive" onClick={() => {
+                    deleteLink.mutate(l.id);
+                    setDeletingId(null);
+                  }}>
+                    <Check className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-7 px-1.5" onClick={() => setDeletingId(null)}>
+                    <X className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              ) : (
+                <Button size="sm" variant="ghost" onClick={() => setDeletingId(l.id)} className="text-muted-foreground hover:text-destructive">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground text-center py-4">{t('admin.noLinks')}</p>
+      )}
+    </div>
+  );
+}
+
 export default function AdminPage() {
+  const recalculate = useRecalculateScores();
+  const fetchFifa = useFetchFifaResults();
+  const [activeTab, setActiveTab] = useState<'users' | 'matches' | 'profiles'>('users');
+  const { t } = useTranslation();
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <h1 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
+        <Shield className="w-5 h-5 text-accent" /> {t('admin.title')}
+      </h1>
+
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => fetchFifa.mutate()}
+          disabled={fetchFifa.isPending}
+          className="flex-1"
+        >
+          {fetchFifa.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
+          <span className="ml-1 text-xs">{t('admin.fetchFifa')}</span>
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => recalculate.mutate()}
+          disabled={recalculate.isPending}
+          className="flex-1"
+        >
+          {recalculate.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+          <span className="ml-1 text-xs">{t('admin.recalculate')}</span>
+        </Button>
+      </div>
+
+      <div className="flex gap-1 p-1 bg-secondary rounded-xl">
+        {(['users', 'matches', 'profiles'] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+              activeTab === tab ? 'gradient-pitch text-primary-foreground' : 'text-muted-foreground'
+            }`}
+          >
+            {tab === 'users' ? t('admin.users') : tab === 'matches' ? t('admin.results') : t('admin.multiProfiles')}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'users' && <UserApprovalSection />}
+      {activeTab === 'matches' && <MatchResultSection />}
+      {activeTab === 'profiles' && <MultiProfileSection />}
+    </div>
+  );
+}
   const recalculate = useRecalculateScores();
   const fetchFifa = useFetchFifaResults();
   const [activeTab, setActiveTab] = useState<'users' | 'matches'>('users');
