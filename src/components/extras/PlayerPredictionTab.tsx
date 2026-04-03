@@ -69,7 +69,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
   const tn = useTeamNameByCode();
 
   const { data: prediction, isLoading: predLoading } = useQuery({
-    queryKey: ['extra-prediction', category, user?.id],
+    queryKey: ['extra-prediction', category, activeUserId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('extra_predictions')
