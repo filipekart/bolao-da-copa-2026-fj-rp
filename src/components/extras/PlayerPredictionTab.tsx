@@ -61,6 +61,7 @@ function useFirstMatchKickoff() {
 
 export default function PlayerPredictionTab({ category, title, description, icon }: Props) {
   const { user } = useAuth();
+  const { activeUserId } = useActiveProfile();
   const queryClient = useQueryClient();
   const { data: teams, isLoading: teamsLoading } = useTeams();
   const { data: firstKickoff, isLoading: kickoffLoading } = useFirstMatchKickoff();
