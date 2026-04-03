@@ -70,6 +70,7 @@ function ProtectedRoutes() {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
+    </ActiveProfileProvider>
   );
 }
 
