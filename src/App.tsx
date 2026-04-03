@@ -56,6 +56,7 @@ function ProtectedRoutes() {
   }
 
   return (
+    <ActiveProfileProvider>
     <AppLayout>
       <Routes>
         <Route path="/" element={<HomePage />} />
