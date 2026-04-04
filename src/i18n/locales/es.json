@@ -55,7 +55,7 @@
   },
   "approval": {
     "title": "Esperando aprobación",
-    "message": "¡Tu cuenta fue creada exitosamente! El administrador necesita aprobar tu registro para acceder a la polla.",
+    "message": "¡Tu cuenta fue creada exitosamente!\nHaz un Pix de R$ 200 al CPF 100.928.167-46 para acceder a la polla.",
     "signOut": "Salir"
   },
   "home": {
