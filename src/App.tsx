@@ -42,7 +42,7 @@ function ProtectedRoutes() {
         <div className="glass rounded-2xl p-8 max-w-sm text-center space-y-4">
           <ShieldAlert className="w-12 h-12 text-accent mx-auto" />
           <h2 className="text-lg font-display font-bold text-foreground">{t('approval.title')}</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground whitespace-pre-line">
             {t('approval.message')}
           </p>
           <button
