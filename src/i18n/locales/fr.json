@@ -55,7 +55,7 @@
   },
   "approval": {
     "title": "En attente d'approbation",
-    "message": "Votre compte a été créé avec succès ! L'administrateur doit approuver votre inscription pour accéder au bolão.",
+    "message": "Votre compte a été créé avec succès !\nFaites un Pix de R$ 200 au CPF 100.928.167-46 pour accéder au bolão.",
     "signOut": "Se déconnecter"
   },
   "home": {

@@ -55,7 +55,7 @@
   },
   "approval": {
     "title": "Aguardando aprovação",
-    "message": "Sua conta foi criada com sucesso! O administrador precisa aprovar seu cadastro para você acessar o bolão.",
+    "message": "Sua conta foi criada com sucesso!\nFaça o Pix de R$ 200 para o CPF 100.928.167-46 para você acessar o bolão.",
     "signOut": "Sair"
   },
   "home": {
