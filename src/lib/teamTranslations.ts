@@ -46,8 +46,8 @@ const teamTranslations: Record<string, Record<string, string>> = {
   TUR: { pt: 'Turquia', en: 'Turkey', es: 'Turquía', fr: 'Turquie' },
   URU: { pt: 'Uruguai', en: 'Uruguay', es: 'Uruguay', fr: 'Uruguay' },
   UZB: { pt: 'Uzbequistão', en: 'Uzbekistan', es: 'Uzbekistán', fr: 'Ouzbékistan' },
-  IC1: { pt: 'Vencedor Repescagem IC 1', en: 'Playoff Winner IC 1', es: 'Ganador Repechaje IC 1', fr: 'Vainqueur Barrage IC 1' },
-  IC2: { pt: 'Vencedor Repescagem IC 2', en: 'Playoff Winner IC 2', es: 'Ganador Repechaje IC 2', fr: 'Vainqueur Barrage IC 2' },
+  COD: { pt: 'RD Congo', en: 'DR Congo', es: 'RD Congo', fr: 'RD Congo' },
+  IRQ: { pt: 'Iraque', en: 'Iraq', es: 'Irak', fr: 'Irak' },
 };
 
 /**
