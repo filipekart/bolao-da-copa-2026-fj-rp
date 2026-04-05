@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.submit_match_prediction(uuid, integer, integer);
