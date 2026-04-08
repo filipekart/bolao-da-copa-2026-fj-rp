@@ -78,6 +78,36 @@ export function RulesModal() {
               <li>No mata-mata, considere o placar do tempo regulamentar + prorrogação (sem pênaltis).</li>
             </ul>
           </div>
+
+          {/* Prizes */}
+          <div className="space-y-3">
+            <h3 className="font-semibold text-foreground">💰 Premiação</h3>
+            <div className="space-y-1.5">
+              <p className="text-foreground text-xs font-medium">Parciais — 20% do total</p>
+              <div className="space-y-0.5 text-muted-foreground text-xs pl-4">
+                <div className="flex justify-between"><span>1ª rodada</span><span className="text-primary font-semibold">3%</span></div>
+                <div className="flex justify-between"><span>2ª rodada</span><span className="text-primary font-semibold">3%</span></div>
+                <div className="flex justify-between"><span>3ª rodada</span><span className="text-primary font-semibold">3%</span></div>
+                <div className="flex justify-between"><span>1ª fase</span><span className="text-primary font-semibold">6%</span></div>
+                <div className="flex justify-between"><span>2ª fase + extras</span><span className="text-primary font-semibold">5%</span></div>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <p className="text-foreground text-xs font-medium">🏅 Ranking final — 80% do total</p>
+              <div className="space-y-0.5 text-muted-foreground text-xs pl-4">
+                <div className="flex justify-between"><span>1º geral</span><span className="text-primary font-semibold">35%</span></div>
+                <div className="flex justify-between"><span>2º geral</span><span className="text-primary font-semibold">19%</span></div>
+                <div className="flex justify-between"><span>3º geral</span><span className="text-primary font-semibold">10%</span></div>
+                <div className="flex justify-between"><span>4º geral</span><span className="text-primary font-semibold">5%</span></div>
+                <div className="flex justify-between"><span>5º geral</span><span className="text-primary font-semibold">3%</span></div>
+                <div className="flex justify-between"><span>6º geral</span><span className="text-primary font-semibold">2,5%</span></div>
+                <div className="flex justify-between"><span>7º geral</span><span className="text-primary font-semibold">2%</span></div>
+                <div className="flex justify-between"><span>8º geral</span><span className="text-primary font-semibold">1,5%</span></div>
+                <div className="flex justify-between"><span>9º geral</span><span className="text-primary font-semibold">1%</span></div>
+                <div className="flex justify-between"><span>10º geral</span><span className="text-primary font-semibold">1%</span></div>
+              </div>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
