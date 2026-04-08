@@ -1,30 +1,50 @@
 
 
-## Plano: Atualizar times da repescagem nos grupos
+## Plano: Rankings personalizados (paralelos)
 
-### Resultados da repescagem
-- **Pathway 1 (IC1) → Grupo K**: **RD Congo** (DR Congo) — venceu Jamaica 1-0 na prorrogação
-- **Pathway 2 (IC2) → Grupo I**: **Iraque** (Iraq) — venceu Bolívia 2-1
+### Conceito
+Cada usuário pode criar um ou mais "mini-rankings" selecionando participantes do bolão. Exemplo: "Família Jorge", "Amigos do trabalho". Os pontos vêm do ranking geral existente — é apenas um filtro/agrupamento personalizado.
 
 ### Alterações
 
-**1. Migração SQL — atualizar os 2 times placeholder**
+**1. Duas novas tabelas (migração SQL)**
 
-Atualizar nome, short_name, fifa_code e flag_url dos times "Vencedor Repescagem IC 1" e "Vencedor Repescagem IC 2":
+- `custom_rankings` — id, owner_id (uuid), name (text), created_at
+- `custom_ranking_members` — id, ranking_id (FK), user_id (uuid), added_at
 
-- `IC1` → nome: "RD Congo", short_name: "COD", fifa_code: "COD", flag_url: bandeira do Congo
-- `IC2` → nome: "Iraque", short_name: "IRQ", fifa_code: "IRQ", flag_url: bandeira do Iraque
+RLS: owner pode CRUD no próprio ranking; membros adicionados podem visualizar o ranking onde foram incluídos.
 
-**2. Atualizar `src/lib/teamTranslations.ts`**
+**2. Nova aba "Meus Rankings" na página de Ranking**
 
-Substituir as entradas IC1 e IC2 por:
-- `COD`: { pt: 'RD Congo', en: 'DR Congo', es: 'RD Congo', fr: 'RD Congo' }
-- `IRQ`: { pt: 'Iraque', en: 'Iraq', es: 'Irak', fr: 'Irak' }
+- Botão "+" para criar novo ranking (nome + seleção de participantes via checklist)
+- Cada ranking customizado aparece como um card expansível ou sub-aba
+- A listagem reutiliza o componente `RankingList` existente, filtrando os dados do ranking geral pelos membros selecionados
+- O dono pode editar (adicionar/remover membros) ou excluir o ranking
 
-Remover as entradas IC1 e IC2.
+**3. Hook `useCustomRankings`**
 
-### Resultado
-- Os grupos K e I mostrarão os nomes e bandeiras corretos dos times classificados
-- Todas as partidas associadas a esses times serão atualizadas automaticamente (usam o mesmo team_id)
-- Palpites existentes de campeão feitos para IC1/IC2 continuarão válidos pois referenciam o UUID
+- Busca os rankings do usuário logado com seus membros
+- Cruza com os dados do `useRanking()` existente para calcular posições relativas
+
+**4. Fluxo do usuário**
+
+```text
+Ranking Page
+├── Geral | Grupos | R1 | R2 | R3 | 2ª Fase   (abas existentes)
+└── [⭐ Meus Rankings]                          (nova aba)
+    ├── + Criar ranking
+    ├── "Família Jorge" (5 membros)  [Editar] [Excluir]
+    │   └── Lista filtrada com posições 1-5
+    └── "Trabalho" (8 membros)       [Editar] [Excluir]
+        └── Lista filtrada com posições 1-8
+```
+
+**5. Traduções**
+- Chaves: `ranking.myRankings`, `ranking.createRanking`, `ranking.rankingName`, `ranking.selectMembers`, `ranking.deleteRanking`, `ranking.editRanking`, `ranking.noCustomRankings`
+
+### Detalhes técnicos
+- Não cria views nem RPCs novas — filtra client-side a partir do ranking geral já carregado
+- Limite sugerido: 10 rankings por usuário, 50 membros por ranking
+- O dono é automaticamente incluído como membro
+- Nenhuma alteração nas tabelas ou views de ranking existentes
 
