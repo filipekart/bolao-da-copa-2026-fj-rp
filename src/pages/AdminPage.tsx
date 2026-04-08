@@ -35,7 +35,7 @@ function UserApprovalSection() {
   if (isLoading) return <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />;
 
   const pending = users?.filter(u => !u.approved) ?? [];
-  const approved = users?.filter(u => u.approved) ?? [];
+  const approved = (users?.filter(u => u.approved) ?? []).sort((a, b) => a.display_name.localeCompare(b.display_name));
 
   return (
     <div className="space-y-4">
