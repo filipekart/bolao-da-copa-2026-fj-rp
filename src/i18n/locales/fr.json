@@ -184,7 +184,7 @@
   },
   "profile": {
     "title": "Profil",
-    "rules": "Règles de notation",
+    "rules": "Règles de Score + Récompenses",
     "rulesMatch": "⚽ Pronostics de matchs",
     "exactScore": "Score exact",
     "winnerAndWinnerGoals": "Vainqueur + buts du vainqueur",
