@@ -176,7 +176,11 @@
     "rankingCreated": "Ranking criado!",
     "rankingSaved": "Ranking salvo!",
     "rankingDeleted": "Ranking excluído!",
-    "save": "Salvar"
+    "save": "Salvar",
+    "confirmDeleteTitle": "Excluir ranking?",
+    "confirmDeleteMessage": "Tem certeza que deseja excluir este ranking? Esta ação não pode ser desfeita.",
+    "cancel": "Cancelar",
+    "delete": "Excluir"
   },
   "profile": {
     "title": "Perfil",

@@ -176,7 +176,11 @@
     "rankingCreated": "Classement créé !",
     "rankingSaved": "Classement sauvegardé !",
     "rankingDeleted": "Classement supprimé !",
-    "save": "Enregistrer"
+    "save": "Enregistrer",
+    "confirmDeleteTitle": "Supprimer le classement ?",
+    "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer ce classement ? Cette action est irréversible.",
+    "cancel": "Annuler",
+    "delete": "Supprimer"
   },
   "profile": {
     "title": "Profil",
