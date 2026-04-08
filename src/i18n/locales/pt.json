@@ -184,7 +184,7 @@
   },
   "profile": {
     "title": "Perfil",
-    "rules": "Regras de Pontuação",
+    "rules": "Regras de Pontuação + Premiação",
     "rulesMatch": "⚽ Palpites por Jogo",
     "exactScore": "Placar exato",
     "winnerAndWinnerGoals": "Vencedor + gols do vencedor",
