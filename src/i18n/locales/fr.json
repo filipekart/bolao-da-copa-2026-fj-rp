@@ -30,7 +30,7 @@
     "sending": "Envoi...",
     "resetEmailSent": "E-mail de réinitialisation envoyé ! Vérifiez votre boîte de réception.",
     "enterEmail": "Entrez votre e-mail",
-    "accountCreated": "Compte créé ! Vérifiez votre e-mail.",
+    "accountCreated": "Compte créé ! En attente d'approbation.",
     "nameRequired": "Veuillez entrer votre nom",
     "nameInvalid": "Le nom ne peut pas contenir de caractères spéciaux",
     "nameInUse": "Ce nom est déjà utilisé. Choisissez-en un autre.",

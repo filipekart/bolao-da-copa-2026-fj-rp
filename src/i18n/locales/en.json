@@ -30,7 +30,7 @@
     "sending": "Sending...",
     "resetEmailSent": "Reset email sent! Check your inbox.",
     "enterEmail": "Enter your email",
-    "accountCreated": "Account created! Check your email.",
+    "accountCreated": "Account created! Await approval.",
     "nameRequired": "Please enter your name",
     "nameInvalid": "Name cannot contain special characters",
     "nameInUse": "This name is already in use. Choose another.",

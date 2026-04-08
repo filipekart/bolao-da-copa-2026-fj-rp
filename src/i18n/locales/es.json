@@ -30,7 +30,7 @@
     "sending": "Enviando...",
     "resetEmailSent": "¡Correo de restablecimiento enviado! Revisa tu bandeja de entrada.",
     "enterEmail": "Ingresa tu correo",
-    "accountCreated": "¡Cuenta creada! Revisa tu correo.",
+    "accountCreated": "¡Cuenta creada! Aguarde aprobación.",
     "nameRequired": "Ingresa tu nombre",
     "nameInvalid": "El nombre no puede contener caracteres especiales",
     "nameInUse": "Este nombre ya está en uso. Elige otro.",
