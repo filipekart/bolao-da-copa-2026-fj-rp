@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      custom_ranking_members: {
+        Row: {
+          added_at: string
+          id: string
+          ranking_id: string
+          user_id: string
+        }
+        Insert: {
+          added_at?: string
+          id?: string
+          ranking_id: string
+          user_id: string
+        }
+        Update: {
+          added_at?: string
+          id?: string
+          ranking_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_ranking_members_ranking_id_fkey"
+            columns: ["ranking_id"]
+            isOneToOne: false
+            referencedRelation: "custom_rankings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_rankings: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: []
+      }
       extra_predictions: {
         Row: {
           category: string

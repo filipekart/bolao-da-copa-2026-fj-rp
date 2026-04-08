@@ -165,7 +165,18 @@
     "round1": "Journée 1",
     "round2": "Journée 2",
     "round3": "Journée 3",
-    "knockout": "Élimin."
+    "knockout": "Élimin.",
+    "myRankings": "Mes Classements",
+    "createRanking": "Créer un classement",
+    "editRanking": "Modifier le classement",
+    "rankingName": "Nom du classement",
+    "selectMembers": "Sélectionner les participants",
+    "noCustomRankings": "Vous n'avez pas encore créé de classement personnalisé.",
+    "members": "membres",
+    "rankingCreated": "Classement créé !",
+    "rankingSaved": "Classement sauvegardé !",
+    "rankingDeleted": "Classement supprimé !",
+    "save": "Enregistrer"
   },
   "profile": {
     "title": "Profil",
