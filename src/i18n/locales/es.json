@@ -165,7 +165,18 @@
     "round1": "Jornada 1",
     "round2": "Jornada 2",
     "round3": "Jornada 3",
-    "knockout": "Eliminatorias"
+    "knockout": "Eliminatorias",
+    "myRankings": "Mis Rankings",
+    "createRanking": "Crear Ranking",
+    "editRanking": "Editar Ranking",
+    "rankingName": "Nombre del ranking",
+    "selectMembers": "Seleccionar participantes",
+    "noCustomRankings": "Aún no has creado ningún ranking personalizado.",
+    "members": "miembros",
+    "rankingCreated": "¡Ranking creado!",
+    "rankingSaved": "¡Ranking guardado!",
+    "rankingDeleted": "¡Ranking eliminado!",
+    "save": "Guardar"
   },
   "profile": {
     "title": "Perfil",

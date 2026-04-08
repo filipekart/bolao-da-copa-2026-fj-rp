@@ -165,7 +165,18 @@
     "round1": "Rodada 1",
     "round2": "Rodada 2",
     "round3": "Rodada 3",
-    "knockout": "2ª Fase"
+    "knockout": "2ª Fase",
+    "myRankings": "Meus Rankings",
+    "createRanking": "Criar Ranking",
+    "editRanking": "Editar Ranking",
+    "rankingName": "Nome do ranking",
+    "selectMembers": "Selecionar participantes",
+    "noCustomRankings": "Você ainda não criou nenhum ranking personalizado.",
+    "members": "membros",
+    "rankingCreated": "Ranking criado!",
+    "rankingSaved": "Ranking salvo!",
+    "rankingDeleted": "Ranking excluído!",
+    "save": "Salvar"
   },
   "profile": {
     "title": "Perfil",

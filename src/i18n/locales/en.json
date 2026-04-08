@@ -165,7 +165,18 @@
     "round1": "Round 1",
     "round2": "Round 2",
     "round3": "Round 3",
-    "knockout": "Knockout"
+    "knockout": "Knockout",
+    "myRankings": "My Rankings",
+    "createRanking": "Create Ranking",
+    "editRanking": "Edit Ranking",
+    "rankingName": "Ranking name",
+    "selectMembers": "Select participants",
+    "noCustomRankings": "You haven't created any custom ranking yet.",
+    "members": "members",
+    "rankingCreated": "Ranking created!",
+    "rankingSaved": "Ranking saved!",
+    "rankingDeleted": "Ranking deleted!",
+    "save": "Save"
   },
   "profile": {
     "title": "Profile",

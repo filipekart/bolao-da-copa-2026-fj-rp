@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Trophy, Medal, Search, X, MapPin } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
+import CustomRankingsTab from '@/components/ranking/CustomRankingsTab';
 
 function useExtrasRevealed() {
   return useQuery({
@@ -207,6 +208,7 @@ export default function RankingPage() {
           <TabsTrigger value="round2" className="flex-shrink-0 text-xs">{t('ranking.round2')}</TabsTrigger>
           <TabsTrigger value="round3" className="flex-shrink-0 text-xs">{t('ranking.round3')}</TabsTrigger>
           <TabsTrigger value="knockout" className="flex-shrink-0 text-xs">{t('ranking.knockout')}</TabsTrigger>
+          <TabsTrigger value="custom" className="flex-shrink-0 text-xs">⭐ {t('ranking.myRankings')}</TabsTrigger>
         </TabsList>
         <TabsContent value="geral" className="mt-4">
           <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} extrasRevealed={extrasRevealed} />
@@ -229,6 +231,9 @@ export default function RankingPage() {
         <TabsContent value="knockout" className="mt-4">
           {koLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
             <RankingList ranking={mergeExtras(knockout)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} />}
+        </TabsContent>
+        <TabsContent value="custom" className="mt-4">
+          <CustomRankingsTab extrasRevealed={extrasRevealed} />
         </TabsContent>
       </Tabs>
     </div>
