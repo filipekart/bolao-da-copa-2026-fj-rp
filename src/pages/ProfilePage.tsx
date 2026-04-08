@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { LogOut, User, Wallet, Loader2, Check, Bell, BellOff, ChevronDown, BookOpen, Users } from 'lucide-react';
+import { LogOut, User, Wallet, Loader2, Check, Bell, BellOff, ChevronDown, BookOpen, Users, Info } from 'lucide-react';
 import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -222,6 +222,51 @@ export default function ProfilePage() {
                   <div className="flex justify-between"><span>{t('profile.prizes10th')}</span><span className="text-primary font-semibold">1%</span></div>
                 </div>
               </div>
+            </div>
+          </CollapsibleContent>
+        </div>
+      </Collapsible>
+
+      {/* Regras de Funcionamento */}
+      <Collapsible>
+        <div className="glass rounded-2xl p-5">
+          <CollapsibleTrigger className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <Info className="w-5 h-5 text-accent" />
+              <h2 className="text-sm font-display font-bold text-foreground">{t('profile.howItWorks')}</h2>
+            </div>
+            <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-4 space-y-4 text-sm">
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground">{t('profile.howGames')}</h3>
+              <ul className="space-y-1 text-muted-foreground text-xs list-disc pl-4">
+                <li>{t('profile.howGames1')}</li>
+                <li>{t('profile.howGames2')}</li>
+                <li>{t('profile.howGames3')}</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground">{t('profile.howBets')}</h3>
+              <ul className="space-y-1 text-muted-foreground text-xs list-disc pl-4">
+                <li>{t('profile.howBets1')}</li>
+                <li>{t('profile.howBets2')}</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground">{t('profile.howExtras')}</h3>
+              <ul className="space-y-1 text-muted-foreground text-xs list-disc pl-4">
+                <li>{t('profile.howExtras1')}</li>
+                <li>{t('profile.howExtras2')}</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground">{t('profile.howRanking')}</h3>
+              <ul className="space-y-1 text-muted-foreground text-xs list-disc pl-4">
+                <li>{t('profile.howRanking1')}</li>
+                <li>{t('profile.howRanking2')}</li>
+                <li>{t('profile.howRanking3')}</li>
+              </ul>
             </div>
           </CollapsibleContent>
         </div>
