@@ -176,7 +176,11 @@
     "rankingCreated": "Ranking created!",
     "rankingSaved": "Ranking saved!",
     "rankingDeleted": "Ranking deleted!",
-    "save": "Save"
+    "save": "Save",
+    "confirmDeleteTitle": "Delete ranking?",
+    "confirmDeleteMessage": "Are you sure you want to delete this ranking? This action cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete"
   },
   "profile": {
     "title": "Profile",
