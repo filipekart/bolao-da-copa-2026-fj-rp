@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useCustomRankings, CustomRanking } from '@/hooks/useCustomRankings';
 import { useRanking } from '@/hooks/useRanking';
 import { useAuth } from '@/lib/auth';
@@ -61,6 +62,7 @@ export default function CustomRankingsTab({ extrasRevealed }: { extrasRevealed: 
   const [expanded, setExpanded] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRanking, setEditingRanking] = useState<CustomRanking | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
 
@@ -102,13 +104,15 @@ export default function CustomRankingsTab({ extrasRevealed }: { extrasRevealed: 
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const confirmDelete = async () => {
+    if (!deletingId) return;
     try {
-      await deleteRanking.mutateAsync(id);
+      await deleteRanking.mutateAsync(deletingId);
       toast.success(t('ranking.rankingDeleted'));
     } catch {
       toast.error('Erro');
     }
+    setDeletingId(null);
   };
 
   const toggleMember = (uid: string) => {
@@ -147,7 +151,7 @@ export default function CustomRankingsTab({ extrasRevealed }: { extrasRevealed: 
               <Button size="icon" variant="ghost" className="h-7 w-7" onClick={e => { e.stopPropagation(); openEdit(r); }}>
                 <Pencil className="w-3.5 h-3.5" />
               </Button>
-              <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={e => { e.stopPropagation(); handleDelete(r.id); }}>
+              <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={e => { e.stopPropagation(); setDeletingId(r.id); }}>
                 <Trash2 className="w-3.5 h-3.5" />
               </Button>
               {expanded === r.id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
