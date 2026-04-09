@@ -304,6 +304,13 @@ export default function HomePage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language?.substring(0, 2) || 'pt';
 
+  // Real-time clock for bet locking — updates every 30s
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Fetch user's existing predictions
   const { data: existingPredictions } = useQuery({
     queryKey: ['all-predictions', activeUserId],
