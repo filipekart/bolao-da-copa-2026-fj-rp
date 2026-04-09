@@ -54,7 +54,7 @@ export function MatchCard({ match }: { match: MatchWithTeams }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {match.home_team_flag_url && (
-            <img src={match.home_team_flag_url} alt="" className="w-6 h-4 rounded-sm object-cover" />
+            <img src={match.home_team_flag_url} alt="" loading="lazy" className="w-6 h-4 rounded-sm object-cover" />
           )}
           <span className="text-sm font-medium text-foreground truncate">{tt(match.home_team_id, match.home_team_name)}</span>
         </div>
@@ -74,7 +74,7 @@ export function MatchCard({ match }: { match: MatchWithTeams }) {
         <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
           <span className="text-sm font-medium text-foreground truncate">{tt(match.away_team_id, match.away_team_name)}</span>
           {match.away_team_flag_url && (
-            <img src={match.away_team_flag_url} alt="" className="w-6 h-4 rounded-sm object-cover" />
+            <img src={match.away_team_flag_url} alt="" loading="lazy" className="w-6 h-4 rounded-sm object-cover" />
           )}
         </div>
       </div>

@@ -163,7 +163,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
           <p className="text-xs text-muted-foreground font-medium">{t('extras.currentPrediction')}</p>
           <div className="flex items-center gap-3">
             {(prediction as any).teams?.flag_url && (
-              <img src={(prediction as any).teams.flag_url} alt="" className="w-8 h-6 rounded-sm" />
+              <img src={(prediction as any).teams.flag_url} alt="" loading="lazy" className="w-8 h-6 rounded-sm" />
             )}
             <div>
               <span className="text-lg font-display font-bold text-foreground">
@@ -194,7 +194,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
                 className="w-full glass rounded-xl px-4 py-3 flex items-center gap-3 ring-1 ring-primary"
               >
                 {selectedTeam.flag_url && (
-                  <img src={selectedTeam.flag_url} alt="" className="w-6 h-4 rounded-sm" />
+                  <img src={selectedTeam.flag_url} alt="" loading="lazy" className="w-6 h-4 rounded-sm" />
                 )}
                 <span className="text-sm text-foreground font-medium">{tn(selectedTeam.name, selectedTeam.fifa_code)}</span>
                 <span className="text-[10px] text-muted-foreground ml-auto">{t('extras.change')}</span>
@@ -231,7 +231,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
                         className="w-full glass rounded-xl px-4 py-2.5 flex items-center gap-3 transition-all hover:ring-1 hover:ring-primary"
                       >
                         {team.flag_url && (
-                          <img src={team.flag_url} alt="" className="w-6 h-4 rounded-sm" />
+                          <img src={team.flag_url} alt="" loading="lazy" className="w-6 h-4 rounded-sm" />
                         )}
                         <span className="text-sm text-foreground">{tn(team.name, team.fifa_code)}</span>
                       </button>

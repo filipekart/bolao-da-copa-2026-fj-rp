@@ -42,7 +42,7 @@ function FilteredRankingList({ ranking, memberIds, userId, t, extrasRevealed }: 
                 <span>{t('ranking.matches')}: {entry.points_matches}</span>
                 <span>{t('ranking.exact')}: {entry.exact_hits ?? 0}</span>
                 {(extrasRevealed || isMe) && entry.champion_flag_url && (
-                  <span className="flex items-center gap-1">🏆 <img src={entry.champion_flag_url} alt="" className="w-4 h-3 rounded-sm" /></span>
+                  <span className="flex items-center gap-1">🏆 <img src={entry.champion_flag_url} alt="" loading="lazy" className="w-4 h-3 rounded-sm" /></span>
                 )}
               </div>
             </div>

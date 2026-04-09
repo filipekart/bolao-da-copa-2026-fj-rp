@@ -139,7 +139,7 @@ export default function ChampionPage() {
           <p className="text-xs text-muted-foreground font-medium">Seu palpite atual:</p>
           <div className="flex items-center gap-3">
             {(prediction as any).teams?.flag_url && (
-              <img src={(prediction as any).teams.flag_url} alt="" className="w-8 h-6 rounded-sm" />
+              <img src={(prediction as any).teams.flag_url} alt="" loading="lazy" className="w-8 h-6 rounded-sm" />
             )}
             <span className="text-lg font-display font-bold text-foreground">
               {(prediction as any).teams?.name ? tn((prediction as any).teams.name, (prediction as any).teams?.fifa_code) : 'Time desconhecido'}
@@ -177,7 +177,7 @@ export default function ChampionPage() {
                           isCurrent ? 'ring-1 ring-accent' : ''
                         }`}
                       >
-                        {team.flag_url && <img src={team.flag_url} alt="" className="w-6 h-4 rounded-sm" />}
+                        {team.flag_url && <img src={team.flag_url} alt="" loading="lazy" className="w-6 h-4 rounded-sm" />}
                         <span className="text-sm text-foreground font-medium">{tn(team.name, team.fifa_code)}</span>
                         {isCurrent && <span className="text-[10px] text-accent ml-auto">atual</span>}
                       </button>

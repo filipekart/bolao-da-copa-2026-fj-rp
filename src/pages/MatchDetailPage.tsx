@@ -98,7 +98,7 @@ export default function MatchDetailPage() {
         <div className="flex items-center justify-between py-4">
           <div className="flex flex-col items-center gap-2 flex-1">
             {match.home_team_flag_url && (
-              <img src={match.home_team_flag_url} alt="" className="w-10 h-7 rounded object-cover" />
+              <img src={match.home_team_flag_url} alt="" loading="lazy" className="w-10 h-7 rounded object-cover" />
             )}
             <span className="text-sm font-medium text-foreground text-center">{tt(match.home_team_id, match.home_team_name)}</span>
           </div>
@@ -117,7 +117,7 @@ export default function MatchDetailPage() {
 
           <div className="flex flex-col items-center gap-2 flex-1">
             {match.away_team_flag_url && (
-              <img src={match.away_team_flag_url} alt="" className="w-10 h-7 rounded object-cover" />
+              <img src={match.away_team_flag_url} alt="" loading="lazy" className="w-10 h-7 rounded object-cover" />
             )}
             <span className="text-sm font-medium text-foreground text-center">{tt(match.away_team_id, match.away_team_name)}</span>
           </div>
