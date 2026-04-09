@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMatch } from '@/hooks/useMatches';
 import { useMatchPrediction, useSubmitPrediction } from '@/hooks/usePredictions';
@@ -55,7 +55,14 @@ export default function MatchDetailPage() {
 
   if (!match) return null;
 
-  const isLocked = new Date(match.kickoff_at) <= new Date();
+  // Real-time clock for bet locking — updates every 30s
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const isLocked = new Date(match.kickoff_at) <= now;
   const isFinished = match.status === 'FINISHED';
 
   const handleSubmit = () => {
