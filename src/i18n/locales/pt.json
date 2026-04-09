@@ -67,6 +67,7 @@
     "savedSuccess": "Palpites do Grupo {{group}} salvos!",
     "errorCount": "{{count}} palpite(s) com erro: {{message}}",
     "saveError": "Erro ao salvar",
+    "partialSave": "{{count}} palpite(s) salvo(s) com sucesso",
     "liveNow": "AO VIVO agora",
     "next24h": "Próximas 24h"
   },

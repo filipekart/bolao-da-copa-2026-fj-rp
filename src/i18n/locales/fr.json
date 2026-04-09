@@ -67,6 +67,7 @@
     "savedSuccess": "Pronostics du groupe {{group}} enregistrés !",
     "errorCount": "{{count}} pronostic(s) en erreur : {{message}}",
     "saveError": "Erreur lors de l'enregistrement",
+    "partialSave": "{{count}} pronostic(s) enregistré(s) avec succès",
     "liveNow": "EN DIRECT",
     "next24h": "Prochaines 24h"
   },
