@@ -22,6 +22,56 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 
+function InlineNameEditor({
+  userId,
+  displayName,
+  isEditing,
+  editValue,
+  onEditStart,
+  onEditChange,
+  onEditCancel,
+  onEditSave,
+  prefix,
+}: {
+  userId: string;
+  displayName: string;
+  isEditing: boolean;
+  editValue: string;
+  onEditStart: () => void;
+  onEditChange: (val: string) => void;
+  onEditCancel: () => void;
+  onEditSave: () => void;
+  prefix?: React.ReactNode;
+}) {
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-1">
+        <Input
+          value={editValue}
+          onChange={e => onEditChange(e.target.value)}
+          className="h-7 text-sm bg-secondary border-border"
+          autoFocus
+        />
+        <Button size="sm" variant="ghost" className="h-7 px-2" onClick={onEditSave}>
+          <Check className="w-3.5 h-3.5 text-primary" />
+        </Button>
+        <Button size="sm" variant="ghost" className="h-7 px-2" onClick={onEditCancel}>
+          <X className="w-3.5 h-3.5" />
+        </Button>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center gap-1.5">
+      {prefix}
+      <span className="text-sm font-medium text-foreground">{displayName}</span>
+      <button onClick={onEditStart} className="text-muted-foreground hover:text-foreground">
+        <Pencil className="w-3 h-3" />
+      </button>
+    </div>
+  );
+}
+
 function UserApprovalSection() {
   const { data: users, isLoading } = usePendingUsers();
   const approveUser = useApproveUser();
@@ -49,34 +99,23 @@ function UserApprovalSection() {
           {pending.map(u => (
             <div key={u.id} className="glass rounded-xl p-3 flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                {editingNameId === u.id ? (
-                  <div className="flex items-center gap-1">
-                    <Input
-                      value={newName}
-                      onChange={e => setNewName(e.target.value)}
-                      className="h-7 text-sm bg-secondary border-border"
-                      autoFocus
-                    />
-                    <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => {
-                      const trimmed = newName.trim();
-                      if (!trimmed) { toast.error(t('admin.nameEmpty')); return; }
-                      const nameRegex = /^[a-zA-ZÀ-ÿ0-9 ]+$/;
-                      if (!nameRegex.test(trimmed)) { toast.error(t('admin.nameInvalid')); return; }
-                      updateName.mutate({ userId: u.id, displayName: trimmed });
-                      setEditingNameId(null);
-                    }}><Check className="w-3.5 h-3.5 text-primary" /></Button>
-                    <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setEditingNameId(null)}>
-                      <X className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-medium text-foreground">{u.display_name}</p>
-                    <button onClick={() => { setEditingNameId(u.id); setNewName(u.display_name); }} className="text-muted-foreground hover:text-foreground">
-                      <Pencil className="w-3 h-3" />
-                    </button>
-                  </div>
-                )}
+                <InlineNameEditor
+                  userId={u.id}
+                  displayName={u.display_name}
+                  isEditing={editingNameId === u.id}
+                  editValue={newName}
+                  onEditStart={() => { setEditingNameId(u.id); setNewName(u.display_name); }}
+                  onEditChange={setNewName}
+                  onEditCancel={() => setEditingNameId(null)}
+                  onEditSave={() => {
+                    const trimmed = newName.trim();
+                    if (!trimmed) { toast.error(t('admin.nameEmpty')); return; }
+                    const nameRegex = /^[a-zA-ZÀ-ÿ0-9 ]+$/;
+                    if (!nameRegex.test(trimmed)) { toast.error(t('admin.nameInvalid')); return; }
+                    updateName.mutate({ userId: u.id, displayName: trimmed });
+                    setEditingNameId(null);
+                  }}
+                />
                 <p className="text-xs text-muted-foreground">
                   {new Date(u.created_at).toLocaleDateString('pt-BR')}
                 </p>
@@ -124,35 +163,24 @@ function UserApprovalSection() {
           {approved.map(u => (
             <div key={u.id} className="glass rounded-xl p-3 flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                {editingNameId === u.id ? (
-                  <div className="flex items-center gap-1">
-                    <Input
-                      value={newName}
-                      onChange={e => setNewName(e.target.value)}
-                      className="h-7 text-sm bg-secondary border-border"
-                      autoFocus
-                    />
-                    <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => {
-                      const trimmed = newName.trim();
-                      if (!trimmed) { toast.error(t('admin.nameEmpty')); return; }
-                      const nameRegex = /^[a-zA-ZÀ-ÿ0-9 ]+$/;
-                      if (!nameRegex.test(trimmed)) { toast.error(t('admin.nameInvalid')); return; }
-                      updateName.mutate({ userId: u.id, displayName: trimmed });
-                      setEditingNameId(null);
-                    }}><Check className="w-3.5 h-3.5 text-primary" /></Button>
-                    <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setEditingNameId(null)}>
-                      <X className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-sm text-foreground">{u.display_name}</span>
-                    <button onClick={() => { setEditingNameId(u.id); setNewName(u.display_name); }} className="text-muted-foreground hover:text-foreground">
-                      <Pencil className="w-3 h-3" />
-                    </button>
-                  </div>
-                )}
+                <InlineNameEditor
+                  userId={u.id}
+                  displayName={u.display_name}
+                  isEditing={editingNameId === u.id}
+                  editValue={newName}
+                  onEditStart={() => { setEditingNameId(u.id); setNewName(u.display_name); }}
+                  onEditChange={setNewName}
+                  onEditCancel={() => setEditingNameId(null)}
+                  onEditSave={() => {
+                    const trimmed = newName.trim();
+                    if (!trimmed) { toast.error(t('admin.nameEmpty')); return; }
+                    const nameRegex = /^[a-zA-ZÀ-ÿ0-9 ]+$/;
+                    if (!nameRegex.test(trimmed)) { toast.error(t('admin.nameInvalid')); return; }
+                    updateName.mutate({ userId: u.id, displayName: trimmed });
+                    setEditingNameId(null);
+                  }}
+                  prefix={<Check className="w-4 h-4 text-primary shrink-0" />}
+                />
                 {u.pix_key && (
                   <div className="flex items-center gap-1.5 mt-1 ml-6">
                     <Wallet className="w-3 h-3 text-accent" />
@@ -233,7 +261,7 @@ function MatchResultSection() {
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  {m.home_team_flag_url && <img src={m.home_team_flag_url} alt="" className="w-5 h-4 rounded-sm" />}
+                  {m.home_team_flag_url && <img src={m.home_team_flag_url} alt="" loading="lazy" className="w-5 h-4 rounded-sm" />}
                   <span className="text-sm text-foreground truncate">{tt(m.home_team_id, m.home_team_name)}</span>
                 </div>
 
@@ -263,7 +291,7 @@ function MatchResultSection() {
 
                 <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
                   <span className="text-sm text-foreground truncate">{tt(m.away_team_id, m.away_team_name)}</span>
-                  {m.away_team_flag_url && <img src={m.away_team_flag_url} alt="" className="w-5 h-4 rounded-sm" />}
+                  {m.away_team_flag_url && <img src={m.away_team_flag_url} alt="" loading="lazy" className="w-5 h-4 rounded-sm" />}
                 </div>
               </div>
 

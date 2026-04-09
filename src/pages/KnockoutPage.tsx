@@ -87,7 +87,7 @@ function GroupTable({ group, standings }: { group: string; standings: GroupStand
                   <td className="px-3 py-2 text-muted-foreground">{position}</td>
                   <td className="px-2 py-2">
                     <div className="flex items-center gap-1.5">
-                      {s.flag_url && <img src={s.flag_url} alt="" className="w-4 h-3 rounded-sm" />}
+                      {s.flag_url && <img src={s.flag_url} alt="" loading="lazy" className="w-4 h-3 rounded-sm" />}
                       <span className="text-foreground font-medium truncate max-w-[80px]">{tt(s.team_id, s.team_name)}</span>
                     </div>
                   </td>
@@ -143,7 +143,7 @@ function BracketMatchCard({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {hasRealMatch && realMatch.home_team_flag_url && (
-            <img src={realMatch.home_team_flag_url} alt="" className="w-5 h-4 rounded-sm shrink-0" />
+            <img src={realMatch.home_team_flag_url} alt="" loading="lazy" className="w-5 h-4 rounded-sm shrink-0" />
           )}
           <div className="min-w-0">
             <span className="text-sm text-foreground font-medium truncate block">
@@ -169,7 +169,7 @@ function BracketMatchCard({
             )}
           </div>
           {hasRealMatch && realMatch.away_team_flag_url && (
-            <img src={realMatch.away_team_flag_url} alt="" className="w-5 h-4 rounded-sm shrink-0" />
+            <img src={realMatch.away_team_flag_url} alt="" loading="lazy" className="w-5 h-4 rounded-sm shrink-0" />
           )}
         </div>
       </div>
