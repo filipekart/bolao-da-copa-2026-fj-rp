@@ -312,15 +312,9 @@ export default function PlayerPredictionTab({ category, title, description, icon
                   )}
                 </>
               ) : (
-                <div className="space-y-1">
-                  <input
-                    type="text"
-                    placeholder={t('extras.typePlayerName')}
-                    value={playerName}
-                    onChange={e => setPlayerName(e.target.value)}
-                    className="w-full glass rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
-                  />
-                  <p className="text-[10px] text-muted-foreground">
+                <div className="glass rounded-xl p-4 flex items-center gap-3 border border-muted/30">
+                  <Lock className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <p className="text-sm text-muted-foreground">
                     {t('extras.squadNotAvailable')}
                   </p>
                 </div>
