@@ -22,6 +22,56 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 
+function InlineNameEditor({
+  userId,
+  displayName,
+  isEditing,
+  editValue,
+  onEditStart,
+  onEditChange,
+  onEditCancel,
+  onEditSave,
+  prefix,
+}: {
+  userId: string;
+  displayName: string;
+  isEditing: boolean;
+  editValue: string;
+  onEditStart: () => void;
+  onEditChange: (val: string) => void;
+  onEditCancel: () => void;
+  onEditSave: () => void;
+  prefix?: React.ReactNode;
+}) {
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-1">
+        <Input
+          value={editValue}
+          onChange={e => onEditChange(e.target.value)}
+          className="h-7 text-sm bg-secondary border-border"
+          autoFocus
+        />
+        <Button size="sm" variant="ghost" className="h-7 px-2" onClick={onEditSave}>
+          <Check className="w-3.5 h-3.5 text-primary" />
+        </Button>
+        <Button size="sm" variant="ghost" className="h-7 px-2" onClick={onEditCancel}>
+          <X className="w-3.5 h-3.5" />
+        </Button>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center gap-1.5">
+      {prefix}
+      <span className="text-sm font-medium text-foreground">{displayName}</span>
+      <button onClick={onEditStart} className="text-muted-foreground hover:text-foreground">
+        <Pencil className="w-3 h-3" />
+      </button>
+    </div>
+  );
+}
+
 function UserApprovalSection() {
   const { data: users, isLoading } = usePendingUsers();
   const approveUser = useApproveUser();
