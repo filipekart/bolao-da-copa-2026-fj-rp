@@ -24,6 +24,7 @@ export interface MatchWithTeams {
 export function useMatches(stage?: 'GROUP_STAGE' | 'ROUND_OF_32' | 'ROUND_OF_16' | 'QUARTER_FINAL' | 'SEMI_FINAL' | 'FINAL') {
   return useQuery({
     queryKey: ['matches', stage],
+    staleTime: 3 * 60 * 1000,
     queryFn: async () => {
       let query = supabase
         .from('v_matches_with_teams')
@@ -44,6 +45,7 @@ export function useMatches(stage?: 'GROUP_STAGE' | 'ROUND_OF_32' | 'ROUND_OF_16'
 export function useMatch(matchId: string) {
   return useQuery({
     queryKey: ['match', matchId],
+    staleTime: 3 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('v_matches_with_teams')

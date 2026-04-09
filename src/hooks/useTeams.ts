@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 export function useTeams() {
   return useQuery({
     queryKey: ['teams'],
+    staleTime: 30 * 60 * 1000, // teams rarely change
     queryFn: async () => {
       const { data, error } = await supabase
         .from('teams')

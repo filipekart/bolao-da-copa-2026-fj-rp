@@ -20,6 +20,7 @@ export interface RankingEntry {
 export function useRanking() {
   return useQuery({
     queryKey: ['ranking'],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const [{ data: ranking, error }, { data: championPreds }, { data: extraPreds }] = await Promise.all([
         supabase.from('v_ranking').select('*'),
