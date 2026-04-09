@@ -447,7 +447,7 @@ export default function HomePage() {
     } finally {
       setSaving(null);
     }
-  }, [matchesByGroup, scores, user, queryClient]);
+  }, [matchesByGroup, scores, user, queryClient, isActingAsOther, activeUserId, t]);
 
   const deriveAndSaveKnockoutPredictions = useCallback(async () => {
     if (!matches || !user || !teamGroups.size) return;
@@ -498,7 +498,7 @@ export default function HomePage() {
     } else {
       queryClient.invalidateQueries({ queryKey: ['knockout-predictions'] });
     }
-  }, [matches, user, teamGroups, matchesByGroup, scores, queryClient]);
+  }, [matches, user, teamGroups, matchesByGroup, scores, queryClient, activeUserId]);
 
   if (matchesLoading || teamsLoading) {
     return (
@@ -562,6 +562,7 @@ export default function HomePage() {
             teamFlags={teamFlags}
             existingPredictionIds={existingPredictionIds}
             hasUpcoming24h={upcoming24hGroups.has(groupName)}
+            now={now}
           />
         ))}
       </div>
