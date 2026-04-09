@@ -428,10 +428,18 @@ export default function HomePage() {
           });
         });
 
-      const results = await Promise.all(promises);
-      const errors = results.filter(r => r.error);
-      if (errors.length) {
-        toast.error(t('home.errorCount', { count: errors.length, message: errors[0].error!.message }));
+      const results = await Promise.allSettled(promises);
+      const fulfilled = results.filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled');
+      const rpcErrors = fulfilled.filter(r => r.value?.error);
+      const rejected = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
+      const totalErrors = rpcErrors.length + rejected.length;
+
+      if (totalErrors > 0) {
+        const msg = rpcErrors[0]?.value?.error?.message ?? rejected[0]?.reason?.message ?? 'Erro desconhecido';
+        toast.error(t('home.errorCount', { count: totalErrors, message: msg }));
+        if (fulfilled.length - rpcErrors.length > 0) {
+          toast.success(t('home.partialSave', { count: fulfilled.length - rpcErrors.length }));
+        }
       } else {
         toast.success(t('home.savedSuccess', { group: groupName }));
       }

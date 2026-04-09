@@ -88,6 +88,8 @@ export function useSubmitPrediction() {
       if (error) throw error;
       return data;
     },
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 5000),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['prediction', variables.matchId] });
       queryClient.invalidateQueries({ queryKey: ['my-predictions'] });
