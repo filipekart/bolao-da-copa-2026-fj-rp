@@ -187,15 +187,18 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
       </h1>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex w-full overflow-x-auto bg-secondary gap-1 p-1">
-          <TabsTrigger value="geral" className="flex-shrink-0 text-xs">{t('ranking.general')}</TabsTrigger>
-          <TabsTrigger value="grupos" className="flex-shrink-0 text-xs">{t('ranking.groupStage')}</TabsTrigger>
-          <TabsTrigger value="round1" className="flex-shrink-0 text-xs">{t('ranking.round1')}</TabsTrigger>
-          <TabsTrigger value="round2" className="flex-shrink-0 text-xs">{t('ranking.round2')}</TabsTrigger>
-          <TabsTrigger value="round3" className="flex-shrink-0 text-xs">{t('ranking.round3')}</TabsTrigger>
-          <TabsTrigger value="knockout" className="flex-shrink-0 text-xs">{t('ranking.knockout')}</TabsTrigger>
-          <TabsTrigger value="custom" className="flex-shrink-0 text-xs">⭐ {t('ranking.myRankings')}</TabsTrigger>
-        </TabsList>
+        <ScrollArea className="w-full">
+          <TabsList className="flex w-max bg-secondary gap-1 p-1">
+            <TabsTrigger value="geral" className="flex-shrink-0 text-xs">{t('ranking.general')}</TabsTrigger>
+            <TabsTrigger value="grupos" className="flex-shrink-0 text-xs">{t('ranking.groupStage')}</TabsTrigger>
+            <TabsTrigger value="round1" className="flex-shrink-0 text-xs">{t('ranking.round1')}</TabsTrigger>
+            <TabsTrigger value="round2" className="flex-shrink-0 text-xs">{t('ranking.round2')}</TabsTrigger>
+            <TabsTrigger value="round3" className="flex-shrink-0 text-xs">{t('ranking.round3')}</TabsTrigger>
+            <TabsTrigger value="knockout" className="flex-shrink-0 text-xs">{t('ranking.knockout')}</TabsTrigger>
+            <TabsTrigger value="custom" className="flex-shrink-0 text-xs">⭐ {t('ranking.myRankings')}</TabsTrigger>
+          </TabsList>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
         <TabsContent value="geral" className="mt-4">
           <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} extrasRevealed={extrasRevealed} />
         </TabsContent>
