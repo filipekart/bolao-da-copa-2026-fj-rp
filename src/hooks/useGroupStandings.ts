@@ -19,6 +19,7 @@ export interface GroupStanding {
 export function useGroupStandings() {
   return useQuery({
     queryKey: ['group-standings'],
+    staleTime: 3 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('v_group_standings')

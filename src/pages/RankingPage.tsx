@@ -146,9 +146,9 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
 RankingList.displayName = 'RankingList';
 
 const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref) {
-  const { data: ranking, isLoading } = useRanking();
-  const { data: groupRanking, isLoading: groupLoading } = useGroupRanking();
   const [activeTab, setActiveTab] = useState('geral');
+  const { data: ranking, isLoading } = useRanking();
+  const { data: groupRanking, isLoading: groupLoading } = useGroupRanking(activeTab === 'grupos');
   const { data: round1, isLoading: r1Loading } = useRoundRanking('round1', activeTab === 'round1');
   const { data: round2, isLoading: r2Loading } = useRoundRanking('round2', activeTab === 'round2');
   const { data: round3, isLoading: r3Loading } = useRoundRanking('round3', activeTab === 'round3');
@@ -156,19 +156,6 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
   const { user } = useAuth();
   const { t } = useTranslation();
   const { data: extrasRevealed = false } = useExtrasRevealed();
-
-  const mergedGroupRanking = groupRanking?.map(gr => {
-    const general = ranking?.find(r => r.user_id === gr.user_id);
-    return {
-      ...gr,
-      champion_team_name: general?.champion_team_name,
-      champion_flag_url: general?.champion_flag_url,
-      top_scorer_name: general?.top_scorer_name,
-      top_scorer_flag_url: general?.top_scorer_flag_url,
-      mvp_name: general?.mvp_name,
-      mvp_flag_url: general?.mvp_flag_url,
-    };
-  });
 
   const mergeExtras = (entries: any[] | undefined) =>
     entries?.map(e => {
@@ -184,9 +171,7 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
       };
     });
 
-  const loading = isLoading || groupLoading;
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
@@ -214,7 +199,8 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
           <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} extrasRevealed={extrasRevealed} />
         </TabsContent>
         <TabsContent value="grupos" className="mt-4">
-          <RankingList ranking={mergedGroupRanking} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} />
+          {groupLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
+            <RankingList ranking={mergeExtras(groupRanking)} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} />}
         </TabsContent>
         <TabsContent value="round1" className="mt-4">
           {r1Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :

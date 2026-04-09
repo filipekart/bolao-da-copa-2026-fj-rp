@@ -25,6 +25,7 @@ export function useRoundRanking(round: 'round1' | 'round2' | 'round3' | 'knockou
   return useQuery({
     queryKey: ['round-ranking', round],
     enabled,
+    staleTime: 5 * 60 * 1000, // 5 min
     queryFn: async () => {
       let query = supabase
         .from('match_predictions')
@@ -38,21 +39,24 @@ export function useRoundRanking(round: 'round1' | 'round2' | 'round3' | 'knockou
         query = query.neq('matches.stage', 'GROUP_STAGE');
       }
 
-      const { data: predictions, error: predError } = await query;
-      if (predError) throw predError;
+      // Fetch predictions and profiles in parallel
+      const [predRes, profRes] = await Promise.all([
+        query,
+        supabase.rpc('get_public_profiles'),
+      ]);
 
-      const { data: profiles, error: profError } = await supabase.rpc('get_public_profiles');
-      if (profError) throw profError;
+      if (predRes.error) throw predRes.error;
+      if (profRes.error) throw profRes.error;
 
       const userMap = new Map<string, { points: number; exact: number }>();
-      (predictions ?? []).forEach((p: any) => {
+      (predRes.data ?? []).forEach((p: any) => {
         const existing = userMap.get(p.user_id) || { points: 0, exact: 0 };
         existing.points += p.points_awarded ?? 0;
         if (p.rule_applied === 'EXACT_SCORE') existing.exact += 1;
         userMap.set(p.user_id, existing);
       });
 
-      const result: RoundRankingEntry[] = (profiles ?? [])
+      const result: RoundRankingEntry[] = (profRes.data ?? [])
         .filter((p: any) => p.approved)
         .map((p: any) => {
           const stats = userMap.get(p.id) || { points: 0, exact: 0 };
