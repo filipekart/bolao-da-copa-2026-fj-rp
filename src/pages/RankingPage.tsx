@@ -9,6 +9,7 @@ import { Loader2, Trophy, Medal, Search, X, MapPin } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
 import CustomRankingsTab from '@/components/ranking/CustomRankingsTab';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 function useExtrasRevealed() {
   return useQuery({
