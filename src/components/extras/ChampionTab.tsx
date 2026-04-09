@@ -104,9 +104,14 @@ export default function ChampionTab() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        {t('extras.championDesc').replace('<1>', '').replace('</1>', '')}
-      </p>
+      <p
+        className="text-sm text-muted-foreground"
+        dangerouslySetInnerHTML={{
+          __html: t('extras.championDesc')
+            .replace(/<1>/g, '<span class="text-accent font-bold">')
+            .replace(/<\/1>/g, '</span>'),
+        }}
+      />
 
       {isLocked && (
         <div className="glass rounded-xl p-4 flex items-center gap-3 border border-accent/30">
