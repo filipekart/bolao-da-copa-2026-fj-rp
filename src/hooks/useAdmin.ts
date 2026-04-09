@@ -113,10 +113,18 @@ export function useUpdateMatchResult() {
         })
         .eq('id', matchId);
       if (error) throw error;
+
+      // Auto-recalculate scores and refresh leaderboard
+      const { error: scoreErr } = await supabase.rpc('score_finished_matches');
+      if (scoreErr) throw scoreErr;
+      const { error: lbErr } = await supabase.rpc('refresh_leaderboard');
+      if (lbErr) throw lbErr;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['matches'] });
-      toast.success('Resultado atualizado!');
+      queryClient.invalidateQueries({ queryKey: ['ranking'] });
+      queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+      toast.success('Resultado atualizado e pontuações recalculadas!');
     },
     onError: (e: Error) => toast.error(e.message),
   });
