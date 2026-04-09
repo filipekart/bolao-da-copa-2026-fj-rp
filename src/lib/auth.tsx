@@ -42,12 +42,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    // Use a flag to avoid double fetchProfileData on mount
+    let initialSessionHandled = false;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
       if (session?.user) {
-        setTimeout(() => fetchProfileData(session.user.id), 0);
+        // Skip if getSession already handled this
+        if (!initialSessionHandled) {
+          initialSessionHandled = true;
+          setTimeout(() => fetchProfileData(session.user.id), 0);
+        }
       } else {
         setIsAdmin(false);
         setIsApproved(false);
@@ -56,6 +63,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (initialSessionHandled) return; // onAuthStateChange already fired
+      initialSessionHandled = true;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);

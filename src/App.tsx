@@ -20,7 +20,15 @@ import NotFound from "./pages/NotFound";
 import { Loader2, ShieldAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 2 * 60 * 1000, // 2 minutes — avoid refetch on every window focus
+      refetchOnWindowFocus: true, // still refetch, but only after staleTime
+      retry: 1,
+    },
+  },
+});
 
 function ProtectedRoutes() {
   const { user, loading, isAdmin, isApproved, profileLoading } = useAuth();
