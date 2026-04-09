@@ -100,8 +100,8 @@ export function useUpdateMatchResult() {
   return useMutation({
     mutationFn: async ({ matchId, homeScore, awayScore, status }: {
       matchId: string;
-      homeScore: number;
-      awayScore: number;
+      homeScore: number | null;
+      awayScore: number | null;
       status: 'FINISHED' | 'LIVE' | 'SCHEDULED';
     }) => {
       const { error } = await supabase
