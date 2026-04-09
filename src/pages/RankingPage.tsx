@@ -145,7 +145,7 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
 
 RankingList.displayName = 'RankingList';
 
-export default function RankingPage() {
+const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref) {
   const { data: ranking, isLoading } = useRanking();
   const { data: groupRanking, isLoading: groupLoading } = useGroupRanking();
   const [activeTab, setActiveTab] = useState('geral');
@@ -238,4 +238,6 @@ export default function RankingPage() {
       </Tabs>
     </div>
   );
-}
+});
+RankingPage.displayName = 'RankingPage';
+export default RankingPage;
