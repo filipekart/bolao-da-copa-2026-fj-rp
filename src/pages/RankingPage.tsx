@@ -199,7 +199,8 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
           <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} extrasRevealed={extrasRevealed} />
         </TabsContent>
         <TabsContent value="grupos" className="mt-4">
-          <RankingList ranking={mergedGroupRanking} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} />
+          {groupLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
+            <RankingList ranking={mergeExtras(groupRanking)} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} />}
         </TabsContent>
         <TabsContent value="round1" className="mt-4">
           {r1Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
