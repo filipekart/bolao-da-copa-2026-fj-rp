@@ -294,18 +294,38 @@ function MatchResultSection() {
                     </Button>
                   </>
                 ) : (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-xs text-muted-foreground"
-                    onClick={() => {
-                      setEditingId(m.id);
-                      setHomeScore(m.official_home_score ?? 0);
-                      setAwayScore(m.official_away_score ?? 0);
-                    }}
-                  >
-                    {t('admin.editResult')}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-xs text-muted-foreground"
+                      onClick={() => {
+                        setEditingId(m.id);
+                        setHomeScore(m.official_home_score ?? 0);
+                        setAwayScore(m.official_away_score ?? 0);
+                      }}
+                    >
+                      {t('admin.editResult')}
+                    </Button>
+                    {m.official_home_score !== null && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-xs text-destructive"
+                        onClick={() => {
+                          updateResult.mutate({
+                            matchId: m.id,
+                            homeScore: null as any,
+                            awayScore: null as any,
+                            status: 'SCHEDULED',
+                          });
+                        }}
+                      >
+                        <Trash2 className="w-3 h-3 mr-1" />
+                        {t('admin.clearResult', 'Limpar')}
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
