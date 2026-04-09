@@ -169,6 +169,15 @@ function UserApprovalSection() {
                   </div>
                 )}
               </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => approveUser.mutate({ userId: u.id, approved: false })}
+                className="text-muted-foreground hover:text-destructive shrink-0"
+                title={t('admin.pending')}
+              >
+                <X className="w-4 h-4" />
+              </Button>
             </div>
           ))}
         </div>
