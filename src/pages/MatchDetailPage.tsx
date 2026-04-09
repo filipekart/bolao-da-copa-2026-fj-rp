@@ -28,6 +28,13 @@ export default function MatchDetailPage() {
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
 
+  // Real-time clock for bet locking — updates every 30s
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(interval);
+  }, []);
+
   const ruleLabels: Record<string, string> = {
     EXACT_SCORE: t('bets.rules.EXACT_SCORE'),
     WINNER_AND_WINNER_GOALS: t('bets.rules.WINNER_AND_WINNER_GOALS'),
@@ -55,7 +62,7 @@ export default function MatchDetailPage() {
 
   if (!match) return null;
 
-  const isLocked = new Date(match.kickoff_at) <= new Date();
+  const isLocked = new Date(match.kickoff_at) <= now;
   const isFinished = match.status === 'FINISHED';
 
   const handleSubmit = () => {

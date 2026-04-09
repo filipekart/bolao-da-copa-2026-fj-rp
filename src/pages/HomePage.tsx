@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useMatches, MatchWithTeams } from '@/hooks/useMatches';
 import { useTeams } from '@/hooks/useTeams';
 import { useAuth } from '@/lib/auth';
@@ -157,18 +157,7 @@ function PredictedStandingsTable({
   );
 }
 
-function GroupCard({
-  groupName,
-  matches,
-  scores,
-  onScoreChange,
-  onSave,
-  saving,
-  teamNames,
-  teamFlags,
-  existingPredictionIds,
-  hasUpcoming24h,
-}: {
+const GroupCard = React.forwardRef<HTMLDivElement, {
   groupName: string;
   matches: MatchWithTeams[];
   scores: Scores;
@@ -179,17 +168,25 @@ function GroupCard({
   teamFlags: Map<string, string | null>;
   existingPredictionIds: Set<string>;
   hasUpcoming24h?: boolean;
-}) {
+  now: Date;
+}>(function GroupCard({
+  groupName,
+  matches,
+  scores,
+  onScoreChange,
+  onSave,
+  saving,
+  teamNames,
+  teamFlags,
+  existingPredictionIds,
+  hasUpcoming24h,
+  now,
+}, ref) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(!!hasUpcoming24h);
 
-  const now = new Date();
   const allLocked = matches.every(m => new Date(m.kickoff_at) <= now);
   const allHavePredictions = matches.every(m => existingPredictionIds.has(m.id));
-  const hasChanges = matches.some(m => {
-    const s = scores[m.id];
-    return s !== undefined && !allLocked;
-  });
 
   // Calculate predicted standings from current scores
   const predictedMatches: PredictedMatch[] = matches.map(m => ({
@@ -204,7 +201,6 @@ function GroupCard({
   const groupTeamIds = useMemo(() => {
     const ids = new Set<string>();
     matches.forEach(m => { ids.add(m.home_team_id); ids.add(m.away_team_id); });
-    // The first match's home team is typically the head seed
     const seedId = matches[0]?.home_team_id;
     const arr = Array.from(ids);
     if (seedId) {
@@ -214,7 +210,7 @@ function GroupCard({
   }, [matches]);
 
   return (
-    <div className={`glass rounded-xl overflow-hidden ${hasUpcoming24h ? 'ring-1 ring-primary/50' : ''}`}>
+    <div ref={ref} className={`glass rounded-xl overflow-hidden ${hasUpcoming24h ? 'ring-1 ring-primary/50' : ''}`}>
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center justify-between px-4 py-3"
@@ -295,7 +291,7 @@ function GroupCard({
       )}
     </div>
   );
-}
+});
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -307,6 +303,13 @@ export default function HomePage() {
   const [saving, setSaving] = useState<string | null>(null);
   const { t, i18n } = useTranslation();
   const lang = i18n.language?.substring(0, 2) || 'pt';
+
+  // Real-time clock for bet locking — updates every 30s
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Fetch user's existing predictions
   const { data: existingPredictions } = useQuery({
@@ -444,7 +447,7 @@ export default function HomePage() {
     } finally {
       setSaving(null);
     }
-  }, [matchesByGroup, scores, user, queryClient]);
+  }, [matchesByGroup, scores, user, queryClient, isActingAsOther, activeUserId, t]);
 
   const deriveAndSaveKnockoutPredictions = useCallback(async () => {
     if (!matches || !user || !teamGroups.size) return;
@@ -495,7 +498,7 @@ export default function HomePage() {
     } else {
       queryClient.invalidateQueries({ queryKey: ['knockout-predictions'] });
     }
-  }, [matches, user, teamGroups, matchesByGroup, scores, queryClient]);
+  }, [matches, user, teamGroups, matchesByGroup, scores, queryClient, activeUserId]);
 
   if (matchesLoading || teamsLoading) {
     return (
@@ -559,6 +562,7 @@ export default function HomePage() {
             teamFlags={teamFlags}
             existingPredictionIds={existingPredictionIds}
             hasUpcoming24h={upcoming24hGroups.has(groupName)}
+            now={now}
           />
         ))}
       </div>
