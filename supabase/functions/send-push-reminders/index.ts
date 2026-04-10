@@ -172,7 +172,10 @@ Deno.serve(async (req) => {
 
     let sent = 0;
     const expiredEndpoints: string[] = [];
-    const pushPromises: Promise<{ ok: boolean; endpoint: string }>[] = [];
+    const BATCH_SIZE = 50;
+
+    type PushTask = () => Promise<{ ok: boolean; endpoint: string }>;
+    const pushTasks: PushTask[] = [];
 
     for (const match of matches) {
       const kickoff = new Date(match.kickoff_at);
@@ -198,7 +201,7 @@ Deno.serve(async (req) => {
         });
 
         for (const sub of subs) {
-          pushPromises.push(
+          pushTasks.push(() =>
             sendWebPush(
               { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
               payload,
@@ -235,7 +238,6 @@ Deno.serve(async (req) => {
       }
 
       if (extrasTimeLabel) {
-        // Fetch all extra predictions (champion, top_scorer, mvp)
         const { data: extraPreds } = await supabase
           .from('extra_predictions')
           .select('user_id, category')
@@ -272,7 +274,7 @@ Deno.serve(async (req) => {
           });
 
           for (const sub of subs) {
-            pushPromises.push(
+            pushTasks.push(() =>
               sendWebPush(
                 { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
                 payload,
@@ -288,12 +290,15 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Resolve all push promises in parallel
-    const results = await Promise.allSettled(pushPromises);
-    for (const r of results) {
-      if (r.status === 'fulfilled') {
-        if (r.value.ok) sent++;
-        else expiredEndpoints.push(r.value.endpoint);
+    // Process push tasks in batches of BATCH_SIZE
+    for (let i = 0; i < pushTasks.length; i += BATCH_SIZE) {
+      const batch = pushTasks.slice(i, i + BATCH_SIZE);
+      const results = await Promise.allSettled(batch.map(fn => fn()));
+      for (const r of results) {
+        if (r.status === 'fulfilled') {
+          if (r.value.ok) sent++;
+          else expiredEndpoints.push(r.value.endpoint);
+        }
       }
     }
 
