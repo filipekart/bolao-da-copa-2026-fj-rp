@@ -786,6 +786,7 @@ export type Database = {
         Args: { _ranking_id: string; _user_id: string }
         Returns: boolean
       }
+      is_tournament_open: { Args: never; Returns: boolean }
       refresh_leaderboard: { Args: never; Returns: undefined }
       score_finished_matches: { Args: never; Returns: undefined }
       submit_champion_prediction: {
