@@ -1,25 +1,29 @@
 
 
-## Otimização: useMemo no sort do RankingList
+## send-push-reminders: Bug Fix
 
-### Problema
-`sorted` é recalculado a cada render (ex: digitação na busca), desnecessariamente re-ordenando 300+ entradas.
+### Current State
+The function **already implements** the batched pattern you described:
+- Line 178: `pushTasks` array collects all tasks (not awaited inline)
+- Lines 285-293: Processes in batches of 50 via `Promise.allSettled`
+- Lines 297-302: Deletes expired endpoints at the end
 
-### Mudança
-**Arquivo:** `src/pages/RankingPage.tsx`
+The architecture is correct. However, there is a **runtime bug** on line 253 that will crash the function:
 
-1. Adicionar `useMemo` ao import (linha 1)
-2. Envolver o sort com `useMemo` (linha 50):
-```tsx
-const sorted = useMemo(
-  () => [...ranking].sort((a, b) => (b[showField] ?? 0) - (a[showField] ?? 0)),
-  [ranking, showField]
-);
+```typescript
+// Line 252-255 — `missing` is never declared
+for (const [userId, subs] of subsByUser) {
+  if (!extraSet.has(`${userId}:champion`)) missing.push(missingLabels.champion);
+  // ...
 ```
 
-Dependências: `[ranking, showField]` — recalcula apenas quando os dados ou a tab mudam, não quando o usuário digita na busca.
+The variable `missing` is used but never initialized. It needs `const missing: string[] = [];` at the start of each loop iteration.
 
-### Impacto
-- Elimina re-sorts redundantes durante digitação de busca e outros re-renders
-- Melhoria proporcional ao número de usuários (300+)
+### Plan
+
+**File:** `supabase/functions/send-push-reminders/index.ts`
+
+1. Add `const missing: string[] = [];` inside the `for (const [userId, subs])` loop at line 252, before the `missing.push()` calls.
+
+That's the only change needed — the batching logic is already in place.
 
