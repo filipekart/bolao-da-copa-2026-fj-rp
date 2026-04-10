@@ -777,6 +777,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_match_open: { Args: { p_match_id: string }; Returns: boolean }
       is_ranking_member: {
         Args: { _ranking_id: string; _user_id: string }
         Returns: boolean
