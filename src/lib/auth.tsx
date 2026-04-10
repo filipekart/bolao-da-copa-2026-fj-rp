@@ -42,15 +42,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Use a flag to avoid double fetchProfileData on mount
     let initialSessionHandled = false;
+    let currentUserId: string | null = null;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      currentUserId = session?.user?.id ?? null;
       setLoading(false);
       if (session?.user) {
-        // Skip if getSession already handled this
         if (!initialSessionHandled) {
           initialSessionHandled = true;
           setTimeout(() => fetchProfileData(session.user.id), 0);
@@ -63,10 +63,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (initialSessionHandled) return; // onAuthStateChange already fired
+      if (initialSessionHandled) return;
       initialSessionHandled = true;
       setSession(session);
       setUser(session?.user ?? null);
+      currentUserId = session?.user?.id ?? null;
       setLoading(false);
       if (session?.user) {
         fetchProfileData(session.user.id);
@@ -75,7 +76,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Realtime: auto-detect approval changes
+    const channel = supabase
+      .channel('profile-approval')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles' },
+        (payload) => {
+          if (payload.new && payload.new.id === currentUserId) {
+            setIsApproved(payload.new.approved as boolean);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const signUp = async (email: string, password: string, displayName: string) => {
