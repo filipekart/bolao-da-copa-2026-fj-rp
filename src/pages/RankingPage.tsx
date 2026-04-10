@@ -163,19 +163,27 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
   const { t } = useTranslation();
   const { data: extrasRevealed = false } = useExtrasRevealed();
 
-  const mergeExtras = (entries: any[] | undefined) =>
-    entries?.map(e => {
-      const general = ranking?.find(r => r.user_id === e.user_id);
-      return {
-        ...e,
-        champion_team_name: general?.champion_team_name,
-        champion_flag_url: general?.champion_flag_url,
-        top_scorer_name: general?.top_scorer_name,
-        top_scorer_flag_url: general?.top_scorer_flag_url,
-        mvp_name: general?.mvp_name,
-        mvp_flag_url: general?.mvp_flag_url,
-      };
-    });
+  const extrasMap = useMemo(
+    () => new Map(ranking?.map(r => [r.user_id, r]) ?? []),
+    [ranking]
+  );
+
+  const mergeExtras = useCallback(
+    (entries: any[] | undefined) =>
+      entries?.map(e => {
+        const general = extrasMap.get(e.user_id);
+        return {
+          ...e,
+          champion_team_name: general?.champion_team_name,
+          champion_flag_url: general?.champion_flag_url,
+          top_scorer_name: general?.top_scorer_name,
+          top_scorer_flag_url: general?.top_scorer_flag_url,
+          mvp_name: general?.mvp_name,
+          mvp_flag_url: general?.mvp_flag_url,
+        };
+      }),
+    [extrasMap]
+  );
 
   if (isLoading) {
     return (
