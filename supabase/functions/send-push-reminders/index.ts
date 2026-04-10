@@ -172,6 +172,7 @@ Deno.serve(async (req) => {
 
     let sent = 0;
     const expiredEndpoints: string[] = [];
+    const pushPromises: Promise<{ ok: boolean; endpoint: string }>[] = [];
 
     for (const match of matches) {
       const kickoff = new Date(match.kickoff_at);
@@ -197,22 +198,17 @@ Deno.serve(async (req) => {
         });
 
         for (const sub of subs) {
-          try {
-            const ok = await sendWebPush(
+          pushPromises.push(
+            sendWebPush(
               { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
               payload,
               vapidPrivateKey,
               vapidPublicKey,
               vapidSubject
-            );
-            if (ok) {
-              sent++;
-            } else {
-              expiredEndpoints.push(sub.endpoint);
-            }
-          } catch (e) {
-            console.error('Push send error:', e);
-          }
+            )
+              .then(ok => ({ ok, endpoint: sub.endpoint }))
+              .catch(() => ({ ok: false, endpoint: sub.endpoint }))
+          );
         }
       }
     }
