@@ -1,4 +1,4 @@
-import { forwardRef, useState, useRef, useEffect, useCallback } from 'react';
+import { forwardRef, useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useRanking } from '@/hooks/useRanking';
 import { useGroupRanking } from '@/hooks/useGroupRanking';
 import { useRoundRanking } from '@/hooks/useRoundRanking';
@@ -47,7 +47,10 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
     );
   }
 
-  const sorted = [...ranking].sort((a, b) => (b[showField] ?? 0) - (a[showField] ?? 0));
+  const sorted = useMemo(
+    () => [...ranking].sort((a, b) => (b[showField] ?? 0) - (a[showField] ?? 0)),
+    [ranking, showField]
+  );
   const searchLower = search.toLowerCase().trim();
   const matchedId = searchLower
     ? sorted.find(e => e.display_name?.toLowerCase().includes(searchLower))?.user_id
