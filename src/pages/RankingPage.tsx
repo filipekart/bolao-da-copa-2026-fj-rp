@@ -127,13 +127,13 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
                 {(extrasRevealed || isMe) && entry.top_scorer_name && (
                   <span className="flex items-center gap-1" title={`${t('extras.topScorer')}: ${entry.top_scorer_name}`}>
                     ⚽ {entry.top_scorer_flag_url && <img src={entry.top_scorer_flag_url} alt="" loading="lazy" className="w-4 h-3 rounded-sm" />}
-                    <span className="truncate max-w-[60px]">{entry.top_scorer_name}</span>
+                    <span className="whitespace-nowrap">{entry.top_scorer_name}</span>
                   </span>
                 )}
                 {(extrasRevealed || isMe) && entry.mvp_name && (
                   <span className="flex items-center gap-1" title={`${t('extras.mvp')}: ${entry.mvp_name}`}>
                     ⭐ {entry.mvp_flag_url && <img src={entry.mvp_flag_url} alt="" loading="lazy" className="w-4 h-3 rounded-sm" />}
-                    <span className="truncate max-w-[60px]">{entry.mvp_name}</span>
+                    <span className="whitespace-nowrap">{entry.mvp_name}</span>
                   </span>
                 )}
               </div>
