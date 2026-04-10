@@ -713,11 +713,17 @@ export type Database = {
       }
       v_ranking: {
         Row: {
+          champion_flag_url: string | null
+          champion_team_name: string | null
           display_name: string | null
           exact_hits: number | null
+          mvp_flag_url: string | null
+          mvp_name: string | null
           points_knockout: number | null
           points_matches: number | null
           points_total: number | null
+          top_scorer_flag_url: string | null
+          top_scorer_name: string | null
           updated_at: string | null
           user_id: string | null
         }
