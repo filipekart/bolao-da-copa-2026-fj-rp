@@ -55,6 +55,17 @@ export function useMatchReminders() {
   const checkReminders = useCallback(async () => {
     if (!user) return;
 
+    // If Web Push is active, skip client-side notifications (server handles it)
+    try {
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) return; // Web Push ativo — servidor cuida dos lembretes
+      }
+    } catch {
+      // Se falhar a verificação, continua como fallback
+    }
+
     const now = new Date();
     const maxAhead = new Date(now.getTime() + 65 * 60 * 1000); // 65 min ahead
 
