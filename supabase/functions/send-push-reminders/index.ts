@@ -272,24 +272,28 @@ Deno.serve(async (req) => {
           });
 
           for (const sub of subs) {
-            try {
-              const ok = await sendWebPush(
+            pushPromises.push(
+              sendWebPush(
                 { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
                 payload,
                 vapidPrivateKey,
                 vapidPublicKey,
                 vapidSubject
-              );
-              if (ok) {
-                sent++;
-              } else {
-                expiredEndpoints.push(sub.endpoint);
-              }
-            } catch (e) {
-              console.error('Push send error (extras):', e);
-            }
+              )
+                .then(ok => ({ ok, endpoint: sub.endpoint }))
+                .catch(() => ({ ok: false, endpoint: sub.endpoint }))
+            );
           }
         }
+      }
+    }
+
+    // Resolve all push promises in parallel
+    const results = await Promise.allSettled(pushPromises);
+    for (const r of results) {
+      if (r.status === 'fulfilled') {
+        if (r.value.ok) sent++;
+        else expiredEndpoints.push(r.value.endpoint);
       }
     }
 
