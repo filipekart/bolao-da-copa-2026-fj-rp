@@ -250,6 +250,7 @@ Deno.serve(async (req) => {
         };
 
         for (const [userId, subs] of subsByUser) {
+          const missing: string[] = [];
           if (!extraSet.has(`${userId}:champion`)) missing.push(missingLabels.champion);
           if (!extraSet.has(`${userId}:top_scorer`)) missing.push(missingLabels.top_scorer);
           if (!extraSet.has(`${userId}:mvp`)) missing.push(missingLabels.mvp);
