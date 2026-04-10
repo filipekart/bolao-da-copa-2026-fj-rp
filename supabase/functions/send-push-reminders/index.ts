@@ -238,18 +238,10 @@ Deno.serve(async (req) => {
       }
 
       if (extrasTimeLabel) {
-        const { data: extraPreds } = await supabase
-          .from('extra_predictions')
-          .select('user_id, category')
-          .in('category', ['top_scorer', 'mvp']);
-
-        const { data: championPreds } = await supabase
-          .from('knockout_predictions')
-          .select('user_id')
-          .eq('stage', 'CHAMPION');
-
-        const extraSet = new Set((extraPreds ?? []).map((p: any) => `${p.user_id}:${p.category}`));
-        const championSet = new Set((championPreds ?? []).map((p: any) => p.user_id));
+        const { data: completions } = await supabase.rpc('get_extras_completion');
+        const extraSet = new Set(
+          (completions ?? []).map((c: any) => `${c.user_id}:${c.category}`)
+        );
 
         const missingLabels: Record<string, string> = {
           champion: 'Campeão',
@@ -258,8 +250,7 @@ Deno.serve(async (req) => {
         };
 
         for (const [userId, subs] of subsByUser) {
-          const missing: string[] = [];
-          if (!championSet.has(userId)) missing.push(missingLabels.champion);
+          if (!extraSet.has(`${userId}:champion`)) missing.push(missingLabels.champion);
           if (!extraSet.has(`${userId}:top_scorer`)) missing.push(missingLabels.top_scorer);
           if (!extraSet.has(`${userId}:mvp`)) missing.push(missingLabels.mvp);
 

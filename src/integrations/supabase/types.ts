@@ -751,6 +751,13 @@ export type Database = {
           rule_applied: Database["public"]["Enums"]["prediction_rule"]
         }[]
       }
+      get_extras_completion: {
+        Args: never
+        Returns: {
+          category: string
+          user_id: string
+        }[]
+      }
       get_public_profiles: {
         Args: never
         Returns: {
