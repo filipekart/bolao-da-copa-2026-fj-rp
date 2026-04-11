@@ -24,77 +24,104 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isApproved, setIsApproved] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
 
-  const fetchProfileData = async (userId: string) => {
-    setProfileLoading(true);
-    try {
-      const [profileRes, roleRes] = await Promise.all([
-        supabase.from('profiles').select('approved').eq('id', userId).single(),
-        supabase.from('user_roles').select('role').eq('user_id', userId).eq('role', 'admin'),
-      ]);
-      setIsApproved(profileRes.data?.approved ?? false);
-      setIsAdmin((roleRes.data?.length ?? 0) > 0);
-    } catch {
-      setIsApproved(false);
+  useEffect(() => {
+    let isCurrent = true;
+    let lastHandledUserId: string | null | undefined;
+
+    const clearProfileState = () => {
+      if (!isCurrent) return;
       setIsAdmin(false);
-    } finally {
+      setIsApproved(false);
       setProfileLoading(false);
-    }
-  };
+    };
+
+    const fetchProfileData = async (userId: string) => {
+      if (!isCurrent) return;
+
+      setProfileLoading(true);
+
+      try {
+        const [profileRes, roleRes] = await Promise.all([
+          supabase.from('profiles').select('approved').eq('id', userId).single(),
+          supabase.from('user_roles').select('role').eq('user_id', userId).eq('role', 'admin'),
+        ]);
+
+        if (profileRes.error) throw profileRes.error;
+        if (roleRes.error) throw roleRes.error;
+        if (!isCurrent || lastHandledUserId !== userId) return;
+
+        setIsApproved(profileRes.data?.approved ?? false);
+        setIsAdmin((roleRes.data?.length ?? 0) > 0);
+      } catch {
+        if (!isCurrent || lastHandledUserId !== userId) return;
+        setIsApproved(false);
+        setIsAdmin(false);
+      } finally {
+        if (isCurrent && lastHandledUserId === userId) {
+          setProfileLoading(false);
+        }
+      }
+    };
+
+    const handleSession = async (nextSession: Session | null) => {
+      const nextUserId = nextSession?.user?.id ?? null;
+      const shouldFetchProfile = lastHandledUserId !== nextUserId;
+
+      lastHandledUserId = nextUserId;
+
+      if (!isCurrent) return;
+
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+      setLoading(false);
+
+      if (!nextUserId) {
+        clearProfileState();
+        return;
+      }
+
+      if (shouldFetchProfile) {
+        await fetchProfileData(nextUserId);
+      }
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      void handleSession(nextSession);
+    });
+
+    void supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      void handleSession(currentSession);
+    });
+
+    return () => {
+      isCurrent = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
-    let initialSessionHandled = false;
-    let currentUserId: string | null = null;
+    if (!user?.id) return;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      currentUserId = session?.user?.id ?? null;
-      setLoading(false);
-      if (session?.user) {
-        if (!initialSessionHandled) {
-          initialSessionHandled = true;
-          setTimeout(() => fetchProfileData(session.user.id), 0);
-        }
-      } else {
-        setIsAdmin(false);
-        setIsApproved(false);
-        setProfileLoading(false);
-      }
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (initialSessionHandled) return;
-      initialSessionHandled = true;
-      setSession(session);
-      setUser(session?.user ?? null);
-      currentUserId = session?.user?.id ?? null;
-      setLoading(false);
-      if (session?.user) {
-        fetchProfileData(session.user.id);
-      } else {
-        setProfileLoading(false);
-      }
-    });
-
-    // Realtime: auto-detect approval changes
     const channel = supabase
-      .channel('profile-approval')
+      .channel(`profile-approval:${user.id}`)
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'profiles' },
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`,
+        },
         (payload) => {
-          if (payload.new && payload.new.id === currentUserId) {
-            setIsApproved(payload.new.approved as boolean);
-          }
+          setIsApproved(Boolean(payload.new.approved));
         }
       )
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user?.id]);
 
   const signUp = async (email: string, password: string, displayName: string) => {
     const { error } = await supabase.auth.signUp({
