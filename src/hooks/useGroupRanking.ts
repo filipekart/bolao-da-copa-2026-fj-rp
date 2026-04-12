@@ -12,30 +12,21 @@ export function useGroupRanking(enabled = true) {
   return useQuery({
     queryKey: ['group-ranking'],
     enabled,
-    staleTime: 5 * 60 * 1000, // 5 min — rankings don't change frequently
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      // Fetch predictions and profiles in parallel
-      const [predRes, profRes] = await Promise.all([
-        supabase
-          .from('match_predictions')
-          .select('user_id, points_awarded, rule_applied, matches!inner(stage)')
-          .eq('matches.stage', 'GROUP_STAGE'),
+      const [rankRes, profRes] = await Promise.all([
+        supabase.rpc('get_round_ranking', {}),
         supabase.rpc('get_public_profiles'),
       ]);
 
-      if (predRes.error) throw predRes.error;
+      if (rankRes.error) throw rankRes.error;
       if (profRes.error) throw profRes.error;
 
-      // Aggregate per user
       const userMap = new Map<string, { points: number; exact: number }>();
-      (predRes.data ?? []).forEach((p: any) => {
-        const existing = userMap.get(p.user_id) || { points: 0, exact: 0 };
-        existing.points += p.points_awarded ?? 0;
-        if (p.rule_applied === 'EXACT_SCORE') existing.exact += 1;
-        userMap.set(p.user_id, existing);
+      (rankRes.data ?? []).forEach((r: any) => {
+        userMap.set(r.user_id, { points: Number(r.round_points), exact: Number(r.exact_hits) });
       });
 
-      // Include only approved profiles
       const result: GroupRankingEntry[] = (profRes.data ?? [])
         .filter(p => p.approved)
         .map(p => {
