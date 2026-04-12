@@ -67,6 +67,7 @@ export default function MatchDetailPage() {
 
   const isLocked = new Date(match.kickoff_at) <= now;
   const isFinished = match.status === 'FINISHED';
+  const revealed = isMatchRevealed(match);
 
   const handleSubmit = () => {
     submitPrediction.mutate({
