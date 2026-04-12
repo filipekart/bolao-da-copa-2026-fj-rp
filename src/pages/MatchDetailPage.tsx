@@ -9,6 +9,7 @@ import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 import { isMatchRevealed } from '@/lib/matchVisibility';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MatchPredictionsList } from '@/components/MatchPredictionsList';
+import { MatchStatsPanel } from '@/components/MatchStatsPanel';
 
 function formatDateTime(iso: string, lang: string) {
   const locale = lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US';
