@@ -244,12 +244,6 @@ export default function ProfilePage() {
                 <li>{t('profile.howGames1')}</li>
                 <li>{t('profile.howGames2')}</li>
                 <li>{t('profile.howGames3')}</li>
-                <li>{t('profile.howGames4')}</li>
-                <ul className="space-y-1 text-muted-foreground text-xs list-disc pl-4">
-                  <li>{t('profile.howGames5')}</li>
-                  <li>{t('profile.howGames6')}</li>
-                  <li>{t('profile.howGames7')}</li>
-                </ul>
               </ul>
             </div>
             <div className="space-y-2">
@@ -257,6 +251,12 @@ export default function ProfilePage() {
               <ul className="space-y-1 text-muted-foreground text-xs list-disc pl-4">
                 <li>{t('profile.howBets1')}</li>
                 <li>{t('profile.howBets2')}</li>
+                <li>{t('profile.howBets3')}</li>
+                <ul className="space-y-1 text-muted-foreground text-xs list-disc pl-4">
+                  <li>{t('profile.howBets4')}</li>
+                  <li>{t('profile.howBets5')}</li>
+                  <li>{t('profile.howBets6')}</li>
+                </ul>
               </ul>
             </div>
             <div className="space-y-2">
