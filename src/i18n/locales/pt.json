@@ -240,7 +240,7 @@
     "howRanking3": "Para criar: toque em 'Criar Ranking', dê um nome, selecione os participantes e salve.",
     "howMultiProfile": "👨‍👩‍👧‍👦 Perfil Familiar (Multi-perfis)",
     "howMultiProfile1": "Se você quer gerenciar os palpites de outra pessoa (ex: filho, cônjuge), cada pessoa precisa ter sua própria conta cadastrada e aprovada.",
-    "howMultiProfile2": "Após o cadastro e aprovação, peça a um Admin para vincular as contas. O Admin faz isso no painel Admin > Multi-perfis.",
+    "howMultiProfile2": "Após o cadastro e aprovação, peça a um Admin para vincular as contas.",
     "howMultiProfile3": "Com o vínculo feito, na aba Perfil aparecerá a seção 'Perfis gerenciados', onde você pode alternar entre os perfis e fazer palpites em nome de cada um.",
     "pixKey": "Chave PIX",
     "pixDescription": "Insira sua chave PIX para receber premiações. Pode ser CPF, e-mail, telefone ou chave aleatória.",
