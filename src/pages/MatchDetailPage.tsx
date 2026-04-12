@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Clock, MapPin, Lock, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
-import { isMatchRevealed } from '@/lib/matchVisibility';
+import { isMatchRevealed, isMatchVisible } from '@/lib/matchVisibility';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MatchPredictionsList } from '@/components/MatchPredictionsList';
 import { MatchStatsPanel } from '@/components/MatchStatsPanel';
