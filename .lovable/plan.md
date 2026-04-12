@@ -1,29 +1,17 @@
 
 
-## send-push-reminders: Bug Fix
+## Plan: Update RLS policy on match_predictions
 
-### Current State
-The function **already implements** the batched pattern you described:
-- Line 178: `pushTasks` array collects all tasks (not awaited inline)
-- Lines 285-293: Processes in batches of 50 via `Promise.allSettled`
-- Lines 297-302: Deletes expired endpoints at the end
+### What changes
 
-The architecture is correct. However, there is a **runtime bug** on line 253 that will crash the function:
+Replace the existing "users read own match predictions" SELECT policy with a new one that allows authenticated users to also read other users' predictions for matches that have started (within a 5-hour window after kickoff).
 
-```typescript
-// Line 252-255 — `missing` is never declared
-for (const [userId, subs] of subsByUser) {
-  if (!extraSet.has(`${userId}:champion`)) missing.push(missingLabels.champion);
-  // ...
-```
+### Database migration
 
-The variable `missing` is used but never initialized. It needs `const missing: string[] = [];` at the start of each loop iteration.
+A single migration that:
 
-### Plan
+1. Drops the old policy `"users read own match predictions"` on `match_predictions`
+2. Creates the new policy `"users read predictions after kickoff"` with the exact SQL provided — allowing users to always read their own predictions, plus read all predictions for matches where `now() >= kickoff_at AND now() <= kickoff_at + interval '5 hours'`
 
-**File:** `supabase/functions/send-push-reminders/index.ts`
-
-1. Add `const missing: string[] = [];` inside the `for (const [userId, subs])` loop at line 252, before the `missing.push()` calls.
-
-That's the only change needed — the batching logic is already in place.
+No code changes needed — existing queries already fetch by match_id and will automatically return more rows when the policy permits.
 
