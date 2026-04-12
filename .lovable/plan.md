@@ -1,17 +1,43 @@
 
 
-## Plan: Update RLS policy on match_predictions
+## Plan: Remover a trava de 5 horas — liberar palpites e estatísticas para sempre após o kickoff
 
-### What changes
+### Por que não afeta performance
+- A RLS faz lookup por PK (`m.id = match_id`) — O(1)
+- Max ~300 rows por partida, consultadas uma de cada vez
+- Cache no cliente (staleTime) já reduz requisições
 
-Replace the existing "users read own match predictions" SELECT policy with a new one that allows authenticated users to also read other users' predictions for matches that have started (within a 5-hour window after kickoff).
+### Mudanças
 
-### Database migration
+**1. Migration — Atualizar RLS policy**
+- Drop policy `"users read predictions after kickoff"`
+- Criar nova policy simplificada:
+```sql
+CREATE POLICY "users read predictions after kickoff"
+ON public.match_predictions FOR SELECT
+USING (
+  auth.role() = 'authenticated'
+  AND (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.matches m
+      WHERE m.id = match_id
+      AND now() >= m.kickoff_at
+    )
+  )
+);
+```
 
-A single migration that:
+**2. Código — Simplificar `isMatchRevealed`** (`src/lib/matchVisibility.ts`)
+- Remover o limite de 5 horas, tornando-a equivalente a `isMatchVisible`:
+```typescript
+export function isMatchRevealed(match: MatchWithTeams): boolean {
+  return Date.now() >= new Date(match.kickoff_at).getTime();
+}
+```
 
-1. Drops the old policy `"users read own match predictions"` on `match_predictions`
-2. Creates the new policy `"users read predictions after kickoff"` with the exact SQL provided — allowing users to always read their own predictions, plus read all predictions for matches where `now() >= kickoff_at AND now() <= kickoff_at + interval '5 hours'`
+**3. Código — Simplificar condição no MatchDetailPage** (`src/pages/MatchDetailPage.tsx`)
+- Com `isMatchRevealed` sem limite, a linha `const revealed = isMatchRevealed(match) || isFinished` pode ser simplificada para apenas `isMatchRevealed(match)` (já que `isFinished` implica que o kickoff passou)
 
-No code changes needed — existing queries already fetch by match_id and will automatically return more rows when the policy permits.
+Nenhuma outra mudança necessária. Os hooks `useMatchPredictions` e `useMatchStats` continuam funcionando igual.
 
