@@ -8,52 +8,33 @@ export interface RoundRankingEntry {
   exact_hits: number;
 }
 
-type RoundFilter =
-  | { type: 'match_number'; min: number; max: number }
-  | { type: 'knockout' };
-
-const ROUND_FILTERS: Record<string, RoundFilter> = {
-  round1: { type: 'match_number', min: 1, max: 24 },
-  round2: { type: 'match_number', min: 25, max: 48 },
-  round3: { type: 'match_number', min: 49, max: 72 },
-  knockout: { type: 'knockout' },
+const ROUND_PARAMS: Record<string, { p_min_match: number; p_max_match: number; p_knockout?: boolean }> = {
+  round1: { p_min_match: 1, p_max_match: 24 },
+  round2: { p_min_match: 25, p_max_match: 48 },
+  round3: { p_min_match: 49, p_max_match: 72 },
 };
 
 export function useRoundRanking(round: 'round1' | 'round2' | 'round3' | 'knockout', enabled = true) {
-  const filter = ROUND_FILTERS[round];
-
   return useQuery({
     queryKey: ['round-ranking', round],
     enabled,
-    staleTime: 5 * 60 * 1000, // 5 min
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      let query = supabase
-        .from('match_predictions')
-        .select('user_id, points_awarded, rule_applied, matches!inner(stage, match_number)');
+      const params = round === 'knockout'
+        ? { p_knockout: true }
+        : ROUND_PARAMS[round];
 
-      if (filter.type === 'match_number') {
-        query = query
-          .gte('matches.match_number', filter.min)
-          .lte('matches.match_number', filter.max);
-      } else {
-        query = query.neq('matches.stage', 'GROUP_STAGE');
-      }
-
-      // Fetch predictions and profiles in parallel
-      const [predRes, profRes] = await Promise.all([
-        query,
+      const [rankRes, profRes] = await Promise.all([
+        supabase.rpc('get_round_ranking', params),
         supabase.rpc('get_public_profiles'),
       ]);
 
-      if (predRes.error) throw predRes.error;
+      if (rankRes.error) throw rankRes.error;
       if (profRes.error) throw profRes.error;
 
       const userMap = new Map<string, { points: number; exact: number }>();
-      (predRes.data ?? []).forEach((p: any) => {
-        const existing = userMap.get(p.user_id) || { points: 0, exact: 0 };
-        existing.points += p.points_awarded ?? 0;
-        if (p.rule_applied === 'EXACT_SCORE') existing.exact += 1;
-        userMap.set(p.user_id, existing);
+      (rankRes.data ?? []).forEach((r: any) => {
+        userMap.set(r.user_id, { points: Number(r.round_points), exact: Number(r.exact_hits) });
       });
 
       const result: RoundRankingEntry[] = (profRes.data ?? [])
