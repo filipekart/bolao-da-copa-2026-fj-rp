@@ -274,6 +274,15 @@ export default function ProfilePage() {
                 <li>{t('profile.howRanking3')}</li>
               </ul>
             </div>
+
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground">{t('profile.howMultiProfile')}</h3>
+              <ul className="space-y-1 text-muted-foreground text-xs list-disc pl-4">
+                <li>{t('profile.howMultiProfile1')}</li>
+                <li>{t('profile.howMultiProfile2')}</li>
+                <li>{t('profile.howMultiProfile3')}</li>
+              </ul>
+            </div>
           </CollapsibleContent>
         </div>
       </Collapsible>
