@@ -770,6 +770,18 @@ export type Database = {
         Args: { away_goals: number; home_goals: number }
         Returns: string
       }
+      get_round_ranking: {
+        Args: {
+          p_knockout?: boolean
+          p_max_match?: number
+          p_min_match?: number
+        }
+        Returns: {
+          exact_hits: number
+          round_points: number
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
