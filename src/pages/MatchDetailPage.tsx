@@ -9,6 +9,7 @@ import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 import { isMatchRevealed } from '@/lib/matchVisibility';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MatchPredictionsList } from '@/components/MatchPredictionsList';
+import { MatchStatsPanel } from '@/components/MatchStatsPanel';
 
 function formatDateTime(iso: string, lang: string) {
   const locale = lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US';
@@ -208,6 +209,7 @@ export default function MatchDetailPage() {
           <TabsList className="w-full">
             <TabsTrigger value="my-prediction" className="flex-1">{t('match.yourPrediction')}</TabsTrigger>
             <TabsTrigger value="all-predictions" className="flex-1">{t('match.allPredictions', 'Palpites')}</TabsTrigger>
+            <TabsTrigger value="stats" className="flex-1">{t('match.stats', 'Estatísticas')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="my-prediction">
@@ -221,6 +223,19 @@ export default function MatchDetailPage() {
               <MatchPredictionsList
                 matchId={match.id}
                 isFinished={isFinished}
+                homeFlagUrl={match.home_team_flag_url}
+                awayFlagUrl={match.away_team_flag_url}
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="stats">
+            <div className="glass rounded-2xl p-5">
+              <MatchStatsPanel
+                matchId={match.id}
+                isFinished={isFinished}
+                homeTeamName={tt(match.home_team_id, match.home_team_name)}
+                awayTeamName={tt(match.away_team_id, match.away_team_name)}
                 homeFlagUrl={match.home_team_flag_url}
                 awayFlagUrl={match.away_team_flag_url}
               />
