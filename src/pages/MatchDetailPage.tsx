@@ -77,6 +77,81 @@ export default function MatchDetailPage() {
     });
   };
 
+  const renderMyPrediction = () => (
+    <>
+      {isLocked ? (
+        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+          <Lock className="w-4 h-4" />
+          <span>{t('match.predictionsLocked')}</span>
+        </div>
+      ) : null}
+
+      <div className="flex items-center justify-center gap-4">
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-xs text-muted-foreground">{tt(match.home_team_id, match.home_team_name)}</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setHomeScore(Math.max(0, homeScore - 1))}
+              disabled={isLocked}
+              className="w-10 h-10 rounded-lg bg-secondary text-foreground font-bold text-lg disabled:opacity-50"
+            >−</button>
+            <span className="w-10 text-center text-2xl font-display font-bold text-foreground">{homeScore}</span>
+            <button
+              onClick={() => setHomeScore(homeScore + 1)}
+              disabled={isLocked}
+              className="w-10 h-10 rounded-lg bg-secondary text-foreground font-bold text-lg disabled:opacity-50"
+            >+</button>
+          </div>
+        </div>
+
+        <span className="text-muted-foreground text-xl mt-5">×</span>
+
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-xs text-muted-foreground">{tt(match.away_team_id, match.away_team_name)}</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setAwayScore(Math.max(0, awayScore - 1))}
+              disabled={isLocked}
+              className="w-10 h-10 rounded-lg bg-secondary text-foreground font-bold text-lg disabled:opacity-50"
+            >−</button>
+            <span className="w-10 text-center text-2xl font-display font-bold text-foreground">{awayScore}</span>
+            <button
+              onClick={() => setAwayScore(awayScore + 1)}
+              disabled={isLocked}
+              className="w-10 h-10 rounded-lg bg-secondary text-foreground font-bold text-lg disabled:opacity-50"
+            >+</button>
+          </div>
+        </div>
+      </div>
+
+      {!isLocked && (
+        <Button
+          onClick={handleSubmit}
+          disabled={submitPrediction.isPending}
+          className="w-full gradient-pitch text-primary-foreground font-semibold h-11"
+        >
+          {submitPrediction.isPending ? t('match.saving') : prediction ? t('match.updatePrediction') : t('match.savePrediction')}
+        </Button>
+      )}
+
+      {prediction && (
+        <div className="mt-3 p-3 rounded-lg bg-secondary text-sm">
+          <p className="text-muted-foreground">
+            {t('match.prediction')}: <span className="text-foreground font-medium">{prediction.predicted_home_score} × {prediction.predicted_away_score}</span>
+          </p>
+          {prediction.rule_applied !== 'PENDING' && (
+            <p className="mt-1 text-foreground font-medium">
+              {ruleLabels[prediction.rule_applied] ?? prediction.rule_applied}
+            </p>
+          )}
+          {prediction.points_awarded > 0 && (
+            <p className="text-primary font-bold mt-1">+{prediction.points_awarded} {t('match.points')}</p>
+          )}
+        </div>
+      )}
+    </>
+  );
+
   return (
     <div className="space-y-6 animate-fade-in">
       <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground text-sm">
