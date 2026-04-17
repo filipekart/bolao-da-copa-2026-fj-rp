@@ -1,13 +1,24 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trophy, Mail, Lock, User, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Trophy, Mail, Lock, User, ArrowLeft, Eye, EyeOff, AlertTriangle, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '@/components/LanguageSelector';
+
+function detectInAppBrowser(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  return /FBAN|FBAV|FB_IAB|Instagram|Line|WhatsApp|Snapchat|Twitter|TikTok|MicroMessenger|MiuiBrowser/i.test(ua);
+}
+
+function isNetworkError(msg: string): boolean {
+  const m = msg.toLowerCase();
+  return m.includes('failed to fetch') || m.includes('networkerror') || m.includes('load failed') || m.includes('network request failed');
+}
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,6 +30,16 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, signUp } = useAuth();
   const { t } = useTranslation();
+  const isInApp = useMemo(() => detectInAppBrowser(), []);
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copiado!');
+    } catch {
+      toast.error('Não foi possível copiar');
+    }
+  };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
