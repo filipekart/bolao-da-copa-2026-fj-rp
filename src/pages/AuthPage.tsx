@@ -89,10 +89,12 @@ export default function AuthPage() {
     <div className="min-h-screen gradient-dark flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-sm animate-fade-in">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl gradient-pitch flex items-center justify-center mb-4">
-            <Trophy className="w-8 h-8 text-primary-foreground" />
-          </div>
-          <h1 className="text-2xl font-display font-bold text-foreground">{t('app.title')}</h1>
+          <img
+            src="/icon-192.png"
+            alt="Bolão Copa 2026 FJ | RP"
+            className="w-20 h-20 rounded-2xl mb-4 shadow-lg"
+          />
+          <h1 className="text-2xl font-display font-bold text-foreground text-center">Bolão Copa 2026 FJ | RP</h1>
           <p className="text-muted-foreground text-sm mt-1">{t('app.subtitle')}</p>
           <div className="mt-3">
             <LanguageSelector variant="compact" />
