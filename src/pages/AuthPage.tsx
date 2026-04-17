@@ -1,13 +1,24 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trophy, Mail, Lock, User, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Trophy, Mail, Lock, User, ArrowLeft, Eye, EyeOff, AlertTriangle, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '@/components/LanguageSelector';
+
+function detectInAppBrowser(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  return /FBAN|FBAV|FB_IAB|Instagram|Line|WhatsApp|Snapchat|Twitter|TikTok|MicroMessenger|MiuiBrowser/i.test(ua);
+}
+
+function isNetworkError(msg: string): boolean {
+  const m = msg.toLowerCase();
+  return m.includes('failed to fetch') || m.includes('networkerror') || m.includes('load failed') || m.includes('network request failed');
+}
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,6 +30,16 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, signUp } = useAuth();
   const { t } = useTranslation();
+  const isInApp = useMemo(() => detectInAppBrowser(), []);
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copiado!');
+    } catch {
+      toast.error('Não foi possível copiar');
+    }
+  };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +56,12 @@ export default function AuthPage() {
       toast.success(t('auth.resetEmailSent'));
       setIsForgot(false);
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : t('auth.emailSendError'));
+      const msg = err instanceof Error ? err.message : t('auth.emailSendError');
+      if (isNetworkError(msg)) {
+        toast.error(t('auth.networkError'), { duration: 10000 });
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -75,7 +101,9 @@ export default function AuthPage() {
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t('auth.authError');
-      if (msg.toLowerCase().includes('invalid login credentials')) {
+      if (isNetworkError(msg)) {
+        toast.error(t('auth.networkError'), { duration: 10000 });
+      } else if (msg.toLowerCase().includes('invalid login credentials')) {
         toast.error(t('auth.invalidCredentials'));
       } else {
         toast.error(msg);
@@ -100,6 +128,22 @@ export default function AuthPage() {
             <LanguageSelector variant="compact" />
           </div>
         </div>
+
+        {isInApp && (
+          <div className="mb-4 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-foreground flex gap-2">
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-destructive" />
+            <div className="space-y-2 flex-1">
+              <p className="leading-snug">{t('auth.inAppBrowserWarning')}</p>
+              <button
+                type="button"
+                onClick={copyLink}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground underline hover:text-primary transition-colors"
+              >
+                <Copy className="w-3 h-3" /> Copiar link
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="glass rounded-2xl p-6">
           {isForgot ? (
