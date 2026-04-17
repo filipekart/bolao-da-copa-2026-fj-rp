@@ -41,6 +41,20 @@ export function usePushSubscription() {
 
       let subscription = await registration.pushManager.getSubscription();
 
+      // If existing subscription was created with a different VAPID key, unsubscribe and recreate
+      if (subscription) {
+        const existingKey = subscription.options?.applicationServerKey;
+        const expectedKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+        const existingArr = existingKey ? new Uint8Array(existingKey) : null;
+        const matches = !!existingArr
+          && existingArr.length === expectedKey.length
+          && existingArr.every((b, i) => b === expectedKey[i]);
+        if (!matches) {
+          try { await subscription.unsubscribe(); } catch {}
+          subscription = null;
+        }
+      }
+
       if (!subscription) {
         // If already granted (e.g. re-subscribe), go ahead; otherwise request
         if (Notification.permission === 'default') {
