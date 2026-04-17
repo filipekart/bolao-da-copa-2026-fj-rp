@@ -36,7 +36,9 @@
     "nameInUse": "Ce nom est déjà utilisé. Choisissez-en un autre.",
     "invalidCredentials": "E-mail ou mot de passe incorrect. Vérifiez vos données et réessayez.",
     "authError": "Erreur d'authentification",
-    "emailSendError": "Erreur lors de l'envoi de l'e-mail"
+    "emailSendError": "Erreur lors de l'envoi de l'e-mail",
+    "networkError": "Impossible de se connecter. Si vous avez ouvert depuis WhatsApp ou Instagram, appuyez sur les 3 points et choisissez \"Ouvrir dans Chrome\" ou \"Ouvrir dans Safari\".",
+    "inAppBrowserWarning": "⚠️ Vous utilisez un navigateur intégré (WhatsApp/Instagram) qui peut bloquer l'inscription. Appuyez sur les 3 points en haut et choisissez \"Ouvrir dans Chrome\" ou \"Ouvrir dans Safari\"."
   },
   "reset": {
     "title": "Nouveau mot de passe",

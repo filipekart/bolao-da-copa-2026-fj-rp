@@ -36,7 +36,9 @@
     "nameInUse": "This name is already in use. Choose another.",
     "invalidCredentials": "Incorrect email or password. Check your data and try again.",
     "authError": "Authentication error",
-    "emailSendError": "Error sending email"
+    "emailSendError": "Error sending email",
+    "networkError": "Could not connect. If you opened from WhatsApp or Instagram, tap the 3 dots and choose \"Open in Chrome\" or \"Open in Safari\".",
+    "inAppBrowserWarning": "⚠️ You are using an in-app browser (WhatsApp/Instagram) which may block signup. Tap the 3 dots at the top and choose \"Open in Chrome\" or \"Open in Safari\"."
   },
   "reset": {
     "title": "New Password",

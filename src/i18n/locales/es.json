@@ -36,7 +36,9 @@
     "nameInUse": "Este nombre ya está en uso. Elige otro.",
     "invalidCredentials": "Correo o contraseña incorrectos. Verifica tus datos e intenta nuevamente.",
     "authError": "Error de autenticación",
-    "emailSendError": "Error al enviar correo"
+    "emailSendError": "Error al enviar correo",
+    "networkError": "No se pudo conectar. Si abriste desde WhatsApp o Instagram, toca los 3 puntos y elige \"Abrir en Chrome\" o \"Abrir en Safari\".",
+    "inAppBrowserWarning": "⚠️ Estás usando un navegador interno (WhatsApp/Instagram) que puede bloquear el registro. Toca los 3 puntos arriba y elige \"Abrir en Chrome\" o \"Abrir en Safari\"."
   },
   "reset": {
     "title": "Nueva Contraseña",
