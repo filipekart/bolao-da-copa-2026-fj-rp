@@ -101,7 +101,9 @@ export default function AuthPage() {
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t('auth.authError');
-      if (msg.toLowerCase().includes('invalid login credentials')) {
+      if (isNetworkError(msg)) {
+        toast.error(t('auth.networkError'), { duration: 10000 });
+      } else if (msg.toLowerCase().includes('invalid login credentials')) {
         toast.error(t('auth.invalidCredentials'));
       } else {
         toast.error(msg);
