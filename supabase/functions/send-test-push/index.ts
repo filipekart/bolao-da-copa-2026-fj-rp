@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const vapidPublicKey = 'BF8C6xDdC_LCNJeUjna-4OvPFyCdkCgajlFSF2zvPQqGSyQmp1NnNHFy-as37wK2xrjxF3uEkzWpi1-3S-g8Sno';
+    const vapidPublicKey = 'BFua3NVjLLw6CUY06WyswZOKPix6GNFzog9V_SpcXe9aCVyxWEDUNd2FBZrGa4c51EPHJup87sT5yhjA8ahLThI';
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;
 
     webpush.setVapidDetails(
