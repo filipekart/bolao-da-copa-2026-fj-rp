@@ -130,14 +130,14 @@ export default function AuthPage() {
         </div>
 
         {isInApp && (
-          <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200 flex gap-2">
-            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-amber-400" />
+          <div className="mb-4 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-foreground flex gap-2">
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-destructive" />
             <div className="space-y-2 flex-1">
               <p className="leading-snug">{t('auth.inAppBrowserWarning')}</p>
               <button
                 type="button"
                 onClick={copyLink}
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-100 underline hover:text-white transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground underline hover:text-primary transition-colors"
               >
                 <Copy className="w-3 h-3" /> Copiar link
               </button>
