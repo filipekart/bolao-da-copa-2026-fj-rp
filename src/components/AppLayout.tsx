@@ -39,7 +39,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen gradient-dark flex flex-col">
       <div
         className="max-w-lg mx-auto w-full px-4"
-        style={{ paddingTop: 'calc(3rem + env(safe-area-inset-top))' }}
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         <InstallBanner />
         <NotificationBanner onAccept={subscribe} />
@@ -59,28 +59,29 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </div>
       <main
         className="flex-1 max-w-lg mx-auto w-full px-4"
-        style={{ paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))' }}
+        style={{ paddingBottom: 'calc(56px + env(safe-area-inset-bottom))' }}
       >
         {children}
       </main>
 
       <nav
         className="fixed bottom-0 left-0 right-0 glass border-t border-border"
-        style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <div className="max-w-lg mx-auto flex items-center justify-around pt-2 pb-1">
+        <div className="max-w-lg mx-auto flex items-center justify-around" style={{ height: '56px' }}>
           {tabs.map(tab => {
             const isActive = location.pathname === tab.path;
             return (
               <button
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
+                className={`flex flex-col items-center gap-1 rounded-lg transition-all ${
                   isActive ? 'text-primary bg-primary/10' : 'text-muted-foreground'
                 }`}
+                style={{ paddingTop: '6px', paddingBottom: '4px', paddingLeft: '8px', paddingRight: '8px' }}
               >
-                <tab.icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium">{tab.label}</span>
+                <tab.icon style={{ width: '20px', height: '20px' }} />
+                <span style={{ fontSize: '10px' }} className="font-medium">{tab.label}</span>
               </button>
             );
           })}
