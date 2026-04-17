@@ -56,7 +56,12 @@ export default function AuthPage() {
       toast.success(t('auth.resetEmailSent'));
       setIsForgot(false);
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : t('auth.emailSendError'));
+      const msg = err instanceof Error ? err.message : t('auth.emailSendError');
+      if (isNetworkError(msg)) {
+        toast.error(t('auth.networkError'), { duration: 10000 });
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setLoading(false);
     }
