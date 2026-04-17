@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;
-    const vapidPublicKey = 'BF8C6xDdC_LCNJeUjna-4OvPFyCdkCgajlFSF2zvPQqGSyQmp1NnNHFy-as37wK2xrjxF3uEkzWpi1-3S-g8Sno';
+    const vapidPublicKey = 'BGEQYV6oMjko-aqi0O5ue6rheaa5FRqwP-UDWzPGPei_StMNCfAk1e2auL6ZQrjBiYmMbxAGhysPPGJfzLoPegk';
     const vapidSubject = 'mailto:admin@bolao-copa.app';
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
