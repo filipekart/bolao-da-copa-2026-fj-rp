@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { translateTeamName } from '@/lib/teamTranslations';
 
-type Scores = Record<string, { home: number; away: number }>;
+type Scores = Record<string, { home: number | null; away: number | null }>;
 
 function formatDate(iso: string, lang = 'pt') {
   const locale = lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US';
