@@ -84,12 +84,27 @@ export function RulesModal() {
             <h3 className="font-semibold text-foreground">💰 Premiação</h3>
             <div className="space-y-1.5">
               <p className="text-foreground text-xs font-medium">Parciais — 20% do total</p>
-              <div className="space-y-0.5 text-muted-foreground text-xs pl-4">
-                <div className="flex justify-between"><span>1ª rodada</span><span className="text-primary font-semibold">3%</span></div>
-                <div className="flex justify-between"><span>2ª rodada</span><span className="text-primary font-semibold">3%</span></div>
-                <div className="flex justify-between"><span>3ª rodada</span><span className="text-primary font-semibold">3%</span></div>
-                <div className="flex justify-between"><span>1ª fase</span><span className="text-primary font-semibold">6%</span></div>
-                <div className="flex justify-between"><span>2ª fase + extras</span><span className="text-primary font-semibold">5%</span></div>
+              <div className="space-y-2 text-muted-foreground text-xs pl-4">
+                <div>
+                  <div className="flex justify-between"><span className="text-foreground">1ª rodada da fase de grupos</span><span className="text-primary font-semibold">3%</span></div>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">Maior pontuação somando apenas os jogos da rodada 1</p>
+                </div>
+                <div>
+                  <div className="flex justify-between"><span className="text-foreground">2ª rodada da fase de grupos</span><span className="text-primary font-semibold">3%</span></div>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">Somando apenas os jogos da rodada 2</p>
+                </div>
+                <div>
+                  <div className="flex justify-between"><span className="text-foreground">3ª rodada da fase de grupos</span><span className="text-primary font-semibold">3%</span></div>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">Somando apenas os jogos da rodada 3</p>
+                </div>
+                <div>
+                  <div className="flex justify-between"><span className="text-foreground">Campeão da 1ª fase (fase de grupos)</span><span className="text-primary font-semibold">6%</span></div>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">Maior pontuação somando todos os jogos da fase de grupos (rodadas 1 + 2 + 3)</p>
+                </div>
+                <div>
+                  <div className="flex justify-between"><span className="text-foreground">Campeão da 2ª fase (mata-mata) + Extras</span><span className="text-primary font-semibold">5%</span></div>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">Soma dos jogos do mata-mata (16-avos até a Final, incluindo Disputa do 3º) + acertos de Campeão, Artilheiro e MVP</p>
+                </div>
               </div>
             </div>
             <div className="space-y-1.5">
