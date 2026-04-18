@@ -9,8 +9,8 @@ const ruleBadge: Record<string, { label: string; cls: string }> = {
   EXACT_SCORE: { label: '25pts', cls: 'bg-green-600/20 text-green-400' },
   WINNER_AND_WINNER_GOALS: { label: '18pts', cls: 'bg-blue-600/20 text-blue-400' },
   WINNER_AND_LOSER_GOALS: { label: '12pts', cls: 'bg-blue-600/20 text-blue-400' },
+  DRAW_RESULT_ONLY: { label: '16pts', cls: 'bg-teal-600/20 text-teal-400' },
   RESULT_ONLY: { label: '10pts', cls: 'bg-yellow-600/20 text-yellow-400' },
-  DRAW_RESULT_ONLY: { label: '10pts', cls: 'bg-yellow-600/20 text-yellow-400' },
   MISS: { label: '0pts', cls: 'bg-red-600/20 text-red-400' },
   PENDING: { label: '—', cls: 'bg-muted text-muted-foreground' },
 };
