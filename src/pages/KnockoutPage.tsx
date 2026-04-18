@@ -3,6 +3,7 @@ import { useMatches } from '@/hooks/useMatches';
 import { Loader2, Trophy, Calendar, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 
@@ -121,18 +122,26 @@ function BracketMatchCard({
   t,
   lang,
   tt,
+  onClick,
 }: {
   entry: BracketEntry;
   realMatch?: any;
   t: any;
   lang: string;
   tt: (teamId: string | null | undefined, fallbackName?: string) => string;
+  onClick?: () => void;
 }) {
   const hasRealMatch = realMatch && realMatch.home_team_name;
   const isFinished = realMatch?.status === 'FINISHED';
+  const isClickable = !!realMatch?.id && !!onClick;
+
+  const Wrapper: any = isClickable ? 'button' : 'div';
+  const wrapperProps = isClickable
+    ? { onClick, type: 'button', className: 'glass rounded-xl p-3 space-y-1.5 w-full text-left hover:bg-secondary/40 transition-colors cursor-pointer' }
+    : { className: 'glass rounded-xl p-3 space-y-1.5' };
 
   return (
-    <div className="glass rounded-xl p-3 space-y-1.5">
+    <Wrapper {...wrapperProps}>
       <div className="flex items-center justify-between text-[10px] text-muted-foreground">
         <span className="font-medium">{t('knockout.game')} {entry.matchNum}</span>
         {hasRealMatch && realMatch.kickoff_at && (
@@ -177,7 +186,12 @@ function BracketMatchCard({
           )}
         </div>
       </div>
-    </div>
+      {isClickable && (
+        <div className="text-[10px] text-primary font-medium pt-0.5">
+          {t('knockout.tapToBet', 'Toque para palpitar →')}
+        </div>
+      )}
+    </Wrapper>
   );
 }
 
@@ -188,6 +202,7 @@ export default function KnockoutPage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language?.substring(0, 2) ?? 'pt';
   const tt = useTranslatedTeamName();
+  const navigate = useNavigate();
 
   const KNOCKOUT_STAGES = [
     { key: 'ROUND_OF_32', label: t('knockout.stages.ROUND_OF_32'), bracket: R32_BRACKET },
@@ -275,16 +290,20 @@ export default function KnockoutPage() {
             <div key={stage.key} className="space-y-2">
               <h2 className="text-sm font-display font-semibold text-foreground">{stage.label}</h2>
               <div className="space-y-2">
-                {stage.bracket.map(entry => (
-                  <BracketMatchCard
-                    key={entry.matchNum}
-                    entry={entry}
-                    realMatch={matchByNumber.get(entry.matchNum)}
-                    t={t}
-                    lang={lang}
-                    tt={tt}
-                  />
-                ))}
+                {stage.bracket.map(entry => {
+                  const real = matchByNumber.get(entry.matchNum);
+                  return (
+                    <BracketMatchCard
+                      key={entry.matchNum}
+                      entry={entry}
+                      realMatch={real}
+                      t={t}
+                      lang={lang}
+                      tt={tt}
+                      onClick={real?.id ? () => navigate(`/match/${real.id}`) : undefined}
+                    />
+                  );
+                })}
               </div>
             </div>
           ))}
