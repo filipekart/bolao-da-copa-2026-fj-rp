@@ -48,6 +48,10 @@ const SF_BRACKET = [
   { matchNum: 102, home: 'V99', away: 'V100', homeLabel: 'Vencedor 99', awayLabel: 'Vencedor 100' },
 ];
 
+const THIRD_PLACE_BRACKET = [
+  { matchNum: 103, home: 'P101', away: 'P102', homeLabel: 'Perdedor 101', awayLabel: 'Perdedor 102' },
+];
+
 const FINAL_BRACKET = [
   { matchNum: 104, home: 'V101', away: 'V102', homeLabel: 'Vencedor 101', awayLabel: 'Vencedor 102' },
 ];
@@ -190,6 +194,7 @@ export default function KnockoutPage() {
     { key: 'ROUND_OF_16', label: t('knockout.stages.ROUND_OF_16'), bracket: R16_BRACKET },
     { key: 'QUARTER_FINAL', label: t('knockout.stages.QUARTER_FINAL'), bracket: QF_BRACKET },
     { key: 'SEMI_FINAL', label: t('knockout.stages.SEMI_FINAL'), bracket: SF_BRACKET },
+    { key: 'THIRD_PLACE', label: 'Disputa do 3º lugar', bracket: THIRD_PLACE_BRACKET },
     { key: 'FINAL', label: t('knockout.stages.FINAL'), bracket: FINAL_BRACKET },
   ] as const;
 
