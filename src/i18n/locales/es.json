@@ -195,6 +195,7 @@
     "resultOnly": "Solo resultado correcto",
     "drawNotExact": "Empate (no exacto)",
     "missed": "Falló",
+    "tiebreakerNote": "Desempate: en caso de empate en puntos, queda delante quien tenga más marcadores exactos.",
     "rulesExtras": "🏆 Pronósticos Extras",
     "champion": "Campeón",
     "topScorer": "Goleador",
