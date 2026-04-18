@@ -71,7 +71,8 @@
     "saveError": "Error al guardar",
     "partialSave": "{{count}} pronóstico(s) guardado(s) con éxito",
     "liveNow": "EN VIVO ahora",
-    "next24h": "Próximas 24h"
+    "next24h": "Próximas 24h",
+    "nothingToSave": "Ningún pronóstico completado para guardar."
   },
   "match": {
     "back": "Volver",

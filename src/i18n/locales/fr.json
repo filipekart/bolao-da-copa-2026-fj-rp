@@ -71,7 +71,8 @@
     "saveError": "Erreur lors de l'enregistrement",
     "partialSave": "{{count}} pronostic(s) enregistré(s) avec succès",
     "liveNow": "EN DIRECT",
-    "next24h": "Prochaines 24h"
+    "next24h": "Prochaines 24h",
+    "nothingToSave": "Aucun pronostic rempli à enregistrer."
   },
   "match": {
     "back": "Retour",
