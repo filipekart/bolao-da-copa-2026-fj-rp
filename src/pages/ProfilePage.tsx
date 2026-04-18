@@ -201,12 +201,27 @@ export default function ProfilePage() {
               
               <div className="space-y-1.5">
                 <p className="text-foreground text-xs font-medium">{t('profile.prizesPartial')}</p>
-                <div className="space-y-0.5 text-muted-foreground text-xs pl-4">
-                  <div className="flex justify-between"><span>{t('profile.prizesRound1')}</span><span className="text-primary font-semibold">3%</span></div>
-                  <div className="flex justify-between"><span>{t('profile.prizesRound2')}</span><span className="text-primary font-semibold">3%</span></div>
-                  <div className="flex justify-between"><span>{t('profile.prizesRound3')}</span><span className="text-primary font-semibold">3%</span></div>
-                  <div className="flex justify-between"><span>{t('profile.prizesPhase1')}</span><span className="text-primary font-semibold">6%</span></div>
-                  <div className="flex justify-between"><span>{t('profile.prizesPhase2')}</span><span className="text-primary font-semibold">5%</span></div>
+                <div className="space-y-2 text-muted-foreground text-xs pl-4">
+                  <div>
+                    <div className="flex justify-between"><span className="text-foreground">{t('profile.prizesRound1')}</span><span className="text-primary font-semibold">3%</span></div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{t('profile.prizesRound1Desc')}</p>
+                  </div>
+                  <div>
+                    <div className="flex justify-between"><span className="text-foreground">{t('profile.prizesRound2')}</span><span className="text-primary font-semibold">3%</span></div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{t('profile.prizesRound2Desc')}</p>
+                  </div>
+                  <div>
+                    <div className="flex justify-between"><span className="text-foreground">{t('profile.prizesRound3')}</span><span className="text-primary font-semibold">3%</span></div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{t('profile.prizesRound3Desc')}</p>
+                  </div>
+                  <div>
+                    <div className="flex justify-between"><span className="text-foreground">{t('profile.prizesPhase1')}</span><span className="text-primary font-semibold">6%</span></div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{t('profile.prizesPhase1Desc')}</p>
+                  </div>
+                  <div>
+                    <div className="flex justify-between"><span className="text-foreground">{t('profile.prizesPhase2')}</span><span className="text-primary font-semibold">5%</span></div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{t('profile.prizesPhase2Desc')}</p>
+                  </div>
                 </div>
               </div>
 
