@@ -202,6 +202,7 @@ export default function KnockoutPage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language?.substring(0, 2) ?? 'pt';
   const tt = useTranslatedTeamName();
+  const navigate = useNavigate();
 
   const KNOCKOUT_STAGES = [
     { key: 'ROUND_OF_32', label: t('knockout.stages.ROUND_OF_32'), bracket: R32_BRACKET },
