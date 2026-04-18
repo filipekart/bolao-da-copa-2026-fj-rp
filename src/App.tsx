@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { ActiveProfileProvider } from "@/lib/activeProfile";
 import { AppLayout } from "@/components/AppLayout";
+import { ThemeProvider } from "@/lib/theme";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
 import MatchDetailPage from "./pages/MatchDetailPage";
@@ -114,9 +115,11 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </ThemeProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

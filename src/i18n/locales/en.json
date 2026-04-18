@@ -263,7 +263,10 @@
     "managedProfiles": "Managed profiles",
     "switchProfile": "Switch profile",
     "actingAs": "Betting as: {{name}}",
-    "backToMyProfile": "Back to my profile"
+    "backToMyProfile": "Back to my profile",
+    "theme": "Theme",
+    "themeDark": "Dark theme",
+    "themeLight": "Light theme"
   },
   "admin": {
     "title": "Admin Panel",

@@ -267,7 +267,10 @@
     "managedProfiles": "Perfis gerenciados",
     "switchProfile": "Trocar perfil",
     "actingAs": "Apostando como: {{name}}",
-    "backToMyProfile": "Voltar ao meu perfil"
+    "backToMyProfile": "Voltar ao meu perfil",
+    "theme": "Tema",
+    "themeDark": "Tema escuro",
+    "themeLight": "Tema claro"
   },
   "admin": {
     "title": "Painel Admin",
