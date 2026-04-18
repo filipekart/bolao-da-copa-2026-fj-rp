@@ -195,13 +195,18 @@ const GroupCard = React.forwardRef<HTMLDivElement, {
   const allLocked = matches.every(m => new Date(m.kickoff_at) <= now);
   const allHavePredictions = matches.every(m => existingPredictionIds.has(m.id));
 
-  // Calculate predicted standings from current scores
-  const predictedMatches: PredictedMatch[] = matches.map(m => ({
-    homeTeamId: m.home_team_id,
-    awayTeamId: m.away_team_id,
-    homeScore: scores[m.id]?.home ?? 0,
-    awayScore: scores[m.id]?.away ?? 0,
-  }));
+  // Calculate predicted standings from current scores (skip matches without a filled prediction)
+  const predictedMatches: PredictedMatch[] = matches
+    .filter(m => {
+      const s = scores[m.id];
+      return s && s.home !== null && s.away !== null;
+    })
+    .map(m => ({
+      homeTeamId: m.home_team_id,
+      awayTeamId: m.away_team_id,
+      homeScore: scores[m.id]!.home as number,
+      awayScore: scores[m.id]!.away as number,
+    }));
   const standings = calculatePredictedStandings(predictedMatches);
 
   // Get unique teams in this group, seed (first match home team) first
