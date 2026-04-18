@@ -168,7 +168,7 @@ const GroupCard = React.forwardRef<HTMLDivElement, {
   groupName: string;
   matches: MatchWithTeams[];
   scores: Scores;
-  onScoreChange: (matchId: string, home: number, away: number) => void;
+  onScoreChange: (matchId: string, home: number | null, away: number | null) => void;
   onSave: () => void;
   saving: boolean;
   teamNames: Map<string, string>;
@@ -268,7 +268,7 @@ const GroupCard = React.forwardRef<HTMLDivElement, {
                 )}
                 <MatchRow
                   match={m}
-                  score={scores[m.id] ?? { home: 0, away: 0 }}
+                  score={scores[m.id] ?? { home: null, away: null }}
                   onChange={(home, away) => onScoreChange(m.id, home, away)}
                   locked={locked}
                   teamNames={teamNames}
@@ -340,7 +340,7 @@ export default function HomePage() {
         const pred = existingPredictions.find(p => p.match_id === m.id);
         initial[m.id] = pred
           ? { home: pred.predicted_home_score, away: pred.predicted_away_score }
-          : { home: 0, away: 0 };
+          : { home: null, away: null };
       }
       setScores(initial);
     }
@@ -409,7 +409,7 @@ export default function HomePage() {
     return new Set(existingPredictions?.map(p => p.match_id) ?? []);
   }, [existingPredictions]);
 
-  const handleScoreChange = useCallback((matchId: string, home: number, away: number) => {
+  const handleScoreChange = useCallback((matchId: string, home: number | null, away: number | null) => {
     setScores(prev => ({ ...prev, [matchId]: { home, away } }));
   }, []);
 
@@ -422,18 +422,29 @@ export default function HomePage() {
     const now = new Date();
 
     try {
-      // Save each match prediction (skip locked matches)
-      const promises = groupMatches
+      // Save each match prediction (skip locked matches and unfilled scores)
+      const eligible = groupMatches
         .filter(m => new Date(m.kickoff_at) > now)
-        .map(m => {
-          const s = scores[m.id] ?? { home: 0, away: 0 };
-          return supabase.rpc('submit_match_prediction', {
-            p_match_id: m.id,
-            p_predicted_home_score: s.home,
-            p_predicted_away_score: s.away,
-            ...(isActingAsOther ? { p_acting_as: activeUserId } : {}),
-          });
+        .filter(m => {
+          const s = scores[m.id];
+          return s && s.home !== null && s.away !== null;
         });
+
+      if (eligible.length === 0) {
+        toast.info(t('home.nothingToSave'));
+        setSaving(null);
+        return;
+      }
+
+      const promises = eligible.map(m => {
+        const s = scores[m.id]!;
+        return supabase.rpc('submit_match_prediction', {
+          p_match_id: m.id,
+          p_predicted_home_score: s.home as number,
+          p_predicted_away_score: s.away as number,
+          ...(isActingAsOther ? { p_acting_as: activeUserId } : {}),
+        });
+      });
 
       const results = await Promise.allSettled(promises);
       const fulfilled = results.filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled');
