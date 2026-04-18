@@ -29,14 +29,21 @@ function MatchRow({
   teamNames,
 }: {
   match: MatchWithTeams;
-  score: { home: number; away: number };
-  onChange: (home: number, away: number) => void;
+  score: { home: number | null; away: number | null };
+  onChange: (home: number | null, away: number | null) => void;
   locked: boolean;
   teamNames?: Map<string, string>;
 }) {
-  const isFinished = match.status === 'FINISHED';
   const homeName = teamNames?.get(match.home_team_id) ?? match.home_team_name;
   const awayName = teamNames?.get(match.away_team_id) ?? match.away_team_name;
+
+  const displayHome = score.home === null ? '–' : score.home;
+  const displayAway = score.away === null ? '–' : score.away;
+
+  const incHome = () => onChange((score.home ?? 0) + 1, score.away);
+  const decHome = () => onChange(score.home === null ? 0 : Math.max(0, score.home - 1), score.away);
+  const incAway = () => onChange(score.home, (score.away ?? 0) + 1);
+  const decAway = () => onChange(score.home, score.away === null ? 0 : Math.max(0, score.away - 1));
 
   return (
     <div className="flex items-center gap-1 py-2">
@@ -53,33 +60,33 @@ function MatchRow({
         {locked ? (
           <div className="flex items-center gap-1">
             <span className="w-7 text-center text-sm font-bold text-foreground bg-secondary rounded px-1 py-0.5">
-              {score.home}
+              {displayHome}
             </span>
             <span className="text-muted-foreground text-xs">×</span>
             <span className="w-7 text-center text-sm font-bold text-foreground bg-secondary rounded px-1 py-0.5">
-              {score.away}
+              {displayAway}
             </span>
             <Lock className="w-3 h-3 text-muted-foreground ml-0.5" />
           </div>
         ) : (
           <div className="flex items-center gap-0.5">
             <button
-              onClick={() => onChange(Math.max(0, score.home - 1), score.away)}
+              onClick={decHome}
               className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
             >−</button>
-            <span className="w-6 text-center text-sm font-bold text-foreground">{score.home}</span>
+            <span className={`w-6 text-center text-sm font-bold ${score.home === null ? 'text-muted-foreground' : 'text-foreground'}`}>{displayHome}</span>
             <button
-              onClick={() => onChange(score.home + 1, score.away)}
+              onClick={incHome}
               className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
             >+</button>
             <span className="text-muted-foreground text-xs mx-0.5">×</span>
             <button
-              onClick={() => onChange(score.home, Math.max(0, score.away - 1))}
+              onClick={decAway}
               className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
             >−</button>
-            <span className="w-6 text-center text-sm font-bold text-foreground">{score.away}</span>
+            <span className={`w-6 text-center text-sm font-bold ${score.away === null ? 'text-muted-foreground' : 'text-foreground'}`}>{displayAway}</span>
             <button
-              onClick={() => onChange(score.home, score.away + 1)}
+              onClick={incAway}
               className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
             >+</button>
           </div>
