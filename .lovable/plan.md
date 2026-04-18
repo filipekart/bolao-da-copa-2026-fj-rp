@@ -1,43 +1,28 @@
 
+Implementar desempate por número de placares exatos (`exact_hits`) em todos os rankings.
 
-## Plan: Remover a trava de 5 horas — liberar palpites e estatísticas para sempre após o kickoff
+## Mudanças
 
-### Por que não afeta performance
-- A RLS faz lookup por PK (`m.id = match_id`) — O(1)
-- Max ~300 rows por partida, consultadas uma de cada vez
-- Cache no cliente (staleTime) já reduz requisições
+**Arquivo único:** `src/pages/RankingPage.tsx`
 
-### Mudanças
+Atualizar a função `sorted` no componente `RankingList` para incluir desempate:
 
-**1. Migration — Atualizar RLS policy**
-- Drop policy `"users read predictions after kickoff"`
-- Criar nova policy simplificada:
-```sql
-CREATE POLICY "users read predictions after kickoff"
-ON public.match_predictions FOR SELECT
-USING (
-  auth.role() = 'authenticated'
-  AND (
-    auth.uid() = user_id
-    OR EXISTS (
-      SELECT 1 FROM public.matches m
-      WHERE m.id = match_id
-      AND now() >= m.kickoff_at
-    )
-  )
+```ts
+const sorted = useMemo(
+  () => ranking?.length
+    ? [...ranking].sort((a, b) => {
+        const pointsDiff = (b[showField] ?? 0) - (a[showField] ?? 0);
+        if (pointsDiff !== 0) return pointsDiff;
+        return (b.exact_hits ?? 0) - (a.exact_hits ?? 0);
+      })
+    : [],
+  [ranking, showField]
 );
 ```
 
-**2. Código — Simplificar `isMatchRevealed`** (`src/lib/matchVisibility.ts`)
-- Remover o limite de 5 horas, tornando-a equivalente a `isMatchVisible`:
-```typescript
-export function isMatchRevealed(match: MatchWithTeams): boolean {
-  return Date.now() >= new Date(match.kickoff_at).getTime();
-}
-```
+Como o `RankingList` é usado por todas as abas (Geral, Grupos, Round 1/2/3, Knockout), a regra se aplica automaticamente a todos os rankings.
 
-**3. Código — Simplificar condição no MatchDetailPage** (`src/pages/MatchDetailPage.tsx`)
-- Com `isMatchRevealed` sem limite, a linha `const revealed = isMatchRevealed(match) || isFinished` pode ser simplificada para apenas `isMatchRevealed(match)` (já que `isFinished` implica que o kickoff passou)
+## Observações
 
-Nenhuma outra mudança necessária. Os hooks `useMatchPredictions` e `useMatchStats` continuam funcionando igual.
-
+- A aba "Custom Rankings" (`CustomRankingsTab`) precisa ser verificada — se ela usar a mesma lógica de ordenação interna, aplicaremos a mesma regra lá também.
+- Atualizar a memória `mem://features/ranking-details` para refletir a nova regra de desempate (substituindo "alfabética" por "placares exatos").
