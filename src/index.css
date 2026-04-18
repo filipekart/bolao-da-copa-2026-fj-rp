@@ -51,6 +51,51 @@
     --pitch-dark: 145 65% 28%;
     --surface: 220 18% 13%;
   }
+
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 220 20% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 12%;
+
+    --primary: 145 65% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 15% 94%;
+    --secondary-foreground: 220 20% 15%;
+
+    --muted: 220 15% 94%;
+    --muted-foreground: 220 10% 40%;
+
+    --accent: 42 85% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 145 65% 35%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 20% 15%;
+    --sidebar-primary: 145 65% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 94%;
+    --sidebar-accent-foreground: 220 20% 15%;
+    --sidebar-border: 220 15% 88%;
+    --sidebar-ring: 145 65% 35%;
+
+    --gold: 42 85% 45%;
+    --gold-foreground: 0 0% 100%;
+    --pitch: 145 65% 35%;
+    --pitch-dark: 145 60% 25%;
+    --surface: 0 0% 96%;
+  }
 }
 
 @layer base {
@@ -76,12 +121,12 @@
     background: linear-gradient(135deg, hsl(42 90% 45%), hsl(42 90% 60%));
   }
   .gradient-dark {
-    background: linear-gradient(180deg, hsl(220 20% 7%), hsl(220 18% 11%));
+    background: linear-gradient(180deg, hsl(var(--background)), hsl(var(--card)));
   }
   .glass {
-    background: hsl(220 18% 11% / 0.8);
+    background: hsl(var(--card) / 0.8);
     backdrop-filter: blur(16px);
-    border: 1px solid hsl(220 15% 20% / 0.5);
+    border: 1px solid hsl(var(--border) / 0.6);
   }
   .text-gradient-gold {
     background: linear-gradient(135deg, hsl(42 90% 55%), hsl(42 80% 70%));
