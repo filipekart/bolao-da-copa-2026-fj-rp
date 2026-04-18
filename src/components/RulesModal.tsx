@@ -12,7 +12,7 @@ const matchRules = [
   { label: 'Vencedor + gols do vencedor', points: 18, example: 'Palpite 3×1, Real 3×0' },
   { label: 'Vencedor + gols do perdedor', points: 12, example: 'Palpite 2×1, Real 3×1' },
   { label: 'Apenas resultado certo', points: 10, example: 'Palpite 1×0, Real 2×0' },
-  { label: 'Empate (não exato)', points: 10, example: 'Palpite 1×1, Real 0×0' },
+  { label: 'Empate (não exato)', points: 16, example: 'Palpite 1×1, Real 0×0' },
   { label: 'Errou', points: 0, example: 'Palpite 1×0, Real 0×1' },
 ];
 
