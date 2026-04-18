@@ -76,7 +76,7 @@
     background: linear-gradient(135deg, hsl(42 90% 45%), hsl(42 90% 60%));
   }
   .gradient-dark {
-    background: linear-gradient(180deg, hsl(220 20% 7%), hsl(220 18% 11%));
+    background: linear-gradient(180deg, hsl(222 47% 11%), hsl(222 47% 14%));
   }
   .glass {
     background: hsl(220 18% 11% / 0.8);
