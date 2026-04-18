@@ -34,7 +34,11 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
 
   const sorted = useMemo(
     () => ranking?.length
-      ? [...ranking].sort((a, b) => (b[showField] ?? 0) - (a[showField] ?? 0))
+      ? [...ranking].sort((a, b) => {
+          const pointsDiff = (b[showField] ?? 0) - (a[showField] ?? 0);
+          if (pointsDiff !== 0) return pointsDiff;
+          return (b.exact_hits ?? 0) - (a.exact_hits ?? 0);
+        })
       : [],
     [ranking, showField]
   );
