@@ -195,6 +195,7 @@
     "resultOnly": "Apenas resultado certo",
     "drawNotExact": "Empate (não exato)",
     "missed": "Errou",
+    "tiebreakerNote": "Critério de desempate: em caso de empate em pontos, fica na frente quem tiver mais placares exatos.",
     "rulesExtras": "🏆 Palpites Extras",
     "champion": "Campeão",
     "topScorer": "Artilheiro",

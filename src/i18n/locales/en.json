@@ -195,6 +195,7 @@
     "resultOnly": "Correct result only",
     "drawNotExact": "Draw (not exact)",
     "missed": "Missed",
+    "tiebreakerNote": "Tiebreaker: when points are tied, whoever has more exact scores ranks higher.",
     "rulesExtras": "🏆 Extra Predictions",
     "champion": "Champion",
     "topScorer": "Top Scorer",

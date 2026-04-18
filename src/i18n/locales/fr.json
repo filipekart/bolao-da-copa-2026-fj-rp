@@ -195,6 +195,7 @@
     "resultOnly": "Résultat correct uniquement",
     "drawNotExact": "Match nul (non exact)",
     "missed": "Raté",
+    "tiebreakerNote": "Départage : en cas d'égalité de points, celui qui a le plus de scores exacts est devant.",
     "rulesExtras": "🏆 Pronostics extras",
     "champion": "Champion",
     "topScorer": "Meilleur buteur",

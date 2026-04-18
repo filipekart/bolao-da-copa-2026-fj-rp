@@ -171,6 +171,9 @@ export default function ProfilePage() {
                   </div>
                 ))}
               </div>
+              <p className="text-[11px] text-muted-foreground italic pt-1">
+                💡 {t('profile.tiebreakerNote')}
+              </p>
             </div>
             <div className="space-y-2">
               <h3 className="font-semibold text-foreground">{t('profile.rulesExtras')}</h3>
