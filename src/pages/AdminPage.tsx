@@ -222,16 +222,29 @@ function UserApprovalSection() {
 
 function MatchResultSection() {
   const { data: matches, isLoading } = useMatches();
+  const { data: teams } = useTeams();
   const updateResult = useUpdateMatchResult();
+  const updateTeams = useUpdateMatchTeams();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
+  const [editingTeamsId, setEditingTeamsId] = useState<string | null>(null);
+  const [homeTeamId, setHomeTeamId] = useState('');
+  const [awayTeamId, setAwayTeamId] = useState('');
+  const [stageFilter, setStageFilter] = useState<'ALL' | 'GROUP_STAGE' | 'KNOCKOUT'>('ALL');
   const { t } = useTranslation();
   const tt = useTranslatedTeamName();
 
   if (isLoading) return <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />;
 
-  const sorted = [...(matches ?? [])].sort((a, b) =>
+  const sortedTeams = [...(teams ?? [])].sort((a, b) => a.name.localeCompare(b.name));
+
+  const filtered = (matches ?? []).filter(m => {
+    if (stageFilter === 'GROUP_STAGE') return m.stage === 'GROUP_STAGE';
+    if (stageFilter === 'KNOCKOUT') return m.stage !== 'GROUP_STAGE';
+    return true;
+  });
+  const sorted = [...filtered].sort((a, b) =>
     new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime()
   );
 
@@ -245,13 +258,32 @@ function MatchResultSection() {
         {t('admin.knockoutNote')}
       </p>
 
+      <div className="flex gap-1 p-1 bg-secondary rounded-xl">
+        {(['ALL', 'GROUP_STAGE', 'KNOCKOUT'] as const).map(f => (
+          <button
+            key={f}
+            onClick={() => setStageFilter(f)}
+            className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all ${
+              stageFilter === f ? 'gradient-pitch text-primary-foreground' : 'text-muted-foreground'
+            }`}
+          >
+            {f === 'ALL' ? 'Todos' : f === 'GROUP_STAGE' ? 'Grupos' : 'Mata-mata'}
+          </button>
+        ))}
+      </div>
+
       <div className="space-y-2 max-h-[60vh] overflow-y-auto">
         {sorted.map(m => {
           const isEditing = editingId === m.id;
+          const isEditingTeams = editingTeamsId === m.id;
+          const isKnockout = m.stage !== 'GROUP_STAGE';
           return (
             <div key={m.id} className="glass rounded-xl p-3 space-y-2">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{t(`match.stages.${m.stage}`, m.stage.replace(/_/g, ' '))}</span>
+                <span>
+                  {m.match_number ? `#${m.match_number} · ` : ''}
+                  {t(`match.stages.${m.stage}`, m.stage.replace(/_/g, ' '))}
+                </span>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
                   m.status === 'FINISHED' ? 'bg-primary/20 text-primary' :
                   m.status === 'LIVE' ? 'bg-destructive/20 text-destructive' :
@@ -261,103 +293,176 @@ function MatchResultSection() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  {m.home_team_flag_url && <img src={m.home_team_flag_url} alt="" loading="lazy" className="w-5 h-4 rounded-sm" />}
-                  <span className="text-sm text-foreground truncate">{tt(m.home_team_id, m.home_team_name)}</span>
-                </div>
-
-                {isEditing ? (
-                  <div className="flex items-center gap-1 px-2">
-                    <Input
-                      type="number"
-                      min={0}
-                      value={homeScore}
-                      onChange={e => setHomeScore(Number(e.target.value))}
-                      className="w-12 h-8 text-center text-sm bg-secondary border-border"
-                    />
-                    <span className="text-muted-foreground text-xs">×</span>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={awayScore}
-                      onChange={e => setAwayScore(Number(e.target.value))}
-                      className="w-12 h-8 text-center text-sm bg-secondary border-border"
-                    />
+              {isEditingTeams ? (
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground mb-1 block">Time mandante</label>
+                    <Select value={homeTeamId} onValueChange={setHomeTeamId}>
+                      <SelectTrigger className="h-9 text-sm bg-secondary border-border">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sortedTeams.map(team => (
+                          <SelectItem key={team.id} value={team.id}>
+                            {tt(team.id, team.name)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                ) : (
-                  <div className="px-3 text-sm font-medium text-foreground">
-                    {m.official_home_score !== null ? `${m.official_home_score} × ${m.official_away_score}` : '– × –'}
+                  <div>
+                    <label className="text-[10px] text-muted-foreground mb-1 block">Time visitante</label>
+                    <Select value={awayTeamId} onValueChange={setAwayTeamId}>
+                      <SelectTrigger className="h-9 text-sm bg-secondary border-border">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sortedTeams.map(team => (
+                          <SelectItem key={team.id} value={team.id}>
+                            {tt(team.id, team.name)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                )}
-
-                <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-                  <span className="text-sm text-foreground truncate">{tt(m.away_team_id, m.away_team_name)}</span>
-                  {m.away_team_flag_url && <img src={m.away_team_flag_url} alt="" loading="lazy" className="w-5 h-4 rounded-sm" />}
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                {isEditing ? (
-                  <>
+                  <div className="flex gap-2">
                     <Button
                       size="sm"
                       className="flex-1 gradient-pitch text-primary-foreground"
                       onClick={() => {
-                        updateResult.mutate({
-                          matchId: m.id,
-                          homeScore,
-                          awayScore,
-                          status: 'FINISHED',
-                        });
-                        setEditingId(null);
+                        if (!homeTeamId || !awayTeamId) {
+                          toast.error('Selecione os dois times');
+                          return;
+                        }
+                        updateTeams.mutate(
+                          { matchId: m.id, homeTeamId, awayTeamId },
+                          { onSuccess: () => setEditingTeamsId(null) }
+                        );
                       }}
                     >
-                      {t('admin.saveFinished')}
+                      Salvar times
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setEditingId(null)}
-                    >
+                    <Button size="sm" variant="outline" onClick={() => setEditingTeamsId(null)}>
                       {t('admin.cancel')}
                     </Button>
-                  </>
-                ) : (
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-xs text-muted-foreground"
-                      onClick={() => {
-                        setEditingId(m.id);
-                        setHomeScore(m.official_home_score ?? 0);
-                        setAwayScore(m.official_away_score ?? 0);
-                      }}
-                    >
-                      {t('admin.editResult')}
-                    </Button>
-                    {m.official_home_score !== null && (
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {m.home_team_flag_url && <img src={m.home_team_flag_url} alt="" loading="lazy" className="w-5 h-4 rounded-sm" />}
+                    <span className="text-sm text-foreground truncate">{tt(m.home_team_id, m.home_team_name)}</span>
+                  </div>
+
+                  {isEditing ? (
+                    <div className="flex items-center gap-1 px-2">
+                      <Input
+                        type="number"
+                        min={0}
+                        value={homeScore}
+                        onChange={e => setHomeScore(Number(e.target.value))}
+                        className="w-12 h-8 text-center text-sm bg-secondary border-border"
+                      />
+                      <span className="text-muted-foreground text-xs">×</span>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={awayScore}
+                        onChange={e => setAwayScore(Number(e.target.value))}
+                        className="w-12 h-8 text-center text-sm bg-secondary border-border"
+                      />
+                    </div>
+                  ) : (
+                    <div className="px-3 text-sm font-medium text-foreground">
+                      {m.official_home_score !== null ? `${m.official_home_score} × ${m.official_away_score}` : '– × –'}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
+                    <span className="text-sm text-foreground truncate">{tt(m.away_team_id, m.away_team_name)}</span>
+                    {m.away_team_flag_url && <img src={m.away_team_flag_url} alt="" loading="lazy" className="w-5 h-4 rounded-sm" />}
+                  </div>
+                </div>
+              )}
+
+              {!isEditingTeams && (
+                <div className="flex gap-2 flex-wrap">
+                  {isEditing ? (
+                    <>
                       <Button
                         size="sm"
-                        variant="ghost"
-                        className="text-xs text-destructive"
+                        className="flex-1 gradient-pitch text-primary-foreground"
                         onClick={() => {
                           updateResult.mutate({
                             matchId: m.id,
-                            homeScore: null as any,
-                            awayScore: null as any,
-                            status: 'SCHEDULED',
+                            homeScore,
+                            awayScore,
+                            status: 'FINISHED',
                           });
+                          setEditingId(null);
                         }}
                       >
-                        <Trash2 className="w-3 h-3 mr-1" />
-                        {t('admin.clearResult', 'Limpar')}
+                        {t('admin.saveFinished')}
                       </Button>
-                    )}
-                  </div>
-                )}
-              </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditingId(null)}
+                      >
+                        {t('admin.cancel')}
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="flex gap-2 flex-wrap">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-xs text-muted-foreground"
+                        onClick={() => {
+                          setEditingId(m.id);
+                          setHomeScore(m.official_home_score ?? 0);
+                          setAwayScore(m.official_away_score ?? 0);
+                        }}
+                      >
+                        {t('admin.editResult')}
+                      </Button>
+                      {isKnockout && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-xs text-accent"
+                          onClick={() => {
+                            setEditingTeamsId(m.id);
+                            setHomeTeamId(m.home_team_id);
+                            setAwayTeamId(m.away_team_id);
+                          }}
+                        >
+                          <Users2 className="w-3 h-3 mr-1" />
+                          Editar times
+                        </Button>
+                      )}
+                      {m.official_home_score !== null && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-xs text-destructive"
+                          onClick={() => {
+                            updateResult.mutate({
+                              matchId: m.id,
+                              homeScore: null as any,
+                              awayScore: null as any,
+                              status: 'SCHEDULED',
+                            });
+                          }}
+                        >
+                          <Trash2 className="w-3 h-3 mr-1" />
+                          {t('admin.clearResult', 'Limpar')}
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
