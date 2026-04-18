@@ -130,6 +130,30 @@ export function useUpdateMatchResult() {
   });
 }
 
+export function useUpdateMatchTeams() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ matchId, homeTeamId, awayTeamId }: {
+      matchId: string;
+      homeTeamId: string;
+      awayTeamId: string;
+    }) => {
+      if (homeTeamId === awayTeamId) throw new Error('Os times devem ser diferentes');
+      const { error } = await supabase
+        .from('matches')
+        .update({ home_team_id: homeTeamId, away_team_id: awayTeamId })
+        .eq('id', matchId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['matches'] });
+      queryClient.invalidateQueries({ queryKey: ['match'] });
+      toast.success('Times atualizados!');
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
 export function useRecalculateScores() {
   return useMutation({
     mutationFn: async () => {
