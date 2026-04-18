@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useMatches } from '@/hooks/useMatches';
+import { useTeams } from '@/hooks/useTeams';
 import {
   usePendingUsers,
   useApproveUser,
   useUpdateMatchResult,
+  useUpdateMatchTeams,
   useRecalculateScores,
   useUpdateUserName,
   useFetchFifaResults,
@@ -14,7 +16,7 @@ import {
 } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Shield, Users, Trophy, RefreshCw, Globe, Loader2, Check, X, Wallet, Copy, Pencil, Trash2, Link2 } from 'lucide-react';
+import { Shield, Users, Trophy, RefreshCw, Globe, Loader2, Check, X, Wallet, Copy, Pencil, Trash2, Link2, Users2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
