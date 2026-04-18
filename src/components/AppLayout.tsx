@@ -6,6 +6,7 @@ import { useMatchReminders } from '@/hooks/useMatchReminders';
 import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { NotificationBanner } from '@/components/NotificationBanner';
 import { InstallBanner } from '@/components/InstallBanner';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useTranslation } from 'react-i18next';
 import { useActiveProfile } from '@/lib/activeProfile';
 
