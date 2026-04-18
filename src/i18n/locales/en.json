@@ -71,7 +71,8 @@
     "saveError": "Error saving",
     "partialSave": "{{count}} prediction(s) saved successfully",
     "liveNow": "LIVE now",
-    "next24h": "Next 24h"
+    "next24h": "Next 24h",
+    "nothingToSave": "No predictions filled in to save."
   },
   "match": {
     "back": "Back",

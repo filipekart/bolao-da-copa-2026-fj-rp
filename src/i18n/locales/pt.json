@@ -71,7 +71,8 @@
     "saveError": "Erro ao salvar",
     "partialSave": "{{count}} palpite(s) salvo(s) com sucesso",
     "liveNow": "AO VIVO agora",
-    "next24h": "Próximas 24h"
+    "next24h": "Próximas 24h",
+    "nothingToSave": "Nenhum palpite preenchido para salvar."
   },
   "match": {
     "back": "Voltar",

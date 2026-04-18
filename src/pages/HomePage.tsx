@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { translateTeamName } from '@/lib/teamTranslations';
 
-type Scores = Record<string, { home: number; away: number }>;
+type Scores = Record<string, { home: number | null; away: number | null }>;
 
 function formatDate(iso: string, lang = 'pt') {
   const locale = lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US';
@@ -29,14 +29,21 @@ function MatchRow({
   teamNames,
 }: {
   match: MatchWithTeams;
-  score: { home: number; away: number };
-  onChange: (home: number, away: number) => void;
+  score: { home: number | null; away: number | null };
+  onChange: (home: number | null, away: number | null) => void;
   locked: boolean;
   teamNames?: Map<string, string>;
 }) {
-  const isFinished = match.status === 'FINISHED';
   const homeName = teamNames?.get(match.home_team_id) ?? match.home_team_name;
   const awayName = teamNames?.get(match.away_team_id) ?? match.away_team_name;
+
+  const displayHome = score.home === null ? '–' : score.home;
+  const displayAway = score.away === null ? '–' : score.away;
+
+  const incHome = () => onChange((score.home ?? 0) + 1, score.away);
+  const decHome = () => onChange(score.home === null ? 0 : Math.max(0, score.home - 1), score.away);
+  const incAway = () => onChange(score.home, (score.away ?? 0) + 1);
+  const decAway = () => onChange(score.home, score.away === null ? 0 : Math.max(0, score.away - 1));
 
   return (
     <div className="flex items-center gap-1 py-2">
@@ -53,33 +60,33 @@ function MatchRow({
         {locked ? (
           <div className="flex items-center gap-1">
             <span className="w-7 text-center text-sm font-bold text-foreground bg-secondary rounded px-1 py-0.5">
-              {score.home}
+              {displayHome}
             </span>
             <span className="text-muted-foreground text-xs">×</span>
             <span className="w-7 text-center text-sm font-bold text-foreground bg-secondary rounded px-1 py-0.5">
-              {score.away}
+              {displayAway}
             </span>
             <Lock className="w-3 h-3 text-muted-foreground ml-0.5" />
           </div>
         ) : (
           <div className="flex items-center gap-0.5">
             <button
-              onClick={() => onChange(Math.max(0, score.home - 1), score.away)}
+              onClick={decHome}
               className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
             >−</button>
-            <span className="w-6 text-center text-sm font-bold text-foreground">{score.home}</span>
+            <span className={`w-6 text-center text-sm font-bold ${score.home === null ? 'text-muted-foreground' : 'text-foreground'}`}>{displayHome}</span>
             <button
-              onClick={() => onChange(score.home + 1, score.away)}
+              onClick={incHome}
               className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
             >+</button>
             <span className="text-muted-foreground text-xs mx-0.5">×</span>
             <button
-              onClick={() => onChange(score.home, Math.max(0, score.away - 1))}
+              onClick={decAway}
               className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
             >−</button>
-            <span className="w-6 text-center text-sm font-bold text-foreground">{score.away}</span>
+            <span className={`w-6 text-center text-sm font-bold ${score.away === null ? 'text-muted-foreground' : 'text-foreground'}`}>{displayAway}</span>
             <button
-              onClick={() => onChange(score.home, score.away + 1)}
+              onClick={incAway}
               className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
             >+</button>
           </div>
@@ -161,7 +168,7 @@ const GroupCard = React.forwardRef<HTMLDivElement, {
   groupName: string;
   matches: MatchWithTeams[];
   scores: Scores;
-  onScoreChange: (matchId: string, home: number, away: number) => void;
+  onScoreChange: (matchId: string, home: number | null, away: number | null) => void;
   onSave: () => void;
   saving: boolean;
   teamNames: Map<string, string>;
@@ -261,7 +268,7 @@ const GroupCard = React.forwardRef<HTMLDivElement, {
                 )}
                 <MatchRow
                   match={m}
-                  score={scores[m.id] ?? { home: 0, away: 0 }}
+                  score={scores[m.id] ?? { home: null, away: null }}
                   onChange={(home, away) => onScoreChange(m.id, home, away)}
                   locked={locked}
                   teamNames={teamNames}
@@ -333,7 +340,7 @@ export default function HomePage() {
         const pred = existingPredictions.find(p => p.match_id === m.id);
         initial[m.id] = pred
           ? { home: pred.predicted_home_score, away: pred.predicted_away_score }
-          : { home: 0, away: 0 };
+          : { home: null, away: null };
       }
       setScores(initial);
     }
@@ -402,7 +409,7 @@ export default function HomePage() {
     return new Set(existingPredictions?.map(p => p.match_id) ?? []);
   }, [existingPredictions]);
 
-  const handleScoreChange = useCallback((matchId: string, home: number, away: number) => {
+  const handleScoreChange = useCallback((matchId: string, home: number | null, away: number | null) => {
     setScores(prev => ({ ...prev, [matchId]: { home, away } }));
   }, []);
 
@@ -415,18 +422,29 @@ export default function HomePage() {
     const now = new Date();
 
     try {
-      // Save each match prediction (skip locked matches)
-      const promises = groupMatches
+      // Save each match prediction (skip locked matches and unfilled scores)
+      const eligible = groupMatches
         .filter(m => new Date(m.kickoff_at) > now)
-        .map(m => {
-          const s = scores[m.id] ?? { home: 0, away: 0 };
-          return supabase.rpc('submit_match_prediction', {
-            p_match_id: m.id,
-            p_predicted_home_score: s.home,
-            p_predicted_away_score: s.away,
-            ...(isActingAsOther ? { p_acting_as: activeUserId } : {}),
-          });
+        .filter(m => {
+          const s = scores[m.id];
+          return s && s.home !== null && s.away !== null;
         });
+
+      if (eligible.length === 0) {
+        toast.info(t('home.nothingToSave'));
+        setSaving(null);
+        return;
+      }
+
+      const promises = eligible.map(m => {
+        const s = scores[m.id]!;
+        return supabase.rpc('submit_match_prediction', {
+          p_match_id: m.id,
+          p_predicted_home_score: s.home as number,
+          p_predicted_away_score: s.away as number,
+          ...(isActingAsOther ? { p_acting_as: activeUserId } : {}),
+        });
+      });
 
       const results = await Promise.allSettled(promises);
       const fulfilled = results.filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled');
