@@ -1,25 +1,43 @@
 
-Vou aplicar uma versão "dark mode moderno" mais clara e tirar um screenshot para comparação antes/depois.
+## Plano: Toggle de tema claro/escuro
 
-## O que vou alterar
+### O que vou fazer
 
-**1. `src/index.css` — Ajustar variáveis de cor**
+**1. Adicionar variáveis de tema claro em `src/index.css`**
+- Criar bloco `.light { ... }` com paleta clara (fundo branco/off-white, texto escuro, mantendo verde e dourado como acento).
+- Manter `:root` como está (tema escuro permanece o padrão).
+- Ajustar `.glass` e `.gradient-dark` para responder ao tema (ou criar variantes).
 
-Mudar o fundo de `hsl(220 20% 7%)` (~`#0a0a1a`, quase preto) para `hsl(222 47% 11%)` (~`#0f172a`, azul-acinzentado escuro tipo Twitter/X/Discord).
+**2. Criar `src/lib/theme.tsx` (ThemeProvider)**
+- Context com `theme: 'dark' | 'light'` e `toggleTheme()`.
+- Persistência em `localStorage` (`bolao-theme`).
+- Default: `dark` (preserva identidade visual atual).
+- Aplica/remove classe `light` no `<html>`.
 
-Ajustar variáveis relacionadas:
-- `--background: 220 20% 7%` → `222 47% 11%`
-- `--card: 220 18% 11%` → `222 47% 14%`
-- `--popover: 220 18% 11%` → `222 47% 14%`
-- `--secondary: 220 15% 18%` → `222 47% 16%`
-- `--muted: 220 15% 15%` → `222 47% 18%`
-- `--surface: 220 18% 13%` → `222 47% 20%`
-- `--sidebar-background: 220 18% 9%` → `222 47% 10%`
+**3. Envolver app com `ThemeProvider` em `src/App.tsx`**
+- Logo após `AuthProvider`.
 
-Mantém o verde primário e dourado de destaque — só clareia o fundo para reduzir o peso visual.
+**4. Criar componente `src/components/ThemeToggle.tsx`**
+- Botão com ícones `Sun`/`Moon` (lucide-react).
+- Usa `useTheme()` do provider.
 
-**2. Preview e screenshot**
+**5. Adicionar toggle em `src/pages/ProfilePage.tsx`**
+- Nova linha na seção de configurações (junto com seletor de idioma), com label traduzida.
 
-Após aplicar, tiro screenshot da mesma tela para comparação lado a lado.
+**6. Traduções em `src/i18n/locales/*.json`**
+- Chaves: `profile.theme`, `profile.themeDark`, `profile.themeLight` em pt/en/es/fr.
 
-**Resultado esperado**: Fundo azul-acinzentado (`#0f172a`) em vez de quase-preto (`#0a0a1a`). Mesmo dark mode, mas mais "respiro" visual.
+### Paleta clara proposta
+- `--background: 0 0% 98%` (off-white)
+- `--foreground: 220 20% 12%`
+- `--card: 0 0% 100%`
+- `--muted: 220 15% 94%`
+- `--border: 220 15% 88%`
+- `--primary` (verde) e `--accent` (dourado) inalterados — identidade preservada
+
+### Observação
+A memória registra "Exclusively Dark Mode" como parte da identidade visual. Vou manter dark como padrão e tratar o claro como opção opcional do usuário, sem alterar a identidade default. Após implementar, posso atualizar a memória se você confirmar que o tema claro agora é oficialmente suportado.
+
+### Arquivos
+- novo: `src/lib/theme.tsx`, `src/components/ThemeToggle.tsx`
+- editados: `src/index.css`, `src/App.tsx`, `src/pages/ProfilePage.tsx`, `src/i18n/locales/{pt,en,es,fr}.json`
