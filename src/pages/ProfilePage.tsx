@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '@/components/LanguageSelector';
-import { ThemeToggle } from '@/components/ThemeToggle';
+
 
 export default function ProfilePage() {
   const { user, signOut } = useAuth();
@@ -109,10 +109,6 @@ export default function ProfilePage() {
           </div>
         </div>
         <LanguageSelector variant="full" />
-        <div className="flex items-center justify-between gap-3 pt-2 border-t border-border/50">
-          <span className="text-sm text-muted-foreground">{t('profile.theme')}</span>
-          <ThemeToggle />
-        </div>
       </div>
 
       {/* Managed Profiles Selector */}

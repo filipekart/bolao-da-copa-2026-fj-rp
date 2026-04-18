@@ -6,6 +6,7 @@ import { useMatchReminders } from '@/hooks/useMatchReminders';
 import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { NotificationBanner } from '@/components/NotificationBanner';
 import { InstallBanner } from '@/components/InstallBanner';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useTranslation } from 'react-i18next';
 import { useActiveProfile } from '@/lib/activeProfile';
 
@@ -41,6 +42,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
         className="max-w-lg mx-auto w-full px-4"
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
+        <div className="flex items-center justify-between gap-3 pt-2">
+          <h1 className="text-sm font-bold text-foreground tracking-tight">BOLÃO FJ | RP</h1>
+          <ThemeToggle compact />
+        </div>
         <InstallBanner />
         <NotificationBanner onAccept={subscribe} />
         {isActingAsOther && activeDisplayName && (
