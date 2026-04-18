@@ -290,16 +290,20 @@ export default function KnockoutPage() {
             <div key={stage.key} className="space-y-2">
               <h2 className="text-sm font-display font-semibold text-foreground">{stage.label}</h2>
               <div className="space-y-2">
-                {stage.bracket.map(entry => (
-                  <BracketMatchCard
-                    key={entry.matchNum}
-                    entry={entry}
-                    realMatch={matchByNumber.get(entry.matchNum)}
-                    t={t}
-                    lang={lang}
-                    tt={tt}
-                  />
-                ))}
+                {stage.bracket.map(entry => {
+                  const real = matchByNumber.get(entry.matchNum);
+                  return (
+                    <BracketMatchCard
+                      key={entry.matchNum}
+                      entry={entry}
+                      realMatch={real}
+                      t={t}
+                      lang={lang}
+                      tt={tt}
+                      onClick={real?.id ? () => navigate(`/match/${real.id}`) : undefined}
+                    />
+                  );
+                })}
               </div>
             </div>
           ))}
