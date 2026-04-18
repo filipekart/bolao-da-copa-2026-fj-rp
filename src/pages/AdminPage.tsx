@@ -282,7 +282,9 @@ function MatchResultSection() {
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>
                   {m.match_number ? `#${m.match_number} · ` : ''}
-                  {t(`match.stages.${m.stage}`, m.stage.replace(/_/g, ' '))}
+                  {m.match_number === 103
+                    ? 'Disputa do 3º lugar'
+                    : t(`match.stages.${m.stage}`, m.stage.replace(/_/g, ' '))}
                 </span>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
                   m.status === 'FINISHED' ? 'bg-primary/20 text-primary' :
