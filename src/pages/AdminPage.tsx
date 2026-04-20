@@ -451,6 +451,24 @@ function MatchResultSection() {
                           Editar times
                         </Button>
                       )}
+                      {isKnockout && m.home_team_id !== '00000000-0000-0000-0000-000000000000' && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-xs text-destructive"
+                          onClick={() => {
+                            if (!confirm('Limpar times definidos e voltar para "A definir"?')) return;
+                            updateTeams.mutate({
+                              matchId: m.id,
+                              homeTeamId: '00000000-0000-0000-0000-000000000000',
+                              awayTeamId: '00000000-0000-0000-0000-000000000000',
+                            });
+                          }}
+                        >
+                          <X className="w-3 h-3 mr-1" />
+                          Limpar times
+                        </Button>
+                      )}
                       {m.official_home_score !== null && (
                         <Button
                           size="sm"
