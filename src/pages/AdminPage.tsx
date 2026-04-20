@@ -244,9 +244,17 @@ function MatchResultSection() {
     if (stageFilter === 'KNOCKOUT') return m.stage !== 'GROUP_STAGE';
     return true;
   });
-  const sorted = [...filtered].sort((a, b) =>
-    new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime()
-  );
+  const sorted = [...filtered].sort((a, b) => {
+    const aKnockout = a.stage !== 'GROUP_STAGE';
+    const bKnockout = b.stage !== 'GROUP_STAGE';
+    if (aKnockout && bKnockout) {
+      return (a.match_number ?? 0) - (b.match_number ?? 0);
+    }
+    if (aKnockout !== bKnockout) {
+      return aKnockout ? 1 : -1;
+    }
+    return new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime();
+  });
 
   return (
     <div className="space-y-4">
