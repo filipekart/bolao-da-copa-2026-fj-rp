@@ -8,12 +8,12 @@ import {
 import { HelpCircle } from 'lucide-react';
 
 const matchRules = [
-  { label: 'Placar exato', points: 25, example: 'Palpite 2×1, Real 2×1' },
-  { label: 'Vencedor + gols do vencedor', points: 18, example: 'Palpite 3×1, Real 3×0' },
-  { label: 'Vencedor + gols do perdedor', points: 12, example: 'Palpite 2×1, Real 3×1' },
-  { label: 'Apenas resultado certo', points: 10, example: 'Palpite 2×1, Real 3×0' },
-  { label: 'Empate (não exato)', points: 16, example: 'Palpite 1×1, Real 0×0' },
-  { label: 'Errou', points: 0, example: 'Palpite 1×0, Real 0×1' },
+  { label: 'Placar exato', points: 25, example: 'Palpite 2×1, Real 2×1', cls: 'text-green-400' },
+  { label: 'Vencedor + gols do vencedor', points: 18, example: 'Palpite 3×1, Real 3×0', cls: 'text-blue-400' },
+  { label: 'Empate (não exato)', points: 16, example: 'Palpite 1×1, Real 0×0', cls: 'text-teal-400' },
+  { label: 'Vencedor + gols do perdedor', points: 12, example: 'Palpite 2×1, Real 3×1', cls: 'text-blue-400' },
+  { label: 'Apenas resultado certo', points: 10, example: 'Palpite 2×1, Real 3×0', cls: 'text-yellow-400' },
+  { label: 'Errou', points: 0, example: 'Palpite 1×0, Real 0×1', cls: 'text-red-400' },
 ];
 
 const extraRules = [
@@ -50,7 +50,7 @@ export function RulesModal() {
                     <p className="text-foreground font-medium">{r.label}</p>
                     <p className="text-[11px] text-muted-foreground">{r.example}</p>
                   </div>
-                  <span className="text-primary font-bold whitespace-nowrap">{r.points} pts</span>
+                  <span className={`${r.cls} font-bold whitespace-nowrap`}>{r.points} pts</span>
                 </div>
               ))}
             </div>
