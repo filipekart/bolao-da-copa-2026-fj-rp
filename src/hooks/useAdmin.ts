@@ -138,7 +138,10 @@ export function useUpdateMatchTeams() {
       homeTeamId: string;
       awayTeamId: string;
     }) => {
-      if (homeTeamId === awayTeamId) throw new Error('Os times devem ser diferentes');
+      const PLACEHOLDER = '00000000-0000-0000-0000-000000000000';
+      if (homeTeamId === awayTeamId && homeTeamId !== PLACEHOLDER) {
+        throw new Error('Os times devem ser diferentes');
+      }
       const { error } = await supabase
         .from('matches')
         .update({ home_team_id: homeTeamId, away_team_id: awayTeamId })
