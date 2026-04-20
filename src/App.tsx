@@ -8,6 +8,7 @@ import { ActiveProfileProvider } from "@/lib/activeProfile";
 import { AppLayout } from "@/components/AppLayout";
 import { ThemeProvider } from "@/lib/theme";
 import AuthPage from "./pages/AuthPage";
+import BolaDaVezAuthPage from "./pages/BolaDaVezAuthPage";
 import HomePage from "./pages/HomePage";
 import MatchDetailPage from "./pages/MatchDetailPage";
 import MyBetsPage from "./pages/MyBetsPage";
@@ -99,10 +100,26 @@ function AuthGuard() {
   return <AuthPage />;
 }
 
+function BolaDaVezAuthGuard() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen gradient-dark flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (user) return <Navigate to="/" replace />;
+  return <BolaDaVezAuthPage />;
+}
+
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/auth" element={<AuthGuard />} />
+      <Route path="/boladavez" element={<BolaDaVezAuthGuard />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/*" element={<ProtectedRoutes />} />
     </Routes>
