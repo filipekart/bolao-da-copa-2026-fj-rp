@@ -1,10 +1,18 @@
 
-## Plano: Remover header "BOLÃO FJ | RP"
 
-Apagar o `<h1>` "BOLÃO FJ | RP" do `AppLayout`, mantendo o `ThemeToggle` alinhado à direita.
+## Corrigir exemplo "Apenas resultado certo" nas Regras
 
-**Alteração em `src/components/AppLayout.tsx`**
-- Remover o `<h1>` do header row.
-- Trocar `justify-between` por `justify-end` para o `ThemeToggle` ficar à direita.
+### Problema
+Em `src/components/RulesModal.tsx`, o exemplo da regra de 10 pts está incorreto: `Palpite 1×0, Real 2×0` acerta vencedor + gols do perdedor (0), o que vale 12 pts, não 10.
 
-Sem mudanças em outros arquivos. Banner de "Atuando como" e demais elementos do header permanecem.
+### Alteração
+Em `src/components/RulesModal.tsx`, no array `matchRules`, trocar o exemplo de "Apenas resultado certo":
+
+- De: `'Palpite 1×0, Real 2×0'`
+- Para: `'Palpite 2×1, Real 3×0'`
+
+Acerta só o vencedor; erra os gols do vencedor (2≠3) e do perdedor (1≠0) → 10 pts.
+
+### Arquivos
+- `src/components/RulesModal.tsx`
+
