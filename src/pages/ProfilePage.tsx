@@ -46,7 +46,7 @@ export default function ProfilePage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('pix_key')
+        .select('pix_key, display_name')
         .eq('id', user!.id)
         .single();
       if (error) throw error;
@@ -103,7 +103,7 @@ export default function ProfilePage() {
           </div>
           <div>
             <p className="text-foreground font-medium">
-              {user?.user_metadata?.display_name ?? user?.email?.split('@')[0]}
+              {profile?.display_name ?? user?.user_metadata?.display_name ?? user?.email?.split('@')[0]}
             </p>
             <p className="text-sm text-muted-foreground">{user?.email}</p>
           </div>
@@ -127,7 +127,7 @@ export default function ProfilePage() {
             >
               <User className="w-4 h-4 text-foreground" />
               <span className="text-sm text-foreground font-medium">
-                {user?.user_metadata?.display_name ?? user?.email?.split('@')[0]}
+                {profile?.display_name ?? user?.user_metadata?.display_name ?? user?.email?.split('@')[0]}
               </span>
               {!isActingAsOther && <span className="text-[10px] text-primary ml-auto">{t('ranking.you')}</span>}
             </button>
