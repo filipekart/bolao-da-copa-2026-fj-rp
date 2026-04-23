@@ -1,18 +1,26 @@
 
 
-## Corrigir exemplo "Apenas resultado certo" nas Regras
+## Corrigir aba "Meus Rankings" para mostrar rankings em que o usuário é membro
 
 ### Problema
-Em `src/components/RulesModal.tsx`, o exemplo da regra de 10 pts está incorreto: `Palpite 1×0, Real 2×0` acerta vencedor + gols do perdedor (0), o que vale 12 pts, não 10.
+Em `src/hooks/useCustomRankings.ts`, a query filtra `custom_rankings` por `owner_id = user.id`. Logo, usuários adicionados a rankings criados por outras pessoas não veem nada — mesmo a RLS permitindo (`is_ranking_member`).
 
-### Alteração
-Em `src/components/RulesModal.tsx`, no array `matchRules`, trocar o exemplo de "Apenas resultado certo":
+### Solução
+Remover o filtro `.eq('owner_id', user!.id)` e deixar a RLS retornar tudo que o usuário pode ver (rankings próprios + rankings em que é membro). Adaptar a UI para distinguir rankings próprios vs. compartilhados.
 
-- De: `'Palpite 1×0, Real 2×0'`
-- Para: `'Palpite 2×1, Real 3×0'`
+### Alterações
 
-Acerta só o vencedor; erra os gols do vencedor (2≠3) e do perdedor (1≠0) → 10 pts.
+**1. `src/hooks/useCustomRankings.ts`**
+- Remover `.eq('owner_id', user!.id)` no `queryFn`. A RLS já garante que só vêm rankings próprios ou onde o usuário é membro.
+
+**2. `src/components/ranking/CustomRankingsTab.tsx`**
+- Calcular `isOwner = r.owner_id === user?.id` para cada ranking.
+- Esconder os botões de Editar/Excluir quando `!isOwner` (RLS bloquearia mesmo, e visualmente confunde).
+- Adicionar um pequeno badge/legenda "Compartilhado" quando `!isOwner`, para o usuário entender que foi adicionado por outra pessoa.
+- Adicionar nova string i18n `ranking.shared` nos 4 locales (pt: "Compartilhado", en: "Shared", es: "Compartido", fr: "Partagé").
 
 ### Arquivos
-- `src/components/RulesModal.tsx`
+- `src/hooks/useCustomRankings.ts`
+- `src/components/ranking/CustomRankingsTab.tsx`
+- `src/i18n/locales/{pt,en,es,fr}.json`
 
