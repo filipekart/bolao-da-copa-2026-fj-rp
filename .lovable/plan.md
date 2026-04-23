@@ -1,26 +1,25 @@
 
 
-## Corrigir aba "Meus Rankings" para mostrar rankings em que o usuário é membro
+## Corrigir Ranking Geral invisível para usuários não-admin
 
 ### Problema
-Em `src/hooks/useCustomRankings.ts`, a query filtra `custom_rankings` por `owner_id = user.id`. Logo, usuários adicionados a rankings criados por outras pessoas não veem nada — mesmo a RLS permitindo (`is_ranking_member`).
+A view `v_ranking` está com `security_invoker=on`. Ela faz `JOIN profiles p ON p.id = l.user_id WHERE p.approved = true`. Como a RLS de `profiles` só permite o próprio usuário ler sua linha (admins leem todas), para usuários comuns o JOIN filtra tudo exceto a própria linha — por isso só admins viam o ranking geral completo.
+
+As outras abas (Grupos, Round1-3, Knockout) funcionam porque chamam o RPC `get_public_profiles` (SECURITY DEFINER), que ignora a RLS.
 
 ### Solução
-Remover o filtro `.eq('owner_id', user!.id)` e deixar a RLS retornar tudo que o usuário pode ver (rankings próprios + rankings em que é membro). Adaptar a UI para distinguir rankings próprios vs. compartilhados.
+Alterar a view `v_ranking` para `security_invoker=off` (definer mode), assim o JOIN com `profiles` é feito com privilégios do owner (postgres) e enxerga todos os perfis aprovados. A view já não expõe campos sensíveis (sem `pix_key`, sem email — apenas `display_name`, pontos, e info de extras já públicas).
 
-### Alterações
+### Migration
+```sql
+ALTER VIEW public.v_ranking SET (security_invoker = off);
+```
 
-**1. `src/hooks/useCustomRankings.ts`**
-- Remover `.eq('owner_id', user!.id)` no `queryFn`. A RLS já garante que só vêm rankings próprios ou onde o usuário é membro.
+Sem mudanças de código frontend — o hook `useRanking` continua igual e voltará a retornar todos os usuários aprovados.
 
-**2. `src/components/ranking/CustomRankingsTab.tsx`**
-- Calcular `isOwner = r.owner_id === user?.id` para cada ranking.
-- Esconder os botões de Editar/Excluir quando `!isOwner` (RLS bloquearia mesmo, e visualmente confunde).
-- Adicionar um pequeno badge/legenda "Compartilhado" quando `!isOwner`, para o usuário entender que foi adicionado por outra pessoa.
-- Adicionar nova string i18n `ranking.shared` nos 4 locales (pt: "Compartilhado", en: "Shared", es: "Compartido", fr: "Partagé").
+### Validação
+Após a migration, abrir a aba "Geral" como usuário comum e confirmar que todos os participantes aprovados aparecem com suas pontuações.
 
 ### Arquivos
-- `src/hooks/useCustomRankings.ts`
-- `src/components/ranking/CustomRankingsTab.tsx`
-- `src/i18n/locales/{pt,en,es,fr}.json`
+- Nova migration SQL alterando a opção da view `v_ranking`.
 
