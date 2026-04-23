@@ -21,7 +21,6 @@ export function useCustomRankings() {
       const { data: rankings, error } = await supabase
         .from('custom_rankings')
         .select('id, owner_id, name, created_at')
-        .eq('owner_id', user!.id)
         .order('created_at', { ascending: true });
       if (error) throw error;
 

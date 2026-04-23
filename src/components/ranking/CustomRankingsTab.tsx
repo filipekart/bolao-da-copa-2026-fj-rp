@@ -148,16 +148,27 @@ export default function CustomRankingsTab({ extrasRevealed }: { extrasRevealed: 
             className="w-full flex items-center justify-between p-4 text-left"
           >
             <div>
-              <p className="font-medium text-foreground">{r.name}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-medium text-foreground">{r.name}</p>
+                {r.owner_id !== user?.id && (
+                  <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
+                    {t('ranking.shared')}
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">{r.members.length} {t('ranking.members')}</p>
             </div>
             <div className="flex items-center gap-2">
-              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={e => { e.stopPropagation(); openEdit(r); }}>
-                <Pencil className="w-3.5 h-3.5" />
-              </Button>
-              <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={e => { e.stopPropagation(); setDeletingId(r.id); }}>
-                <Trash2 className="w-3.5 h-3.5" />
-              </Button>
+              {r.owner_id === user?.id && (
+                <>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={e => { e.stopPropagation(); openEdit(r); }}>
+                    <Pencil className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={e => { e.stopPropagation(); setDeletingId(r.id); }}>
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </>
+              )}
               {expanded === r.id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
             </div>
           </button>
