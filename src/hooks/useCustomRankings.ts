@@ -18,22 +18,20 @@ export function useCustomRankings() {
     queryKey: ['custom-rankings', user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data: rankings, error } = await supabase
+      // Single round-trip: fetch all visible rankings with their members embedded.
+      // RLS on both tables already restricts results to rankings the user owns
+      // or is a member of. We bump the range to avoid the implicit 1000-row cap.
+      const { data, error } = await supabase
         .from('custom_rankings')
-        .select('id, owner_id, name, created_at')
-        .order('created_at', { ascending: true });
+        .select('id, owner_id, name, created_at, members:custom_ranking_members(user_id)')
+        .order('created_at', { ascending: true })
+        .range(0, 9999);
       if (error) throw error;
 
-      const allMembers = await Promise.all(
-        (rankings ?? []).map(async (r) => {
-          const { data } = await supabase
-            .from('custom_ranking_members')
-            .select('user_id')
-            .eq('ranking_id', r.id);
-          return { ...r, members: data ?? [] };
-        })
-      );
-      return allMembers as CustomRanking[];
+      return (data ?? []).map((r: any) => ({
+        ...r,
+        members: r.members ?? [],
+      })) as CustomRanking[];
     },
   });
 
