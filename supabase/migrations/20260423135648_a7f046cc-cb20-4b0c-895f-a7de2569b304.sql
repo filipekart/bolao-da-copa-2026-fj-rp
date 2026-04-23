@@ -1,0 +1,1 @@
+ALTER VIEW public.v_ranking SET (security_invoker = off);
