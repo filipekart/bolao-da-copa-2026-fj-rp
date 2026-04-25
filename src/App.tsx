@@ -19,8 +19,10 @@ import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
-import { Loader2, ShieldAlert } from "lucide-react";
+import { Loader2, ShieldAlert, Copy, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,6 +37,19 @@ const queryClient = new QueryClient({
 function ProtectedRoutes() {
   const { user, loading, isAdmin, isApproved, profileLoading } = useAuth();
   const { t } = useTranslation();
+  const [pixCopied, setPixCopied] = useState(false);
+  const PIX_NUMBER = "10092816746";
+
+  const handleCopyPix = async () => {
+    try {
+      await navigator.clipboard.writeText(PIX_NUMBER);
+      setPixCopied(true);
+      toast.success(t('admin.pixCopied'));
+      setTimeout(() => setPixCopied(false), 2000);
+    } catch {
+      toast.error('Erro ao copiar');
+    }
+  };
 
   if (loading || profileLoading) {
     return (
@@ -55,6 +70,13 @@ function ProtectedRoutes() {
           <p className="text-sm text-muted-foreground whitespace-pre-line">
             {t('approval.message')}
           </p>
+          <button
+            onClick={handleCopyPix}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-sm font-mono font-semibold transition-colors border border-primary/20"
+          >
+            <span>{PIX_NUMBER}</span>
+            {pixCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+          </button>
           <button
             onClick={() => { void import('@/integrations/supabase/client').then(m => m.supabase.auth.signOut()); }}
             className="text-sm text-muted-foreground underline"
