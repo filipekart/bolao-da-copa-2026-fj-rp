@@ -184,6 +184,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "knockout_predictions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ranking"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       knockout_results: {
@@ -272,6 +279,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "leaderboard_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_ranking"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       managed_profiles: {
@@ -356,6 +370,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_predictions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ranking"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -617,6 +638,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ranking"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       teams: {
@@ -727,15 +755,7 @@ export type Database = {
           updated_at: string | null
           user_id: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "leaderboard_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Functions: {
