@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import CustomRankingsTab from '@/components/ranking/CustomRankingsTab';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
+import { Flag } from '@/components/Flag';
 function useExtrasRevealed() {
   return useQuery({
     queryKey: ['first-match-kickoff'],
@@ -125,18 +126,18 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
                 <span>{t('ranking.exact')}: {entry.exact_hits ?? 0}</span>
                 {(extrasRevealed || isMe) && entry.champion_flag_url && (
                   <span className="flex items-center gap-1" title={`${t('extras.champion')}: ${entry.champion_team_name}`}>
-                    🏆 <img src={entry.champion_flag_url} alt={entry.champion_team_name ?? ''} loading="lazy" className="w-4 h-3 rounded-sm" />
+                    🏆 <Flag src={entry.champion_flag_url} alt="entry.champion_team_name ?? ''" className="w-4 h-3 rounded-sm" />
                   </span>
                 )}
                 {(extrasRevealed || isMe) && entry.top_scorer_name && (
                   <span className="flex items-center gap-1" title={`${t('extras.topScorer')}: ${entry.top_scorer_name}`}>
-                    ⚽ {entry.top_scorer_flag_url && <img src={entry.top_scorer_flag_url} alt="" loading="lazy" className="w-4 h-3 rounded-sm" />}
+                    ⚽ {entry.top_scorer_flag_url && <Flag src={entry.top_scorer_flag_url} alt="" className="w-4 h-3 rounded-sm" />}
                     <span className="whitespace-nowrap">{entry.top_scorer_name}</span>
                   </span>
                 )}
                 {(extrasRevealed || isMe) && entry.mvp_name && (
                   <span className="flex items-center gap-1" title={`${t('extras.mvp')}: ${entry.mvp_name}`}>
-                    ⭐ {entry.mvp_flag_url && <img src={entry.mvp_flag_url} alt="" loading="lazy" className="w-4 h-3 rounded-sm" />}
+                    ⭐ {entry.mvp_flag_url && <Flag src={entry.mvp_flag_url} alt="" className="w-4 h-3 rounded-sm" />}
                     <span className="whitespace-nowrap">{entry.mvp_name}</span>
                   </span>
                 )}

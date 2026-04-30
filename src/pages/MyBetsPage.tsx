@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { useTranslation } from 'react-i18next';
 import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 
+import { Flag } from '@/components/Flag';
 function formatDate(iso: string, lang: string) {
   const locale = lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US';
   return new Date(iso).toLocaleDateString(locale, {
@@ -127,7 +128,7 @@ export default function MyBetsPage() {
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                   {match.home_team_flag_url && (
-                                    <img src={match.home_team_flag_url} alt="" loading="lazy" className="w-6 h-4 rounded-sm" />
+                                    <Flag src={match.home_team_flag_url} alt="" className="w-6 h-4 rounded-sm" />
                                   )}
                                   <span className="text-sm font-medium text-foreground truncate">
                                     {tt(match.home_team_id, match.home_team_name)}
@@ -149,7 +150,7 @@ export default function MyBetsPage() {
                                     {tt(match.away_team_id, match.away_team_name)}
                                   </span>
                                   {match.away_team_flag_url && (
-                                    <img src={match.away_team_flag_url} alt="" loading="lazy" className="w-6 h-4 rounded-sm" />
+                                    <Flag src={match.away_team_flag_url} alt="" className="w-6 h-4 rounded-sm" />
                                   )}
                                 </div>
                               </div>
