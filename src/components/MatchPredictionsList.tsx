@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/auth';
 import { Loader2, Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useTranslation } from 'react-i18next';
+import { Flag } from '@/components/Flag';
 
 const ruleBadge: Record<string, { label: string; cls: string }> = {
   EXACT_SCORE: { label: '25pts', cls: 'bg-green-600/20 text-green-400' },
@@ -91,11 +92,11 @@ export function MatchPredictionsList({ matchId, isFinished, homeFlagUrl, awayFla
 
               {/* Score with flags */}
               <div className="flex items-center gap-1 shrink-0">
-                {homeFlagUrl && <img src={homeFlagUrl} alt="" className="w-4 h-3 rounded-sm object-cover" />}
+                {homeFlagUrl && <Flag src={homeFlagUrl} className="w-4 h-3 rounded-sm object-cover" width={16} height={12} />}
                 <span className="text-sm font-semibold text-foreground tabular-nums">
                   {p.predicted_home_score} × {p.predicted_away_score}
                 </span>
-                {awayFlagUrl && <img src={awayFlagUrl} alt="" className="w-4 h-3 rounded-sm object-cover" />}
+                {awayFlagUrl && <Flag src={awayFlagUrl} className="w-4 h-3 rounded-sm object-cover" width={16} height={12} />}
               </div>
 
               {/* Points badge */}
