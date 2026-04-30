@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTeamNameByCode } from '@/hooks/useTranslatedTeamName';
 
+import { Flag } from '@/components/Flag';
 function useTeams() {
   return useQuery({
     queryKey: ['teams'],
@@ -127,7 +128,7 @@ export default function ChampionTab() {
           <p className="text-xs text-muted-foreground font-medium">{t('extras.currentPrediction')}</p>
           <div className="flex items-center gap-3">
             {(prediction as any).teams?.flag_url && (
-              <img src={(prediction as any).teams.flag_url} alt="" loading="lazy" className="w-8 h-6 rounded-sm" />
+              <Flag src={(prediction as any).teams.flag_url} alt="" className="w-8 h-6 rounded-sm" />
             )}
             <span className="text-lg font-display font-bold text-foreground">
               {(prediction as any).teams?.name ? tn((prediction as any).teams.name, (prediction as any).teams?.fifa_code) : t('extras.unknownTeam')}
@@ -162,7 +163,7 @@ export default function ChampionTab() {
                           isSelected ? 'ring-2 ring-primary' : isCurrent ? 'ring-1 ring-accent' : ''
                         }`}
                       >
-                        {team.flag_url && <img src={team.flag_url} alt="" loading="lazy" className="w-6 h-4 rounded-sm" />}
+                        {team.flag_url && <Flag src={team.flag_url} alt="" className="w-6 h-4 rounded-sm" />}
                         <span className="text-sm text-foreground font-medium">{tn(team.name, team.fifa_code)}</span>
                         {isCurrent && <span className="text-[10px] text-accent ml-auto">{t('extras.current')}</span>}
                       </button>

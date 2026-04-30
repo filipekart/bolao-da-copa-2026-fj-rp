@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { translateTeamName } from '@/lib/teamTranslations';
 
+import { Flag } from '@/components/Flag';
 type Scores = Record<string, { home: number | null; away: number | null }>;
 
 function formatDate(iso: string, lang = 'pt') {
@@ -51,7 +52,7 @@ function MatchRow({
       <div className="flex items-center gap-1 flex-1 min-w-0 justify-end">
         <span className="text-xs text-foreground truncate text-right">{homeName}</span>
         {match.home_team_flag_url && (
-          <img src={match.home_team_flag_url} alt="" loading="lazy" className="w-5 h-3.5 rounded-sm flex-shrink-0" />
+          <Flag src={match.home_team_flag_url} alt="" className="w-5 h-3.5 rounded-sm flex-shrink-0" />
         )}
       </div>
 
@@ -96,7 +97,7 @@ function MatchRow({
       {/* Away team */}
       <div className="flex items-center gap-1 flex-1 min-w-0">
         {match.away_team_flag_url && (
-          <img src={match.away_team_flag_url} alt="" loading="lazy" className="w-5 h-3.5 rounded-sm flex-shrink-0" />
+          <Flag src={match.away_team_flag_url} alt="" className="w-5 h-3.5 rounded-sm flex-shrink-0" />
         )}
         <span className="text-xs text-foreground truncate">{awayName}</span>
       </div>
@@ -563,7 +564,7 @@ export default function HomePage() {
           {liveMatches.map(m => (
             <div key={m.id} className="glass rounded-xl p-3 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                {m.home_team_flag_url && <img src={m.home_team_flag_url} alt="" loading="lazy" className="w-5 h-3.5 rounded-sm" />}
+                {m.home_team_flag_url && <Flag src={m.home_team_flag_url} alt="" className="w-5 h-3.5 rounded-sm" />}
                 <span className="text-xs text-foreground">{teamNames.get(m.home_team_id) ?? m.home_team_name}</span>
               </div>
               <span className="text-sm font-bold text-foreground">
@@ -571,7 +572,7 @@ export default function HomePage() {
               </span>
               <div className="flex items-center gap-1.5">
                 <span className="text-xs text-foreground">{teamNames.get(m.away_team_id) ?? m.away_team_name}</span>
-                {m.away_team_flag_url && <img src={m.away_team_flag_url} alt="" loading="lazy" className="w-5 h-3.5 rounded-sm" />}
+                {m.away_team_flag_url && <Flag src={m.away_team_flag_url} alt="" className="w-5 h-3.5 rounded-sm" />}
               </div>
             </div>
           ))}

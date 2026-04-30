@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 
+import { Flag } from '@/components/Flag';
 // Inline filtered ranking list (simplified)
 function FilteredRankingList({ ranking, memberIds, userId, t, extrasRevealed }: any) {
   const filtered = ranking?.filter((r: any) => memberIds.includes(r.user_id))
@@ -46,7 +47,7 @@ function FilteredRankingList({ ranking, memberIds, userId, t, extrasRevealed }: 
                 <span>{t('ranking.matches')}: {entry.points_matches}</span>
                 <span>{t('ranking.exact')}: {entry.exact_hits ?? 0}</span>
                 {(extrasRevealed || isMe) && entry.champion_flag_url && (
-                  <span className="flex items-center gap-1">🏆 <img src={entry.champion_flag_url} alt="" loading="lazy" className="w-4 h-3 rounded-sm" /></span>
+                  <span className="flex items-center gap-1">🏆 <Flag src={entry.champion_flag_url} alt="" className="w-4 h-3 rounded-sm" /></span>
                 )}
               </div>
             </div>
