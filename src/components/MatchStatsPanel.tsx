@@ -3,6 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer } from 'recharts';
 import { Progress } from '@/components/ui/progress';
+import { Flag } from '@/components/Flag';
 
 interface Props {
   matchId: string;
@@ -97,11 +98,11 @@ export function MatchStatsPanel({ matchId, isFinished, homeTeamName, awayTeamNam
           {stats.top_scores.slice(0, 3).map((s, i) => (
             <div key={i} className="flex flex-col items-center gap-1 p-3 rounded-xl bg-secondary">
               <div className="flex items-center gap-1">
-                {homeFlagUrl && <img src={homeFlagUrl} alt="" className="w-4 h-3 rounded-sm object-cover" />}
+                {homeFlagUrl && <Flag src={homeFlagUrl} className="w-4 h-3 rounded-sm object-cover" width={16} height={12} />}
                 <span className="text-lg font-bold text-foreground tabular-nums">
                   {s.home} × {s.away}
                 </span>
-                {awayFlagUrl && <img src={awayFlagUrl} alt="" className="w-4 h-3 rounded-sm object-cover" />}
+                {awayFlagUrl && <Flag src={awayFlagUrl} className="w-4 h-3 rounded-sm object-cover" width={16} height={12} />}
               </div>
               <span className="text-xs text-muted-foreground">
                 ({s.count} {s.count === 1 ? 'palpite' : 'palpites'})
