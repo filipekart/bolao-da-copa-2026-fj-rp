@@ -16,13 +16,13 @@ import {
 } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Shield, Users, Trophy, RefreshCw, Globe, Loader2, Check, X, Wallet, Copy, Pencil, Trash2, Link2, Users2 } from 'lucide-react';
+import { Shield, Users, Trophy, RefreshCw, Globe, Loader2, Check, X, Wallet, Copy, Pencil, Trash2, Link2, Users2, Star, Award, Target } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { Flag } from '@/components/Flag';
 function InlineNameEditor({
@@ -609,10 +609,252 @@ function MultiProfileSection() {
   );
 }
 
+// ============================================================
+// Extras Results Section (Champion / Top Scorer / MVP)
+// ============================================================
+interface OfficialExtras {
+  champion_team_id: string | null;
+  champion_team_name: string | null;
+  champion_flag_url: string | null;
+  top_scorer_name: string | null;
+  top_scorer_team_id: string | null;
+  top_scorer_flag_url: string | null;
+  mvp_name: string | null;
+  mvp_team_id: string | null;
+  mvp_flag_url: string | null;
+}
+
+function ExtrasResultsSection() {
+  const queryClient = useQueryClient();
+  const { data: teams } = useTeams();
+  const translateTeam = useTranslatedTeamName();
+
+  const { data: official, isLoading } = useQuery({
+    queryKey: ['official-extras'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_official_extras');
+      if (error) throw error;
+      return (data?.[0] ?? null) as OfficialExtras | null;
+    },
+  });
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ['official-extras'] });
+    queryClient.invalidateQueries({ queryKey: ['ranking'] });
+    queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+  };
+
+  const setChampion = useMutation({
+    mutationFn: async (teamId: string) => {
+      const { error } = await supabase.rpc('admin_set_champion', { p_team_id: teamId });
+      if (error) throw error;
+    },
+    onSuccess: () => { invalidate(); toast.success('Campeão registrado e ranking atualizado!'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const clearChampion = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('admin_clear_champion');
+      if (error) throw error;
+    },
+    onSuccess: () => { invalidate(); toast.success('Campeão removido.'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const setExtra = useMutation({
+    mutationFn: async ({ category, playerName, teamId }: { category: 'top_scorer_result' | 'mvp_result'; playerName: string; teamId: string | null }) => {
+      const { error } = await supabase.rpc('admin_set_extra_result', {
+        p_category: category,
+        p_player_name: playerName,
+        p_team_id: teamId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => { invalidate(); toast.success('Resultado registrado e ranking atualizado!'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const clearExtra = useMutation({
+    mutationFn: async (category: 'top_scorer_result' | 'mvp_result') => {
+      const { error } = await supabase.rpc('admin_clear_extra_result', { p_category: category });
+      if (error) throw error;
+    },
+    onSuccess: () => { invalidate(); toast.success('Resultado removido.'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  // Local form state
+  const [championTeamId, setChampionTeamId] = useState<string>('');
+  const [scorerName, setScorerName] = useState('');
+  const [scorerTeamId, setScorerTeamId] = useState<string>('');
+  const [mvpName, setMvpName] = useState('');
+  const [mvpTeamId, setMvpTeamId] = useState<string>('');
+
+  if (isLoading) return <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />;
+
+  const sortedTeams = teams ? [...teams].sort((a, b) => translateTeam(a.name).localeCompare(translateTeam(b.name))) : [];
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        Registre aqui os resultados oficiais dos extras. O ranking é recalculado automaticamente. Pontos: Campeão = 100, Artilheiro = 50, MVP = 50.
+      </p>
+
+      {/* CAMPEÃO */}
+      <div className="glass rounded-xl p-4 space-y-3">
+        <h3 className="text-sm font-display font-bold text-foreground flex items-center gap-2">
+          <Trophy className="w-4 h-4 text-accent" /> Campeão Oficial
+        </h3>
+
+        {official?.champion_team_id ? (
+          <div className="flex items-center gap-2 text-sm bg-secondary/50 rounded-lg p-2">
+            {official.champion_flag_url && <Flag src={official.champion_flag_url} alt="" className="w-6 h-4 rounded-sm" />}
+            <span className="font-medium text-foreground">{translateTeam(official.champion_team_name ?? '')}</span>
+            <Button size="sm" variant="ghost" className="ml-auto text-destructive h-7" onClick={() => clearChampion.mutate()} disabled={clearChampion.isPending}>
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">Nenhum campeão registrado.</p>
+        )}
+
+        <div className="flex gap-2">
+          <Select value={championTeamId} onValueChange={setChampionTeamId}>
+            <SelectTrigger className="flex-1 bg-secondary border-border">
+              <SelectValue placeholder="Selecione o campeão" />
+            </SelectTrigger>
+            <SelectContent>
+              {sortedTeams.map(t => (
+                <SelectItem key={t.id} value={t.id}>
+                  <div className="flex items-center gap-2">
+                    {t.flag_url && <Flag src={t.flag_url} alt="" className="w-4 h-3 rounded-sm" />}
+                    {translateTeam(t.name)}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            size="sm"
+            onClick={() => { if (championTeamId) setChampion.mutate(championTeamId); }}
+            disabled={!championTeamId || setChampion.isPending}
+          >
+            {setChampion.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar'}
+          </Button>
+        </div>
+      </div>
+
+      {/* ARTILHEIRO */}
+      <div className="glass rounded-xl p-4 space-y-3">
+        <h3 className="text-sm font-display font-bold text-foreground flex items-center gap-2">
+          <Target className="w-4 h-4 text-accent" /> Artilheiro Oficial
+        </h3>
+
+        {official?.top_scorer_name ? (
+          <div className="flex items-center gap-2 text-sm bg-secondary/50 rounded-lg p-2">
+            {official.top_scorer_flag_url && <Flag src={official.top_scorer_flag_url} alt="" className="w-6 h-4 rounded-sm" />}
+            <span className="font-medium text-foreground">{official.top_scorer_name}</span>
+            <Button size="sm" variant="ghost" className="ml-auto text-destructive h-7" onClick={() => clearExtra.mutate('top_scorer_result')} disabled={clearExtra.isPending}>
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">Nenhum artilheiro registrado.</p>
+        )}
+
+        <Input
+          placeholder="Nome do jogador (deve bater exatamente com o palpite)"
+          value={scorerName}
+          onChange={e => setScorerName(e.target.value)}
+          className="bg-secondary border-border"
+        />
+        <div className="flex gap-2">
+          <Select value={scorerTeamId} onValueChange={setScorerTeamId}>
+            <SelectTrigger className="flex-1 bg-secondary border-border">
+              <SelectValue placeholder="Time (opcional, p/ bandeira)" />
+            </SelectTrigger>
+            <SelectContent>
+              {sortedTeams.map(t => (
+                <SelectItem key={t.id} value={t.id}>
+                  <div className="flex items-center gap-2">
+                    {t.flag_url && <Flag src={t.flag_url} alt="" className="w-4 h-3 rounded-sm" />}
+                    {translateTeam(t.name)}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            size="sm"
+            onClick={() => { if (scorerName.trim()) setExtra.mutate({ category: 'top_scorer_result', playerName: scorerName.trim(), teamId: scorerTeamId || null }); }}
+            disabled={!scorerName.trim() || setExtra.isPending}
+          >
+            {setExtra.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar'}
+          </Button>
+        </div>
+        <p className="text-[10px] text-muted-foreground">
+          A comparação ignora maiúsculas/minúsculas e espaços, mas o nome precisa bater. Avise os usuários sobre o formato esperado.
+        </p>
+      </div>
+
+      {/* MVP */}
+      <div className="glass rounded-xl p-4 space-y-3">
+        <h3 className="text-sm font-display font-bold text-foreground flex items-center gap-2">
+          <Award className="w-4 h-4 text-accent" /> MVP Oficial
+        </h3>
+
+        {official?.mvp_name ? (
+          <div className="flex items-center gap-2 text-sm bg-secondary/50 rounded-lg p-2">
+            {official.mvp_flag_url && <Flag src={official.mvp_flag_url} alt="" className="w-6 h-4 rounded-sm" />}
+            <span className="font-medium text-foreground">{official.mvp_name}</span>
+            <Button size="sm" variant="ghost" className="ml-auto text-destructive h-7" onClick={() => clearExtra.mutate('mvp_result')} disabled={clearExtra.isPending}>
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">Nenhum MVP registrado.</p>
+        )}
+
+        <Input
+          placeholder="Nome do jogador (deve bater exatamente com o palpite)"
+          value={mvpName}
+          onChange={e => setMvpName(e.target.value)}
+          className="bg-secondary border-border"
+        />
+        <div className="flex gap-2">
+          <Select value={mvpTeamId} onValueChange={setMvpTeamId}>
+            <SelectTrigger className="flex-1 bg-secondary border-border">
+              <SelectValue placeholder="Time (opcional, p/ bandeira)" />
+            </SelectTrigger>
+            <SelectContent>
+              {sortedTeams.map(t => (
+                <SelectItem key={t.id} value={t.id}>
+                  <div className="flex items-center gap-2">
+                    {t.flag_url && <Flag src={t.flag_url} alt="" className="w-4 h-3 rounded-sm" />}
+                    {translateTeam(t.name)}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            size="sm"
+            onClick={() => { if (mvpName.trim()) setExtra.mutate({ category: 'mvp_result', playerName: mvpName.trim(), teamId: mvpTeamId || null }); }}
+            disabled={!mvpName.trim() || setExtra.isPending}
+          >
+            {setExtra.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const recalculate = useRecalculateScores();
   const fetchFifa = useFetchFifaResults();
-  const [activeTab, setActiveTab] = useState<'users' | 'matches' | 'profiles'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'matches' | 'profiles' | 'extras'>('users');
   const { t } = useTranslation();
 
   return (
@@ -644,16 +886,16 @@ export default function AdminPage() {
         </Button>
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-xl">
-        {(['users', 'matches', 'profiles'] as const).map(tab => (
+      <div className="flex gap-1 p-1 bg-secondary rounded-xl flex-wrap">
+        {(['users', 'matches', 'profiles', 'extras'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+            className={`flex-1 min-w-[80px] py-2 text-xs font-medium rounded-lg transition-all ${
               activeTab === tab ? 'gradient-pitch text-primary-foreground' : 'text-muted-foreground'
             }`}
           >
-            {tab === 'users' ? t('admin.users') : tab === 'matches' ? t('admin.results') : t('admin.multiProfiles')}
+            {tab === 'users' ? t('admin.users') : tab === 'matches' ? t('admin.results') : tab === 'profiles' ? t('admin.multiProfiles') : 'Extras'}
           </button>
         ))}
       </div>
@@ -661,6 +903,7 @@ export default function AdminPage() {
       {activeTab === 'users' && <UserApprovalSection />}
       {activeTab === 'matches' && <MatchResultSection />}
       {activeTab === 'profiles' && <MultiProfileSection />}
+      {activeTab === 'extras' && <ExtrasResultsSection />}
     </div>
   );
 }

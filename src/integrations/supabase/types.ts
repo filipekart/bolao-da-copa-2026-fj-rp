@@ -759,6 +759,16 @@ export type Database = {
       }
     }
     Functions: {
+      admin_clear_champion: { Args: never; Returns: undefined }
+      admin_clear_extra_result: {
+        Args: { p_category: string }
+        Returns: undefined
+      }
+      admin_set_champion: { Args: { p_team_id: string }; Returns: undefined }
+      admin_set_extra_result: {
+        Args: { p_category: string; p_player_name: string; p_team_id: string }
+        Returns: undefined
+      }
       calculate_match_prediction_points: {
         Args: {
           pred_away: number
@@ -776,6 +786,20 @@ export type Database = {
         Returns: {
           category: string
           user_id: string
+        }[]
+      }
+      get_official_extras: {
+        Args: never
+        Returns: {
+          champion_flag_url: string
+          champion_team_id: string
+          champion_team_name: string
+          mvp_flag_url: string
+          mvp_name: string
+          mvp_team_id: string
+          top_scorer_flag_url: string
+          top_scorer_name: string
+          top_scorer_team_id: string
         }[]
       }
       get_public_profiles: {
