@@ -612,7 +612,7 @@ function MultiProfileSection() {
 export default function AdminPage() {
   const recalculate = useRecalculateScores();
   const fetchFifa = useFetchFifaResults();
-  const [activeTab, setActiveTab] = useState<'users' | 'matches' | 'profiles'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'matches' | 'profiles' | 'extras'>('users');
   const { t } = useTranslation();
 
   return (
@@ -644,16 +644,16 @@ export default function AdminPage() {
         </Button>
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-xl">
-        {(['users', 'matches', 'profiles'] as const).map(tab => (
+      <div className="flex gap-1 p-1 bg-secondary rounded-xl flex-wrap">
+        {(['users', 'matches', 'profiles', 'extras'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+            className={`flex-1 min-w-[80px] py-2 text-xs font-medium rounded-lg transition-all ${
               activeTab === tab ? 'gradient-pitch text-primary-foreground' : 'text-muted-foreground'
             }`}
           >
-            {tab === 'users' ? t('admin.users') : tab === 'matches' ? t('admin.results') : t('admin.multiProfiles')}
+            {tab === 'users' ? t('admin.users') : tab === 'matches' ? t('admin.results') : tab === 'profiles' ? t('admin.multiProfiles') : 'Extras'}
           </button>
         ))}
       </div>
@@ -661,6 +661,7 @@ export default function AdminPage() {
       {activeTab === 'users' && <UserApprovalSection />}
       {activeTab === 'matches' && <MatchResultSection />}
       {activeTab === 'profiles' && <MultiProfileSection />}
+      {activeTab === 'extras' && <ExtrasResultsSection />}
     </div>
   );
 }
