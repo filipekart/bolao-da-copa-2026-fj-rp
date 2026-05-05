@@ -863,13 +863,23 @@ function ExtrasResultsSection() {
 
         <TeamPicker teams={teams} value={championTeamId} onChange={setChampionTeamId} placeholder="Buscar time campeão" />
 
-        <Button
-          onClick={() => { if (championTeamId) setChampion.mutate(championTeamId); }}
-          disabled={!championTeamId || setChampion.isPending}
-          className="w-full gradient-pitch text-primary-foreground font-semibold h-11"
-        >
-          {setChampion.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar Campeão'}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setChampionTeamId(null)}
+            disabled={!championTeamId}
+            className="h-11"
+          >
+            Limpar
+          </Button>
+          <Button
+            onClick={() => { if (championTeamId) setChampion.mutate(championTeamId); }}
+            disabled={!championTeamId || setChampion.isPending}
+            className="flex-1 gradient-pitch text-primary-foreground font-semibold h-11"
+          >
+            {setChampion.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar Campeão'}
+          </Button>
+        </div>
       </div>
 
       {/* ARTILHEIRO */}
@@ -892,13 +902,23 @@ function ExtrasResultsSection() {
         <TeamPicker teams={teams} value={scorerTeamId} onChange={(id) => { setScorerTeamId(id); setScorerName(''); }} placeholder="Buscar time do artilheiro" />
         {scorerTeamId && <PlayerPicker teamId={scorerTeamId} value={scorerName} onChange={setScorerName} />}
 
-        <Button
-          onClick={() => { if (scorerName && scorerTeamId) setExtra.mutate({ category: 'top_scorer_result', playerName: scorerName, teamId: scorerTeamId }); }}
-          disabled={!scorerName || !scorerTeamId || setExtra.isPending}
-          className="w-full gradient-pitch text-primary-foreground font-semibold h-11"
-        >
-          {setExtra.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar Artilheiro'}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => { setScorerTeamId(null); setScorerName(''); }}
+            disabled={!scorerTeamId && !scorerName}
+            className="h-11"
+          >
+            Limpar
+          </Button>
+          <Button
+            onClick={() => { if (scorerName && scorerTeamId) setExtra.mutate({ category: 'top_scorer_result', playerName: scorerName, teamId: scorerTeamId }); }}
+            disabled={!scorerName || !scorerTeamId || setExtra.isPending}
+            className="flex-1 gradient-pitch text-primary-foreground font-semibold h-11"
+          >
+            {setExtra.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar Artilheiro'}
+          </Button>
+        </div>
       </div>
 
       {/* MVP */}
@@ -921,13 +941,23 @@ function ExtrasResultsSection() {
         <TeamPicker teams={teams} value={mvpTeamId} onChange={(id) => { setMvpTeamId(id); setMvpName(''); }} placeholder="Buscar time do MVP" />
         {mvpTeamId && <PlayerPicker teamId={mvpTeamId} value={mvpName} onChange={setMvpName} />}
 
-        <Button
-          onClick={() => { if (mvpName && mvpTeamId) setExtra.mutate({ category: 'mvp_result', playerName: mvpName, teamId: mvpTeamId }); }}
-          disabled={!mvpName || !mvpTeamId || setExtra.isPending}
-          className="w-full gradient-pitch text-primary-foreground font-semibold h-11"
-        >
-          {setExtra.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar MVP'}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => { setMvpTeamId(null); setMvpName(''); }}
+            disabled={!mvpTeamId && !mvpName}
+            className="h-11"
+          >
+            Limpar
+          </Button>
+          <Button
+            onClick={() => { if (mvpName && mvpTeamId) setExtra.mutate({ category: 'mvp_result', playerName: mvpName, teamId: mvpTeamId }); }}
+            disabled={!mvpName || !mvpTeamId || setExtra.isPending}
+            className="flex-1 gradient-pitch text-primary-foreground font-semibold h-11"
+          >
+            {setExtra.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar MVP'}
+          </Button>
+        </div>
       </div>
     </div>
   );
