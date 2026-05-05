@@ -624,10 +624,155 @@ interface OfficialExtras {
   mvp_flag_url: string | null;
 }
 
+function useAdminPlayers(teamId: string | null) {
+  return useQuery({
+    queryKey: ['admin-players', teamId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('players')
+        .select('*')
+        .eq('team_id', teamId!)
+        .order('name');
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!teamId,
+  });
+}
+
+function TeamPicker({ teams, value, onChange, placeholder }: {
+  teams: any[] | undefined;
+  value: string | null;
+  onChange: (id: string | null) => void;
+  placeholder: string;
+}) {
+  const [search, setSearch] = useState('');
+  const [open, setOpen] = useState(false);
+  const tn = useTeamNameByCode();
+
+  const selected = teams?.find(t => t.id === value);
+  const filtered = useMemo(
+    () => teams?.filter(t => tn(t.name, t.fifa_code).toLowerCase().includes(search.toLowerCase())) ?? [],
+    [teams, search, tn]
+  );
+
+  if (selected) {
+    return (
+      <button
+        onClick={() => { onChange(null); setOpen(true); setSearch(''); }}
+        className="w-full glass rounded-xl px-4 py-3 flex items-center gap-3 ring-1 ring-primary"
+      >
+        {selected.flag_url && <Flag src={selected.flag_url} alt="" className="w-6 h-4 rounded-sm" />}
+        <span className="text-sm text-foreground font-medium">{tn(selected.name, selected.fifa_code)}</span>
+        <span className="text-[10px] text-muted-foreground ml-auto">trocar</span>
+      </button>
+    );
+  }
+
+  return (
+    <>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <input
+          type="text"
+          placeholder={placeholder}
+          value={search}
+          onChange={e => { setSearch(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          className="w-full glass rounded-xl pl-9 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
+        />
+      </div>
+      {open && (
+        <div className="space-y-1 max-h-[30vh] overflow-y-auto">
+          {filtered.map(team => (
+            <button
+              key={team.id}
+              onClick={() => { onChange(team.id); setOpen(false); setSearch(''); }}
+              className="w-full glass rounded-xl px-4 py-2.5 flex items-center gap-3 transition-all hover:ring-1 hover:ring-primary"
+            >
+              {team.flag_url && <Flag src={team.flag_url} alt="" className="w-6 h-4 rounded-sm" />}
+              <span className="text-sm text-foreground">{tn(team.name, team.fifa_code)}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+function PlayerPicker({ teamId, value, onChange }: {
+  teamId: string | null;
+  value: string;
+  onChange: (name: string) => void;
+}) {
+  const { data: players, isLoading } = useAdminPlayers(teamId);
+  const [search, setSearch] = useState('');
+  const [open, setOpen] = useState(false);
+
+  const filtered = useMemo(
+    () => players?.filter(p => p.name.toLowerCase().includes(search.toLowerCase())) ?? [],
+    [players, search]
+  );
+
+  if (!teamId) return null;
+  if (isLoading) return <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>;
+  if (!players?.length) {
+    return (
+      <div className="glass rounded-xl p-4 text-sm text-muted-foreground border border-muted/30">
+        Elenco indisponível para este time.
+      </div>
+    );
+  }
+
+  if (value) {
+    return (
+      <button
+        onClick={() => { onChange(''); setOpen(true); setSearch(''); }}
+        className="w-full glass rounded-xl px-4 py-3 flex items-center gap-3 ring-1 ring-primary"
+      >
+        <span className="text-sm text-foreground font-medium">{value}</span>
+        <span className="text-[10px] text-muted-foreground ml-auto">trocar</span>
+      </button>
+    );
+  }
+
+  return (
+    <>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <input
+          type="text"
+          placeholder="Buscar jogador"
+          value={search}
+          onChange={e => { setSearch(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          className="w-full glass rounded-xl pl-9 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
+        />
+      </div>
+      {open && (
+        <div className="space-y-1 max-h-[30vh] overflow-y-auto">
+          {filtered.length > 0 ? filtered.map(p => (
+            <button
+              key={p.id}
+              onClick={() => { onChange(p.name); setOpen(false); setSearch(''); }}
+              className="w-full glass rounded-xl px-4 py-2.5 flex items-center gap-3 transition-all hover:ring-1 hover:ring-primary"
+            >
+              <span className="text-sm text-foreground">{p.name}</span>
+              {p.position && <span className="text-[10px] text-muted-foreground ml-auto">{p.position}</span>}
+            </button>
+          )) : (
+            <p className="text-xs text-muted-foreground text-center py-3">Nenhum jogador encontrado</p>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
 function ExtrasResultsSection() {
   const queryClient = useQueryClient();
   const { data: teams } = useTeams();
-  const translateTeam = useTranslatedTeamName();
+  const tn = useTeamNameByCode();
 
   const { data: official, isLoading } = useQuery({
     queryKey: ['official-extras'],
@@ -684,21 +829,19 @@ function ExtrasResultsSection() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // Local form state
-  const [championTeamId, setChampionTeamId] = useState<string>('');
+  // Form state
+  const [championTeamId, setChampionTeamId] = useState<string | null>(null);
+  const [scorerTeamId, setScorerTeamId] = useState<string | null>(null);
   const [scorerName, setScorerName] = useState('');
-  const [scorerTeamId, setScorerTeamId] = useState<string>('');
+  const [mvpTeamId, setMvpTeamId] = useState<string | null>(null);
   const [mvpName, setMvpName] = useState('');
-  const [mvpTeamId, setMvpTeamId] = useState<string>('');
 
   if (isLoading) return <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />;
-
-  const sortedTeams = teams ? [...teams].sort((a, b) => translateTeam(a.name).localeCompare(translateTeam(b.name))) : [];
 
   return (
     <div className="space-y-4">
       <p className="text-xs text-muted-foreground">
-        Registre aqui os resultados oficiais dos extras. O ranking é recalculado automaticamente. Pontos: Campeão = 100, Artilheiro = 50, MVP = 50.
+        Registre os resultados oficiais. O ranking é recalculado automaticamente. Pontos: Campeão = 100, Artilheiro = 50, MVP = 50.
       </p>
 
       {/* CAMPEÃO */}
@@ -707,42 +850,26 @@ function ExtrasResultsSection() {
           <Trophy className="w-4 h-4 text-accent" /> Campeão Oficial
         </h3>
 
-        {official?.champion_team_id ? (
+        {official?.champion_team_id && (
           <div className="flex items-center gap-2 text-sm bg-secondary/50 rounded-lg p-2">
+            <span className="text-[10px] text-muted-foreground uppercase">Atual:</span>
             {official.champion_flag_url && <Flag src={official.champion_flag_url} alt="" className="w-6 h-4 rounded-sm" />}
-            <span className="font-medium text-foreground">{translateTeam(official.champion_team_name ?? '')}</span>
+            <span className="font-medium text-foreground">{tn(official.champion_team_name ?? '', null)}</span>
             <Button size="sm" variant="ghost" className="ml-auto text-destructive h-7" onClick={() => clearChampion.mutate()} disabled={clearChampion.isPending}>
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
           </div>
-        ) : (
-          <p className="text-xs text-muted-foreground">Nenhum campeão registrado.</p>
         )}
 
-        <div className="flex gap-2">
-          <Select value={championTeamId} onValueChange={setChampionTeamId}>
-            <SelectTrigger className="flex-1 bg-secondary border-border">
-              <SelectValue placeholder="Selecione o campeão" />
-            </SelectTrigger>
-            <SelectContent>
-              {sortedTeams.map(t => (
-                <SelectItem key={t.id} value={t.id}>
-                  <div className="flex items-center gap-2">
-                    {t.flag_url && <Flag src={t.flag_url} alt="" className="w-4 h-3 rounded-sm" />}
-                    {translateTeam(t.name)}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            size="sm"
-            onClick={() => { if (championTeamId) setChampion.mutate(championTeamId); }}
-            disabled={!championTeamId || setChampion.isPending}
-          >
-            {setChampion.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar'}
-          </Button>
-        </div>
+        <TeamPicker teams={teams} value={championTeamId} onChange={setChampionTeamId} placeholder="Buscar time campeão" />
+
+        <Button
+          onClick={() => { if (championTeamId) setChampion.mutate(championTeamId); }}
+          disabled={!championTeamId || setChampion.isPending}
+          className="w-full gradient-pitch text-primary-foreground font-semibold h-11"
+        >
+          {setChampion.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar Campeão'}
+        </Button>
       </div>
 
       {/* ARTILHEIRO */}
@@ -751,51 +878,27 @@ function ExtrasResultsSection() {
           <Target className="w-4 h-4 text-accent" /> Artilheiro Oficial
         </h3>
 
-        {official?.top_scorer_name ? (
+        {official?.top_scorer_name && (
           <div className="flex items-center gap-2 text-sm bg-secondary/50 rounded-lg p-2">
+            <span className="text-[10px] text-muted-foreground uppercase">Atual:</span>
             {official.top_scorer_flag_url && <Flag src={official.top_scorer_flag_url} alt="" className="w-6 h-4 rounded-sm" />}
             <span className="font-medium text-foreground">{official.top_scorer_name}</span>
             <Button size="sm" variant="ghost" className="ml-auto text-destructive h-7" onClick={() => clearExtra.mutate('top_scorer_result')} disabled={clearExtra.isPending}>
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
           </div>
-        ) : (
-          <p className="text-xs text-muted-foreground">Nenhum artilheiro registrado.</p>
         )}
 
-        <Input
-          placeholder="Nome do jogador (deve bater exatamente com o palpite)"
-          value={scorerName}
-          onChange={e => setScorerName(e.target.value)}
-          className="bg-secondary border-border"
-        />
-        <div className="flex gap-2">
-          <Select value={scorerTeamId} onValueChange={setScorerTeamId}>
-            <SelectTrigger className="flex-1 bg-secondary border-border">
-              <SelectValue placeholder="Time (opcional, p/ bandeira)" />
-            </SelectTrigger>
-            <SelectContent>
-              {sortedTeams.map(t => (
-                <SelectItem key={t.id} value={t.id}>
-                  <div className="flex items-center gap-2">
-                    {t.flag_url && <Flag src={t.flag_url} alt="" className="w-4 h-3 rounded-sm" />}
-                    {translateTeam(t.name)}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            size="sm"
-            onClick={() => { if (scorerName.trim()) setExtra.mutate({ category: 'top_scorer_result', playerName: scorerName.trim(), teamId: scorerTeamId || null }); }}
-            disabled={!scorerName.trim() || setExtra.isPending}
-          >
-            {setExtra.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar'}
-          </Button>
-        </div>
-        <p className="text-[10px] text-muted-foreground">
-          A comparação ignora maiúsculas/minúsculas e espaços, mas o nome precisa bater. Avise os usuários sobre o formato esperado.
-        </p>
+        <TeamPicker teams={teams} value={scorerTeamId} onChange={(id) => { setScorerTeamId(id); setScorerName(''); }} placeholder="Buscar time do artilheiro" />
+        {scorerTeamId && <PlayerPicker teamId={scorerTeamId} value={scorerName} onChange={setScorerName} />}
+
+        <Button
+          onClick={() => { if (scorerName && scorerTeamId) setExtra.mutate({ category: 'top_scorer_result', playerName: scorerName, teamId: scorerTeamId }); }}
+          disabled={!scorerName || !scorerTeamId || setExtra.isPending}
+          className="w-full gradient-pitch text-primary-foreground font-semibold h-11"
+        >
+          {setExtra.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar Artilheiro'}
+        </Button>
       </div>
 
       {/* MVP */}
@@ -804,48 +907,27 @@ function ExtrasResultsSection() {
           <Award className="w-4 h-4 text-accent" /> MVP Oficial
         </h3>
 
-        {official?.mvp_name ? (
+        {official?.mvp_name && (
           <div className="flex items-center gap-2 text-sm bg-secondary/50 rounded-lg p-2">
+            <span className="text-[10px] text-muted-foreground uppercase">Atual:</span>
             {official.mvp_flag_url && <Flag src={official.mvp_flag_url} alt="" className="w-6 h-4 rounded-sm" />}
             <span className="font-medium text-foreground">{official.mvp_name}</span>
             <Button size="sm" variant="ghost" className="ml-auto text-destructive h-7" onClick={() => clearExtra.mutate('mvp_result')} disabled={clearExtra.isPending}>
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
           </div>
-        ) : (
-          <p className="text-xs text-muted-foreground">Nenhum MVP registrado.</p>
         )}
 
-        <Input
-          placeholder="Nome do jogador (deve bater exatamente com o palpite)"
-          value={mvpName}
-          onChange={e => setMvpName(e.target.value)}
-          className="bg-secondary border-border"
-        />
-        <div className="flex gap-2">
-          <Select value={mvpTeamId} onValueChange={setMvpTeamId}>
-            <SelectTrigger className="flex-1 bg-secondary border-border">
-              <SelectValue placeholder="Time (opcional, p/ bandeira)" />
-            </SelectTrigger>
-            <SelectContent>
-              {sortedTeams.map(t => (
-                <SelectItem key={t.id} value={t.id}>
-                  <div className="flex items-center gap-2">
-                    {t.flag_url && <Flag src={t.flag_url} alt="" className="w-4 h-3 rounded-sm" />}
-                    {translateTeam(t.name)}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            size="sm"
-            onClick={() => { if (mvpName.trim()) setExtra.mutate({ category: 'mvp_result', playerName: mvpName.trim(), teamId: mvpTeamId || null }); }}
-            disabled={!mvpName.trim() || setExtra.isPending}
-          >
-            {setExtra.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar'}
-          </Button>
-        </div>
+        <TeamPicker teams={teams} value={mvpTeamId} onChange={(id) => { setMvpTeamId(id); setMvpName(''); }} placeholder="Buscar time do MVP" />
+        {mvpTeamId && <PlayerPicker teamId={mvpTeamId} value={mvpName} onChange={setMvpName} />}
+
+        <Button
+          onClick={() => { if (mvpName && mvpTeamId) setExtra.mutate({ category: 'mvp_result', playerName: mvpName, teamId: mvpTeamId }); }}
+          disabled={!mvpName || !mvpTeamId || setExtra.isPending}
+          className="w-full gradient-pitch text-primary-foreground font-semibold h-11"
+        >
+          {setExtra.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar MVP'}
+        </Button>
       </div>
     </div>
   );
