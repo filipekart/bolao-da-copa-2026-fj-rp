@@ -1,52 +1,81 @@
-# Painel Admin: Registrar Resultados de Extras
+## Objetivo
 
-## Problema
-A função de pontuação (`refresh_leaderboard`) já sabe pontuar Campeão (100 pts), Artilheiro (50 pts) e MVP (50 pts) — mas hoje **não existe interface** para o admin registrar quem foram os vencedores oficiais. Os dados precisam ir parar em:
+Após o fechamento das apostas de cada jogo (kickoff), o sistema gera automaticamente um arquivo **Excel (.xlsx)** com todos os palpites daquele jogo e envia por email para **filipekart@gmail.com**.
 
-- `knockout_results` (stage = `CHAMPION`, team_id) → para o Campeão
-- `extra_predictions` (category = `top_scorer_result`, player_name + team_id) → para o Artilheiro
-- `extra_predictions` (category = `mvp_result`, player_name + team_id) → para o MVP
+## Como vai funcionar
 
-## O que vou construir
+```text
+[cron a cada 1 min]
+        │
+        ▼
+[edge function: export-match-predictions]
+        │
+        ├── busca jogos com kickoff_at <= now() e ainda não exportados
+        ├── para cada jogo:
+        │     ├── lê todos palpites + nome do usuário
+        │     ├── gera planilha Excel em memória
+        │     ├── envia email com anexo p/ filipekart@gmail.com
+        │     └── marca jogo como exportado (tabela de controle)
+        ▼
+   [email entregue]
+```
 
-Adicionar uma nova aba/seção no `AdminPage.tsx` chamada **"Resultados Extras"** com 3 cards:
+## Conteúdo da planilha
 
-### 1. Campeão Oficial
-- Dropdown com a lista de times (`teams`)
-- Botão "Salvar Campeão"
-- Mostra o time atualmente registrado (com bandeira)
-- Botão "Limpar" para apagar o resultado
+Uma planilha por jogo, com cabeçalho identificando a partida e tabela de palpites:
 
-### 2. Artilheiro Oficial
-- Campo de texto para o nome do jogador
-- Dropdown opcional do time (para mostrar bandeira no ranking)
-- Botão "Salvar Artilheiro"
-- Mostra o jogador atualmente registrado
-- Botão "Limpar"
+| Cabeçalho | |
+|---|---|
+| Jogo nº | 12 |
+| Partida | Brasil x Argentina |
+| Kickoff | 15/06/2026 16:00 (Brasília) |
 
-### 3. MVP Oficial
-- Mesmo padrão do artilheiro (nome + time opcional)
-- Botão "Salvar MVP"
-- Mostra o MVP atual + botão "Limpar"
+| Usuário | Palpite | Horário do palpite |
+|---|---|---|
+| João Silva | 2 x 1 | 14/06/2026 22:34 |
+| Maria Souza | 1 x 1 | 15/06/2026 09:12 |
+| ... | ... | ... |
 
-Após salvar qualquer resultado, dispara automaticamente `refresh_leaderboard` para recalcular as pontuações de todos os usuários.
+Nome do arquivo: `palpites-jogo-12-BRA-vs-ARG.xlsx`
+Assunto do email: `Palpites Jogo 12 — Brasil x Argentina`
 
-## Detalhes técnicos
+## Implementação técnica
 
-**Novas RPCs** (`SECURITY DEFINER`, com `has_role(auth.uid(), 'admin')`):
-- `admin_set_champion(p_team_id uuid)` — apaga linha anterior em `knockout_results` com stage CHAMPION e insere a nova
-- `admin_clear_champion()`
-- `admin_set_extra_result(p_category text, p_player_name text, p_team_id uuid)` — categoria deve ser `top_scorer_result` ou `mvp_result`. Faz upsert por categoria (vou usar `user_id = auth.uid()` do admin como chave técnica, já que `extra_predictions` exige `user_id NOT NULL`).
-- `admin_clear_extra_result(p_category text)`
+### 1. Tabela de controle (migration)
+Nova tabela `match_export_log` para evitar reenvios duplicados:
+- `match_id` (PK), `exported_at`, `email_message_id`
+- RLS: somente admins leem; edge function escreve via service role.
 
-Todas chamam `refresh_leaderboard()` no final.
+### 2. Infraestrutura de email
+- Configurar domínio de email da Lovable (botão de setup) — necessário para envio com anexo.
+- Provisionar a infraestrutura de emails (filas + dispatcher).
+- Criar função de envio transacional `send-match-export-email` baseada nos templates da Lovable, mas com suporte a **anexo .xlsx** (a Lovable Email não suporta anexos nativamente, então usaremos o connector **Resend** que aceita anexos — o usuário precisará confirmar/conectar Resend, OU optaremos pelo workaround abaixo).
 
-**Observação sobre `extra_predictions`**: a tabela atual usa `(user_id, category)` como chave de unicidade. Para os "resultados oficiais", vou usar o `user_id` do admin que registrou — a função `refresh_leaderboard` já filtra por `category = 'top_scorer_result'` / `'mvp_result'` independentemente do user_id, então funciona.
+> **Decisão necessária sobre anexo:** A infra padrão da Lovable Email não envia anexos. Duas opções:
+> - **(A) Conectar Resend** (gratuito até 3.000 emails/mês) — envia o .xlsx como anexo real.
+> - **(B) Lovable Email + link de download** — fazemos upload do .xlsx para o Storage e enviamos email com link "Baixar planilha". Sem necessidade de serviço externo.
+>
+> Recomendo **(B)** pela simplicidade. Confirme antes de implementar.
 
-**Frontend**:
-- Novo componente `src/components/admin/ExtrasResultsPanel.tsx`
-- Hooks novos em `src/hooks/useAdmin.ts`: `useChampionResult`, `useExtraResults`, `useSetChampion`, `useSetExtraResult`, `useClearChampion`, `useClearExtraResult`
-- Integrar como nova aba dentro da `AdminPage`
+### 3. Edge function `export-match-predictions`
+- Roda a cada 1 min via `pg_cron`.
+- Query: jogos com `kickoff_at <= now()` AND `id NOT IN (select match_id from match_export_log)`.
+- Para cada jogo:
+  - Busca `match_predictions` + `profiles.display_name`.
+  - Gera .xlsx usando biblioteca Deno (`https://deno.land/x/excelize` ou similar).
+  - Faz upload para Supabase Storage (bucket privado `match-exports`) e gera signed URL de 90 dias.
+  - Envia email com link de download.
+  - Insere em `match_export_log`.
 
-## Resultado
-Você abre **Admin → Resultados Extras**, escolhe o campeão, digita o nome do artilheiro e do MVP, clica salvar, e o ranking de todos os usuários é recalculado automaticamente. Cada usuário que acertou ganha 100/50/50 pontos.
+### 4. Cron job
+SQL que agenda a função a cada 1 min (via tabela `cron.job` + `net.http_post`).
+
+### 5. Cobertura de jogos antigos
+Se o admin quiser, adicionamos um botão na aba Admin **"Reenviar planilha de jogo X"** para gerar novamente o arquivo de qualquer jogo passado (sem marcar duplicado).
+
+## O que vou pedir antes de começar a implementar
+
+1. **Anexo real (Resend) ou link de download (Lovable Email)?**
+2. Confirmar email único: `filipekart@gmail.com` (você mencionou 2 admins mas só passou 1 — adiciona outro?).
+
+Após sua aprovação do plano e dessas duas confirmações, implemento tudo de uma vez.
