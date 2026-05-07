@@ -1,1 +1,4 @@
 project_id = "adsosggvlursdngteyhg"
+
+[functions.export-match-predictions]
+verify_jwt = false

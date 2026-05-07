@@ -1,6 +1,6 @@
 ## Objetivo
 
-Após o fechamento das apostas de cada jogo (kickoff), o sistema gera automaticamente um arquivo **Excel (.xlsx)** com todos os palpites daquele jogo e envia por email para **filipekart@gmail.com**.
+No kickoff de cada jogo, o sistema gera automaticamente um arquivo `.xlsx` com todos os palpites daquele jogo e disponibiliza para **download na aba Admin**. Sem envio de email.
 
 ## Como vai funcionar
 
@@ -10,23 +10,24 @@ Após o fechamento das apostas de cada jogo (kickoff), o sistema gera automatica
         ▼
 [edge function: export-match-predictions]
         │
-        ├── busca jogos com kickoff_at <= now() e ainda não exportados
+        ├── busca jogos com kickoff_at <= now() ainda não exportados
         ├── para cada jogo:
-        │     ├── lê todos palpites + nome do usuário
-        │     ├── gera planilha Excel em memória
-        │     ├── envia email com anexo p/ filipekart@gmail.com
-        │     └── marca jogo como exportado (tabela de controle)
+        │     ├── lê palpites + nome do usuário
+        │     ├── gera .xlsx em memória
+        │     ├── faz upload no bucket privado match-exports
+        │     └── registra em match_export_log
         ▼
-   [email entregue]
+[aba Admin → seção "Planilhas de palpites"]
+        │
+        └── lista jogos exportados + botão Baixar (signed URL na hora)
 ```
 
 ## Conteúdo da planilha
 
-Uma planilha por jogo, com cabeçalho identificando a partida e tabela de palpites:
+Cabeçalho com identificação do jogo + tabela de palpites:
 
-| Cabeçalho | |
-|---|---|
 | Jogo nº | 12 |
+|---|---|
 | Partida | Brasil x Argentina |
 | Kickoff | 15/06/2026 16:00 (Brasília) |
 
@@ -34,48 +35,45 @@ Uma planilha por jogo, com cabeçalho identificando a partida e tabela de palpit
 |---|---|---|
 | João Silva | 2 x 1 | 14/06/2026 22:34 |
 | Maria Souza | 1 x 1 | 15/06/2026 09:12 |
-| ... | ... | ... |
 
 Nome do arquivo: `palpites-jogo-12-BRA-vs-ARG.xlsx`
-Assunto do email: `Palpites Jogo 12 — Brasil x Argentina`
 
 ## Implementação técnica
 
-### 1. Tabela de controle (migration)
-Nova tabela `match_export_log` para evitar reenvios duplicados:
-- `match_id` (PK), `exported_at`, `email_message_id`
+### 1. Migração (schema)
+- Tabela `match_export_log`: `match_id` (PK, FK matches), `exported_at`, `storage_path`, `row_count`.
 - RLS: somente admins leem; edge function escreve via service role.
+- Bucket privado `match-exports` (storage) + policies: somente admins listam/leem; service role escreve.
 
-### 2. Infraestrutura de email
-- Configurar domínio de email da Lovable (botão de setup) — necessário para envio com anexo.
-- Provisionar a infraestrutura de emails (filas + dispatcher).
-- Criar função de envio transacional `send-match-export-email` baseada nos templates da Lovable, mas com suporte a **anexo .xlsx** (a Lovable Email não suporta anexos nativamente, então usaremos o connector **Resend** que aceita anexos — o usuário precisará confirmar/conectar Resend, OU optaremos pelo workaround abaixo).
-
-> **Decisão necessária sobre anexo:** A infra padrão da Lovable Email não envia anexos. Duas opções:
-> - **(A) Conectar Resend** (gratuito até 3.000 emails/mês) — envia o .xlsx como anexo real.
-> - **(B) Lovable Email + link de download** — fazemos upload do .xlsx para o Storage e enviamos email com link "Baixar planilha". Sem necessidade de serviço externo.
->
-> Recomendo **(B)** pela simplicidade. Confirme antes de implementar.
-
-### 3. Edge function `export-match-predictions`
-- Roda a cada 1 min via `pg_cron`.
+### 2. Edge function `export-match-predictions`
+- Sem auth (chamada via cron). Em código, valida que vem do cron via header secreto OU simplesmente roda idempotente.
 - Query: jogos com `kickoff_at <= now()` AND `id NOT IN (select match_id from match_export_log)`.
 - Para cada jogo:
-  - Busca `match_predictions` + `profiles.display_name`.
-  - Gera .xlsx usando biblioteca Deno (`https://deno.land/x/excelize` ou similar).
-  - Faz upload para Supabase Storage (bucket privado `match-exports`) e gera signed URL de 90 dias.
-  - Envia email com link de download.
+  - Busca `match_predictions` + `profiles.display_name` + dados do jogo (`v_matches_with_teams`).
+  - Gera `.xlsx` usando `npm:exceljs`.
+  - Faz upload em `match-exports/<match_number>-<HOMECODE>-vs-<AWAYCODE>.xlsx`.
   - Insere em `match_export_log`.
 
-### 4. Cron job
-SQL que agenda a função a cada 1 min (via tabela `cron.job` + `net.http_post`).
+### 3. Edge function `get-match-export-url`
+- Valida JWT + `has_role(admin)`.
+- Recebe `match_id`, gera signed URL de 1 hora para o arquivo correspondente e retorna.
 
-### 5. Cobertura de jogos antigos
-Se o admin quiser, adicionamos um botão na aba Admin **"Reenviar planilha de jogo X"** para gerar novamente o arquivo de qualquer jogo passado (sem marcar duplicado).
+### 4. Edge function `regenerate-match-export` (admin)
+- Valida JWT + admin.
+- Recebe `match_id`, regenera o `.xlsx` (sobrescreve no storage), atualiza `match_export_log`.
 
-## O que vou pedir antes de começar a implementar
+### 5. Cron job (1 min)
+SQL via `cron.schedule` + `net.http_post` chamando `export-match-predictions`. Inserido via tool de SQL (não migration), pois contém URL/anon key específicos.
 
-1. **Anexo real (Resend) ou link de download (Lovable Email)?**
-2. Confirmar email único: `filipekart@gmail.com` (você mencionou 2 admins mas só passou 1 — adiciona outro?).
+### 6. UI — nova seção na aba Admin
+Em `src/pages/AdminPage.tsx`, adicionar **"Planilhas de palpites por jogo"**:
+- Hook `useMatchExports()` que lê `match_export_log` JOIN com `v_matches_with_teams`, ordenado por `kickoff_at DESC`.
+- Lista cada jogo exportado com: nº, "Time A x Time B", kickoff formatado, qtd. palpites, botão **Baixar** (chama `get-match-export-url` e abre o link) e botão **Regenerar** (chama `regenerate-match-export`).
+- i18n: chaves novas em `pt/en/es/fr` (`admin.exports.*`).
 
-Após sua aprovação do plano e dessas duas confirmações, implemento tudo de uma vez.
+## Observações
+- Nada é enviado por email — tudo fica disponível dentro do app.
+- O bucket é privado; downloads exigem signed URL gerada server-side após validação de admin.
+- Idempotente: se o cron rodar duas vezes, o segundo run ignora jogos já em `match_export_log`.
+
+Posso começar?

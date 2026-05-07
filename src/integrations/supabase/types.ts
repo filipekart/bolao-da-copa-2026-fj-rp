@@ -309,6 +309,27 @@ export type Database = {
         }
         Relationships: []
       }
+      match_export_log: {
+        Row: {
+          exported_at: string
+          match_id: string
+          row_count: number
+          storage_path: string
+        }
+        Insert: {
+          exported_at?: string
+          match_id: string
+          row_count?: number
+          storage_path: string
+        }
+        Update: {
+          exported_at?: string
+          match_id?: string
+          row_count?: number
+          storage_path?: string
+        }
+        Relationships: []
+      }
       match_predictions: {
         Row: {
           created_at: string
