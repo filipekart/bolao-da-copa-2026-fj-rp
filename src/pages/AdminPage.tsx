@@ -16,7 +16,8 @@ import {
 } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Shield, Users, Trophy, RefreshCw, Globe, Loader2, Check, X, Wallet, Copy, Pencil, Trash2, Link2, Users2, Star, Award, Target, Search } from 'lucide-react';
+import { Shield, Users, Trophy, RefreshCw, Globe, Loader2, Check, X, Wallet, Copy, Pencil, Trash2, Link2, Users2, Star, Award, Target, Search, FileSpreadsheet, Download } from 'lucide-react';
+import { useMatchExports, useDownloadMatchExport, useRegenerateMatchExport } from '@/hooks/useMatchExports';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useTranslatedTeamName, useTeamNameByCode } from '@/hooks/useTranslatedTeamName';
@@ -966,7 +967,7 @@ function ExtrasResultsSection() {
 export default function AdminPage() {
   const recalculate = useRecalculateScores();
   const fetchFifa = useFetchFifaResults();
-  const [activeTab, setActiveTab] = useState<'users' | 'matches' | 'profiles' | 'extras'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'matches' | 'profiles' | 'extras' | 'exports'>('users');
   const { t } = useTranslation();
 
   return (
@@ -999,7 +1000,7 @@ export default function AdminPage() {
       </div>
 
       <div className="flex gap-1 p-1 bg-secondary rounded-xl flex-wrap">
-        {(['users', 'matches', 'profiles', 'extras'] as const).map(tab => (
+        {(['users', 'matches', 'profiles', 'extras', 'exports'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -1007,7 +1008,7 @@ export default function AdminPage() {
               activeTab === tab ? 'gradient-pitch text-primary-foreground' : 'text-muted-foreground'
             }`}
           >
-            {tab === 'users' ? t('admin.users') : tab === 'matches' ? t('admin.results') : tab === 'profiles' ? t('admin.multiProfiles') : 'Extras'}
+            {tab === 'users' ? t('admin.users') : tab === 'matches' ? t('admin.results') : tab === 'profiles' ? t('admin.multiProfiles') : tab === 'extras' ? 'Extras' : 'Planilhas'}
           </button>
         ))}
       </div>
@@ -1016,6 +1017,82 @@ export default function AdminPage() {
       {activeTab === 'matches' && <MatchResultSection />}
       {activeTab === 'profiles' && <MultiProfileSection />}
       {activeTab === 'extras' && <ExtrasResultsSection />}
+      {activeTab === 'exports' && <MatchExportsSection />}
+    </div>
+  );
+}
+
+function MatchExportsSection() {
+  const { data: exports, isLoading } = useMatchExports();
+  const download = useDownloadMatchExport();
+  const regenerate = useRegenerateMatchExport();
+
+  const fmt = (iso: string) =>
+    iso
+      ? new Intl.DateTimeFormat('pt-BR', {
+          timeZone: 'America/Sao_Paulo',
+          day: '2-digit', month: '2-digit', year: '2-digit',
+          hour: '2-digit', minute: '2-digit',
+        }).format(new Date(iso))
+      : '—';
+
+  return (
+    <div className="card-glass p-4 rounded-2xl space-y-3">
+      <h2 className="text-base font-display font-bold flex items-center gap-2">
+        <FileSpreadsheet className="w-5 h-5 text-accent" /> Planilhas de palpites por jogo
+      </h2>
+      <p className="text-xs text-muted-foreground">
+        Geradas automaticamente no kickoff de cada jogo. Clique em Baixar para obter o arquivo .xlsx.
+      </p>
+
+      {isLoading && (
+        <div className="flex justify-center py-4">
+          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
+      {!isLoading && (!exports || exports.length === 0) && (
+        <p className="text-sm text-muted-foreground text-center py-4">
+          Nenhuma planilha gerada ainda. Aparecerão aqui assim que o primeiro jogo começar.
+        </p>
+      )}
+
+      <div className="space-y-2">
+        {exports?.map((e) => (
+          <div key={e.match_id} className="flex flex-col gap-2 p-3 rounded-xl bg-secondary/40 border border-border">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold truncate">
+                  {e.match_number ? `#${e.match_number} — ` : ''}{e.home_team_name} x {e.away_team_name}
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  Kickoff {fmt(e.kickoff_at)} · {e.row_count} palpites · gerado {fmt(e.exported_at)}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={() => download.mutate(e.match_id)}
+                disabled={download.isPending}
+                className="flex-1"
+              >
+                <Download className="w-4 h-4 mr-1" /> Baixar
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => regenerate.mutate(e.match_id)}
+                disabled={regenerate.isPending}
+              >
+                {regenerate.isPending
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : <RefreshCw className="w-4 h-4" />}
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
