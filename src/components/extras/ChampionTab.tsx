@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTeamNameByCode } from '@/hooks/useTranslatedTeamName';
+import { useFirstMatchKickoff, isExtrasLocked } from '@/hooks/useFirstMatchKickoff';
 
 import { Flag } from '@/components/Flag';
 function useTeams() {
@@ -39,22 +40,6 @@ function useChampionPrediction() {
   });
 }
 
-function useFirstMatchKickoff() {
-  return useQuery({
-    queryKey: ['first-match-kickoff'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('matches')
-        .select('kickoff_at')
-        .order('kickoff_at', { ascending: true })
-        .limit(1)
-        .single();
-      if (error) throw error;
-      return data?.kickoff_at ? new Date(data.kickoff_at) : null;
-    },
-  });
-}
-
 export default function ChampionTab() {
   const { user } = useAuth();
   const { activeUserId } = useActiveProfile();
@@ -67,7 +52,7 @@ export default function ChampionTab() {
   const { t } = useTranslation();
   const tn = useTeamNameByCode();
 
-  const isLocked = firstKickoff ? new Date() >= firstKickoff : false;
+  const isLocked = isExtrasLocked(firstKickoff);
 
   const submitMutation = useMutation({
     mutationFn: async (teamId: string) => {
