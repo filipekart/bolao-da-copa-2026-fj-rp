@@ -1,79 +1,66 @@
 ## Objetivo
 
-No kickoff de cada jogo, o sistema gera automaticamente um arquivo `.xlsx` com todos os palpites daquele jogo e disponibiliza para **download na aba Admin**. Sem envio de email.
+Garantir que o bloqueio das apostas de Extras (Campeão, Artilheiro, MVP) seja consistente entre UI, RPCs e RLS — e deixar a regra documentada para evitar regressões futuras.
 
-## Como vai funcionar
+## Diagnóstico atual
 
-```text
-[cron a cada 1 min]
-        │
-        ▼
-[edge function: export-match-predictions]
-        │
-        ├── busca jogos com kickoff_at <= now() ainda não exportados
-        ├── para cada jogo:
-        │     ├── lê palpites + nome do usuário
-        │     ├── gera .xlsx em memória
-        │     ├── faz upload no bucket privado match-exports
-        │     └── registra em match_export_log
-        ▼
-[aba Admin → seção "Planilhas de palpites"]
-        │
-        └── lista jogos exportados + botão Baixar (signed URL na hora)
-```
+Trava acontece em três camadas. Todas usam o mesmo gatilho: `MIN(matches.kickoff_at)` (1º jogo da Copa = México x África do Sul, 11/06/2026 19:00 UTC).
 
-## Conteúdo da planilha
-
-Cabeçalho com identificação do jogo + tabela de palpites:
-
-| Jogo nº | 12 |
-|---|---|
-| Partida | Brasil x Argentina |
-| Kickoff | 15/06/2026 16:00 (Brasília) |
-
-| Usuário | Palpite | Horário do palpite |
+| Camada | Onde | Regra efetiva |
 |---|---|---|
-| João Silva | 2 x 1 | 14/06/2026 22:34 |
-| Maria Souza | 1 x 1 | 15/06/2026 09:12 |
+| UI Campeão | `ChampionTab.tsx` → `useFirstMatchKickoff` | `now() >= MIN(kickoff_at)` esconde formulário |
+| UI Artilheiro/MVP | `PlayerPredictionTab.tsx` → `useFirstMatchKickoff` | mesma regra |
+| RPC Campeão | `submit_champion_prediction` | **não valida prazo** — depende de RLS |
+| RPC Extras | `submit_extra_prediction` | **não valida prazo** — depende de RLS |
+| RLS `knockout_predictions` INSERT | `is_knockout_stage_open('CHAMPION')` | `now() < MIN(kickoff_at)` |
+| RLS `extra_predictions` INSERT/UPDATE | `is_tournament_open()` | `now() < MIN(kickoff_at)` |
 
-Nome do arquivo: `palpites-jogo-12-BRA-vs-ARG.xlsx`
+### Inconsistências encontradas
 
-## Implementação técnica
+1. **`extra_predictions` aceita UPSERT mas RLS UPDATE também exige `is_tournament_open()`.** OK em termos de bloqueio, mas o `ON CONFLICT DO UPDATE` dentro de `submit_extra_prediction` (SECURITY DEFINER) **bypassa RLS**. Hoje qualquer chamada autenticada via RPC poderia atualizar após o início da Copa.
+2. **`submit_champion_prediction` faz DELETE+INSERT em SECURITY DEFINER**, também bypassando a checagem `is_knockout_stage_open`. Mesmo problema.
+3. **`knockout_predictions` não tem policy UPDATE** (só INSERT/DELETE). O fluxo de troca de campeão depende de DELETE+INSERT — frágil se a RPC mudar.
+4. **`useFirstMatchKickoff` usa `.single()`** sem tratamento se a tabela estiver vazia (cenário de seed). Risco baixo, mas vale `maybeSingle()`.
+5. **Documentação ausente**: a regra "trava = 1º kickoff" não está registrada em memória do projeto nem em comentário das funções.
 
-### 1. Migração (schema)
-- Tabela `match_export_log`: `match_id` (PK, FK matches), `exported_at`, `storage_path`, `row_count`.
-- RLS: somente admins leem; edge function escreve via service role.
-- Bucket privado `match-exports` (storage) + policies: somente admins listam/leem; service role escreve.
+## Plano de ação
 
-### 2. Edge function `export-match-predictions`
-- Sem auth (chamada via cron). Em código, valida que vem do cron via header secreto OU simplesmente roda idempotente.
-- Query: jogos com `kickoff_at <= now()` AND `id NOT IN (select match_id from match_export_log)`.
-- Para cada jogo:
-  - Busca `match_predictions` + `profiles.display_name` + dados do jogo (`v_matches_with_teams`).
-  - Gera `.xlsx` usando `npm:exceljs`.
-  - Faz upload em `match-exports/<match_number>-<HOMECODE>-vs-<AWAYCODE>.xlsx`.
-  - Insere em `match_export_log`.
+### 1. Endurecer as RPCs (migration)
 
-### 3. Edge function `get-match-export-url`
-- Valida JWT + `has_role(admin)`.
-- Recebe `match_id`, gera signed URL de 1 hora para o arquivo correspondente e retorna.
+Adicionar guard explícito de prazo dentro das duas RPCs, espelhando a RLS:
 
-### 4. Edge function `regenerate-match-export` (admin)
-- Valida JWT + admin.
-- Recebe `match_id`, regenera o `.xlsx` (sobrescreve no storage), atualiza `match_export_log`.
+- `submit_champion_prediction`: `IF NOT public.is_knockout_stage_open('CHAMPION') THEN RAISE EXCEPTION 'A Copa já começou — palpite de campeão encerrado'; END IF;`
+- `submit_extra_prediction`: `IF NOT public.is_tournament_open() THEN RAISE EXCEPTION 'A Copa já começou — palpites de Artilheiro/MVP encerrados'; END IF;`
 
-### 5. Cron job (1 min)
-SQL via `cron.schedule` + `net.http_post` chamando `export-match-predictions`. Inserido via tool de SQL (não migration), pois contém URL/anon key específicos.
+Resultado: defesa em profundidade — mesmo com SECURITY DEFINER, a RPC respeita o prazo.
 
-### 6. UI — nova seção na aba Admin
-Em `src/pages/AdminPage.tsx`, adicionar **"Planilhas de palpites por jogo"**:
-- Hook `useMatchExports()` que lê `match_export_log` JOIN com `v_matches_with_teams`, ordenado por `kickoff_at DESC`.
-- Lista cada jogo exportado com: nº, "Time A x Time B", kickoff formatado, qtd. palpites, botão **Baixar** (chama `get-match-export-url` e abre o link) e botão **Regenerar** (chama `regenerate-match-export`).
-- i18n: chaves novas em `pt/en/es/fr` (`admin.exports.*`).
+### 2. Pequenos ajustes de frontend
 
-## Observações
-- Nada é enviado por email — tudo fica disponível dentro do app.
-- O bucket é privado; downloads exigem signed URL gerada server-side após validação de admin.
-- Idempotente: se o cron rodar duas vezes, o segundo run ignora jogos já em `match_export_log`.
+- Em `ChampionTab.tsx` e `PlayerPredictionTab.tsx`, trocar `.single()` por `.maybeSingle()` em `useFirstMatchKickoff` e tratar `null` como "trava desconhecida → desabilitar botão por segurança" (em vez de liberar).
+- Extrair o hook `useFirstMatchKickoff` para `src/hooks/useFirstMatchKickoff.ts` (atualmente duplicado nos dois arquivos).
 
-Posso começar?
+### 3. Documentação
+
+- Criar `mem://features/extras-lockdown` com:
+  - Gatilho único: `MIN(matches.kickoff_at)`.
+  - Camadas de defesa: UI (hook compartilhado) → RPC (guard explícito) → RLS (`is_tournament_open` / `is_knockout_stage_open`).
+  - Cenário de regressão a evitar: alterar SECURITY DEFINER sem reinstalar o guard.
+- Atualizar `mem://index.md` adicionando referência ao novo arquivo.
+- Comentários `COMMENT ON FUNCTION` em `submit_champion_prediction` e `submit_extra_prediction` apontando para a regra.
+
+### 4. Validação
+
+- Query manual: simular `now() = MIN(kickoff_at) + 1s` localmente (via `set_config`) e confirmar que RPCs rejeitam com mensagem clara.
+- Smoke test no preview com usuário comum: tentar salvar campeão e artilheiro hoje (deve passar) — não há como testar pós-kickoff sem mock de tempo, então a validação principal é via SQL.
+
+## Detalhes técnicos
+
+Arquivos afetados:
+- `supabase/migrations/<timestamp>_harden_extras_lockdown.sql` (novo)
+- `src/hooks/useFirstMatchKickoff.ts` (novo)
+- `src/components/extras/ChampionTab.tsx` (import + maybeSingle)
+- `src/components/extras/PlayerPredictionTab.tsx` (import + maybeSingle)
+- `mem://features/extras-lockdown` (novo)
+- `mem://index.md` (atualização)
+
+Nenhuma mudança em RLS, schema de tabela ou contratos públicos das RPCs (assinaturas permanecem iguais). Risco baixo.
