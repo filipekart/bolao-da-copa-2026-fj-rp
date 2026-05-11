@@ -8,6 +8,7 @@ import { useState, ReactNode, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { useTeamNameByCode } from '@/hooks/useTranslatedTeamName';
+import { useFirstMatchKickoff, isExtrasLocked } from '@/hooks/useFirstMatchKickoff';
 
 import { Flag } from '@/components/Flag';
 interface Props {
@@ -41,22 +42,6 @@ function usePlayers(teamId: string | null) {
       return data;
     },
     enabled: !!teamId,
-  });
-}
-
-function useFirstMatchKickoff() {
-  return useQuery({
-    queryKey: ['first-match-kickoff'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('matches')
-        .select('kickoff_at')
-        .order('kickoff_at', { ascending: true })
-        .limit(1)
-        .single();
-      if (error) throw error;
-      return data?.kickoff_at ? new Date(data.kickoff_at) : null;
-    },
   });
 }
 
@@ -94,7 +79,7 @@ export default function PlayerPredictionTab({ category, title, description, icon
 
   const { data: players, isLoading: playersLoading } = usePlayers(selectedTeamId);
 
-  const isLocked = firstKickoff ? new Date() >= firstKickoff : false;
+  const isLocked = isExtrasLocked(firstKickoff);
 
   const selectedTeam = teams?.find(t => t.id === selectedTeamId);
 
