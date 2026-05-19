@@ -1,0 +1,2 @@
+UPDATE public.matches SET kickoff_at = '2026-07-03 03:00:00+00', updated_at = now() WHERE match_number = 85;
+UPDATE public.matches SET kickoff_at = '2026-07-03 22:00:00+00', updated_at = now() WHERE match_number = 86;
