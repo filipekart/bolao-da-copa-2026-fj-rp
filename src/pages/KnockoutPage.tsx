@@ -28,14 +28,14 @@ const R32_BRACKET = [
 ];
 
 const R16_BRACKET = [
-  { matchNum: 89, home: 'V73', away: 'V74', homeLabel: 'Vencedor 73', awayLabel: 'Vencedor 74' },
-  { matchNum: 90, home: 'V75', away: 'V76', homeLabel: 'Vencedor 75', awayLabel: 'Vencedor 76' },
-  { matchNum: 91, home: 'V77', away: 'V78', homeLabel: 'Vencedor 77', awayLabel: 'Vencedor 78' },
+  { matchNum: 89, home: 'V74', away: 'V77', homeLabel: 'Vencedor 74', awayLabel: 'Vencedor 77' },
+  { matchNum: 90, home: 'V73', away: 'V75', homeLabel: 'Vencedor 73', awayLabel: 'Vencedor 75' },
+  { matchNum: 91, home: 'V76', away: 'V78', homeLabel: 'Vencedor 76', awayLabel: 'Vencedor 78' },
   { matchNum: 92, home: 'V79', away: 'V80', homeLabel: 'Vencedor 79', awayLabel: 'Vencedor 80' },
-  { matchNum: 93, home: 'V81', away: 'V82', homeLabel: 'Vencedor 81', awayLabel: 'Vencedor 82' },
-  { matchNum: 94, home: 'V83', away: 'V84', homeLabel: 'Vencedor 83', awayLabel: 'Vencedor 84' },
-  { matchNum: 95, home: 'V85', away: 'V86', homeLabel: 'Vencedor 85', awayLabel: 'Vencedor 86' },
-  { matchNum: 96, home: 'V87', away: 'V88', homeLabel: 'Vencedor 87', awayLabel: 'Vencedor 88' },
+  { matchNum: 93, home: 'V83', away: 'V84', homeLabel: 'Vencedor 83', awayLabel: 'Vencedor 84' },
+  { matchNum: 94, home: 'V81', away: 'V82', homeLabel: 'Vencedor 81', awayLabel: 'Vencedor 82' },
+  { matchNum: 95, home: 'V86', away: 'V88', homeLabel: 'Vencedor 86', awayLabel: 'Vencedor 88' },
+  { matchNum: 96, home: 'V85', away: 'V87', homeLabel: 'Vencedor 85', awayLabel: 'Vencedor 87' },
 ];
 
 const QF_BRACKET = [
