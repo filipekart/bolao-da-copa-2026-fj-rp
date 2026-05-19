@@ -40,8 +40,8 @@ const R16_BRACKET = [
 
 const QF_BRACKET = [
   { matchNum: 97, home: 'V89', away: 'V90', homeLabel: 'Vencedor 89', awayLabel: 'Vencedor 90' },
-  { matchNum: 98, home: 'V91', away: 'V92', homeLabel: 'Vencedor 91', awayLabel: 'Vencedor 92' },
-  { matchNum: 99, home: 'V93', away: 'V94', homeLabel: 'Vencedor 93', awayLabel: 'Vencedor 94' },
+  { matchNum: 98, home: 'V93', away: 'V94', homeLabel: 'Vencedor 93', awayLabel: 'Vencedor 94' },
+  { matchNum: 99, home: 'V91', away: 'V92', homeLabel: 'Vencedor 91', awayLabel: 'Vencedor 92' },
   { matchNum: 100, home: 'V95', away: 'V96', homeLabel: 'Vencedor 95', awayLabel: 'Vencedor 96' },
 ];
 
