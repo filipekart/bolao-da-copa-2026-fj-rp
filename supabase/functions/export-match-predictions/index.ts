@@ -94,11 +94,12 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    // Require either an admin JWT or a valid cron secret header
+    // Require service-role token (internal/cron), admin JWT, or a valid cron secret header
     const cronHeader = req.headers.get("x-cron-secret") ?? "";
     const isCron = CRON_SECRET.length > 0 && cronHeader === CRON_SECRET;
-    if (!isCron) {
-      const authHeader = req.headers.get("Authorization");
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const isServiceRole = authHeader === `Bearer ${SERVICE_KEY}`;
+    if (!isCron && !isServiceRole) {
       if (!authHeader) {
         return new Response(JSON.stringify({ error: "Não autenticado" }), {
           status: 401,
