@@ -119,6 +119,20 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const cronSecret = Deno.env.get('CRON_SECRET') ?? '';
+
+    // Restrict to cron/service-role callers
+    const authHeader = req.headers.get('Authorization') ?? '';
+    const headerSecret = req.headers.get('x-cron-secret') ?? '';
+    const isServiceRole = authHeader === `Bearer ${serviceRoleKey}`;
+    const isCron = cronSecret.length > 0 && headerSecret === cronSecret;
+    if (!isServiceRole && !isCron) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;
     const vapidPublicKey = 'BDxV6g8V9OvsPS2eGrz5U9LDXm9w3vkcgqsDMf_GxsXkRiinDopX0Nu7rcIvd3qTFkDhumAb5q5lzIs8JADavuU';
     const vapidSubject = 'mailto:admin@bolao-copa.app';

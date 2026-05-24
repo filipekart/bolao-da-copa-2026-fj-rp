@@ -9,6 +9,8 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+const CRON_SECRET = Deno.env.get("CRON_SECRET") ?? "";
 
 function fmtBrasilia(iso: string): string {
   const d = new Date(iso);
@@ -92,6 +94,42 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    // Require service-role token (internal/cron), admin JWT, or a valid cron secret header
+    const cronHeader = req.headers.get("x-cron-secret") ?? "";
+    const isCron = CRON_SECRET.length > 0 && cronHeader === CRON_SECRET;
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const isServiceRole = authHeader === `Bearer ${SERVICE_KEY}`;
+    if (!isCron && !isServiceRole) {
+      if (!authHeader) {
+        return new Response(JSON.stringify({ error: "Não autenticado" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const userClient = createClient(SUPABASE_URL, ANON_KEY, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: userData } = await userClient.auth.getUser();
+      if (!userData?.user) {
+        return new Response(JSON.stringify({ error: "Não autenticado" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const adminCheck = createClient(SUPABASE_URL, SERVICE_KEY);
+      const { data: roleRows } = await adminCheck
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userData.user.id)
+        .eq("role", "admin");
+      if (!roleRows || roleRows.length === 0) {
+        return new Response(JSON.stringify({ error: "Apenas admins" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
     let body: any = {};
     try { body = await req.json(); } catch (_) {}
