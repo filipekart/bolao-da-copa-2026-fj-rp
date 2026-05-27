@@ -1,0 +1,1 @@
+DELETE FROM public.match_predictions WHERE id IN ('5ebad3b9-1ee6-4a8d-9862-9311113f522f','b510ce07-e8cf-4fd1-a6c8-35b7e43d2904','4413d112-84ae-4c74-b4b7-43fb070c53a1','a780ef3d-07e6-4e50-be91-8a3cbbb4f17e','f27bf7d9-4c07-4e90-84e8-8493c9be780f','96ea1c6d-b60f-4964-a58c-2be9aad9a85e');
