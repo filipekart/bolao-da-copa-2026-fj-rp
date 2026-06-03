@@ -1,0 +1,1 @@
+UPDATE auth.users SET email = 'amandioamaralsantos@gmail.com', email_confirmed_at = COALESCE(email_confirmed_at, now()) WHERE id = 'c95e5aae-99d3-4b55-960c-4ab2166ffc73';
