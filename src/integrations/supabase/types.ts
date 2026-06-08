@@ -809,6 +809,24 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_general_ranking: {
+        Args: never
+        Returns: {
+          champion_flag_url: string
+          champion_team_name: string
+          display_name: string
+          exact_hits: number
+          mvp_flag_url: string
+          mvp_name: string
+          points_knockout: number
+          points_matches: number
+          points_total: number
+          top_scorer_flag_url: string
+          top_scorer_name: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
       get_official_extras: {
         Args: never
         Returns: {

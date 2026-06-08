@@ -1,43 +1,80 @@
-## Objetivo
+# Correção do Ranking Geral
 
-Reduzir a superfície de ataque das funções `SECURITY DEFINER` revogando `EXECUTE` de quem não precisa chamá-las e blindando as duas funções administrativas que hoje não validam o papel internamente.
+## Causa raiz
 
-## Diagnóstico
+A view `public.v_ranking` é `security_invoker=true` e começa por `FROM profiles p`. A RLS de `profiles` para usuários autenticados permite SELECT apenas em `auth.uid() = id` (ou admin). Resultado: para qualquer usuário não-admin, `select * from v_ranking` devolve apenas a própria linha — por isso o Geral "não aparece para todos", enquanto os parciais funcionam (eles usam a RPC `get_public_profiles()` SECURITY DEFINER, que ignora a RLS de `profiles`).
 
-Auditei as 20 funções `SECURITY DEFINER` do schema `public` e cruzei com o uso real no app/edge functions:
+## Princípio da correção
 
-**Categoria A — chamadas legítimas por usuários autenticados (manter EXECUTE para `authenticated`, revogar de `anon`/`public`):**
-- `submit_match_prediction`, `submit_champion_prediction`, `submit_extra_prediction`
-- `get_public_profiles`, `get_official_extras`, `get_round_ranking`
+Não mexer em `profiles` (a RLS restritiva é desejada — proteção de PII) nem na infraestrutura dos parciais. Expor o Ranking Geral pela mesma porta que os parciais usam: uma função SECURITY DEFINER que devolve apenas os campos públicos do ranking.
 
-**Categoria B — admin-only (já validam `has_role` internamente; manter `authenticated`, revogar de `anon`/`public`):**
-- `admin_set_champion`, `admin_clear_champion`, `admin_set_extra_result`, `admin_clear_extra_result`
+## Mudanças
 
-**Categoria C — uso só em RLS / outras funções / triggers (revogar de `anon`, `authenticated` e `public`):**
-- `has_role`, `is_match_open`, `is_tournament_open`, `is_knockout_stage_open`
-- `is_ranking_owner`, `is_ranking_member`
-- `handle_new_user` (trigger), `get_extras_completion` (só edge function com service_role)
+### 1. Banco — nova RPC `get_general_ranking()`
 
-**Categoria D — sensíveis, hoje chamáveis sem checagem:**
-- `score_finished_matches` e `refresh_leaderboard` são invocadas pelo `useAdmin` no client, mas não validam `has_role` por dentro. Qualquer autenticado pode disparar recálculo do leaderboard.
+```sql
+CREATE OR REPLACE FUNCTION public.get_general_ranking()
+RETURNS TABLE (
+  user_id uuid,
+  display_name text,
+  points_matches integer,
+  points_knockout integer,
+  points_total integer,
+  exact_hits integer,
+  updated_at timestamptz,
+  champion_team_name text,
+  champion_flag_url text,
+  top_scorer_name text,
+  top_scorer_flag_url text,
+  mvp_name text,
+  mvp_flag_url text
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT
+    p.id,
+    p.display_name,
+    COALESCE(l.points_matches, 0),
+    COALESCE(l.points_knockout, 0),
+    COALESCE(l.points_total, 0),
+    COALESCE(l.exact_hits, 0),
+    COALESCE(l.updated_at, p.created_at),
+    t_champ.name,
+    t_champ.flag_url,
+    ep_ts.player_name,
+    t_ts.flag_url,
+    ep_mvp.player_name,
+    t_mvp.flag_url
+  FROM profiles p
+  LEFT JOIN leaderboard l ON l.user_id = p.id
+  LEFT JOIN knockout_predictions kp ON kp.user_id = p.id AND kp.stage = 'CHAMPION'
+  LEFT JOIN teams t_champ ON t_champ.id = kp.team_id
+  LEFT JOIN extra_predictions ep_ts ON ep_ts.user_id = p.id AND ep_ts.category = 'top_scorer'
+  LEFT JOIN teams t_ts ON t_ts.id = ep_ts.team_id
+  LEFT JOIN extra_predictions ep_mvp ON ep_mvp.user_id = p.id AND ep_mvp.category = 'mvp'
+  LEFT JOIN teams t_mvp ON t_mvp.id = ep_mvp.team_id
+  WHERE p.approved = true;
+$$;
 
-> Observação: `calculate_match_prediction_points` e `get_result_label` são `IMMUTABLE` sem `SECURITY DEFINER` real relevante — vou revogar do `public` por consistência.
+GRANT EXECUTE ON FUNCTION public.get_general_ranking() TO authenticated;
+```
 
-## Plano
+A view `v_ranking` pode ser mantida (não vou removê-la para não quebrar nada que eventualmente dependa dela em outro lugar).
 
-1. **Migration única** que:
-   - Adiciona checagem `has_role(auth.uid(),'admin')` no topo de `score_finished_matches()` e `refresh_leaderboard()` (defesa em profundidade, já que admins continuam chamando via `useAdmin`).
-   - `REVOKE EXECUTE ... FROM PUBLIC, anon, authenticated` em todas as funções da Categoria C.
-   - `REVOKE EXECUTE ... FROM PUBLIC, anon` nas Categorias A e B (mantém `authenticated`).
-   - Mantém `service_role` com `EXECUTE` em tudo (edge functions continuam funcionando: `fetch-fifa-results`, `send-push-reminders`, `export-match-predictions`).
+### 2. Frontend — `src/hooks/useRanking.ts`
 
-2. **Sem mudanças de frontend.** Todas as chamadas atuais continuam válidas:
-   - Cliente segue chamando `submit_*`, `get_public_profiles`, `get_official_extras`, `get_round_ranking`, `admin_*` (admins são `authenticated`).
-   - `useAdmin` continua chamando `score_finished_matches`/`refresh_leaderboard` — agora protegidas por `has_role`.
-   - RLS continua funcionando porque políticas executam as funções no contexto do owner (postgres), não do role chamador.
+Trocar a única linha de leitura:
 
-3. **Validação pós-migration**: rodar `supabase--linter` e confirmar que o aviso `SUPA_authenticated_security_definer_function_executable` desapareceu para a Categoria C e que o app continua funcional (submissão de palpite, ranking, admin).
+```ts
+const { data, error } = await supabase.rpc('get_general_ranking');
+```
 
-## O que NÃO faz parte
+A interface `RankingEntry` já bate com as colunas retornadas pela função. Nada mais muda — `RankingPage.tsx` e o restante seguem iguais.
 
-- Não mexo nos achados separados de Realtime/pix_key, view SECURITY DEFINER e bucket `match-exports` — esses são tickets distintos.
+## Validação
+
+- Logar como usuário comum (não-admin) e abrir a aba "Geral": deve listar todos os participantes aprovados.
+- Conferir que os outros rankings (Grupos / Rounds / Knockout / Custom) continuam idênticos.
