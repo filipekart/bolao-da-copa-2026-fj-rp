@@ -16,17 +16,25 @@ export function useMatchPredictions(matchId: string, enabled: boolean) {
     enabled,
     staleTime: 2 * 60 * 1000,
     queryFn: async (): Promise<MatchPrediction[]> => {
-      const { data, error } = await supabase
-        .from("match_predictions")
-        .select("user_id, predicted_home_score, predicted_away_score, points_awarded, rule_applied, profiles!match_predictions_user_id_fkey(display_name)")
-        .eq("match_id", matchId);
+      const [predsRes, profilesRes] = await Promise.all([
+        supabase
+          .from("match_predictions")
+          .select("user_id, predicted_home_score, predicted_away_score, points_awarded, rule_applied")
+          .eq("match_id", matchId),
+        supabase.rpc("get_public_profiles"),
+      ]);
 
-      if (error) throw error;
+      if (predsRes.error) throw predsRes.error;
+      if (profilesRes.error) throw profilesRes.error;
 
-      return (data ?? [])
+      const nameById = new Map<string, string>(
+        (profilesRes.data ?? []).map((p: any) => [p.id, p.display_name])
+      );
+
+      return (predsRes.data ?? [])
         .map((row: any) => ({
           user_id: row.user_id,
-          display_name: row.profiles?.display_name ?? "—",
+          display_name: nameById.get(row.user_id) ?? "—",
           predicted_home_score: row.predicted_home_score,
           predicted_away_score: row.predicted_away_score,
           points_awarded: row.points_awarded,
