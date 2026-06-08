@@ -122,7 +122,6 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
                 {isMe && <span className="text-primary ml-1">{t('ranking.you')}</span>}
               </p>
               <div className="flex gap-3 text-xs text-muted-foreground mt-0.5 items-center flex-wrap">
-                <span>{t('ranking.matches')}: {showField === 'points_total' ? entry.points_matches : points}</span>
                 <span>{t('ranking.exact')}: {entry.exact_hits ?? 0}</span>
                 {(extrasRevealed || isMe) && entry.champion_flag_url && (
                   <span className="flex items-center gap-1" title={`${t('extras.champion')}: ${entry.champion_team_name}`}>
