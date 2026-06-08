@@ -22,9 +22,9 @@ export function useRanking() {
     queryKey: ['ranking'],
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase.from('v_ranking').select('*');
+      const { data, error } = await supabase.rpc('get_general_ranking');
       if (error) throw error;
-      return data as RankingEntry[];
+      return (data ?? []) as unknown as RankingEntry[];
     },
   });
 }
