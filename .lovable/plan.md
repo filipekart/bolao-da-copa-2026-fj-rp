@@ -1,20 +1,15 @@
-## Problema
+## Objetivo
+Gerar um arquivo Excel (.xlsx) com a lista completa de participantes do bolão, contendo apenas duas colunas: **Nome** e **Email**.
 
-A função `public.get_general_ranking()` (criada na correção do Ranking Geral) ficou com `EXECUTE` para `PUBLIC` e `anon`, além de `authenticated`. Como é `SECURITY DEFINER`, qualquer requisição anônima pode invocá-la pela Data API e ler nomes/pontos de todos os participantes aprovados sem login — origem do alerta do scanner.
+## Fonte dos dados
+- `public.profiles.display_name` (nome)
+- `auth.users.email` (email), join por `id`
+- Ordenação alfabética por nome
+- Inclui todos os usuários cadastrados (aprovados e pendentes)
 
-Todas as outras funções `SECURITY DEFINER` do projeto já estão restritas (sem `anon`, sem `PUBLIC`). Só `get_general_ranking` está exposta.
+## Entrega
+Arquivo salvo em `/mnt/documents/participantes-bolao.xlsx`, disponível para download direto no chat via `<presentation-artifact>`.
 
-## Correção (migração mínima)
-
-```sql
-REVOKE EXECUTE ON FUNCTION public.get_general_ranking() FROM PUBLIC, anon;
--- authenticated mantém EXECUTE (já concedido); service_role idem.
-```
-
-Nada muda no frontend — `useRanking` continua chamando via cliente autenticado.
-
-## Validação
-
-- Rodar o linter / scan novamente: alerta sai.
-- Logar como usuário comum e abrir a aba Geral: ranking continua aparecendo.
-- Chamada anônima a `rpc('get_general_ranking')` passa a retornar erro de permissão.
+## Observações
+- Nenhuma alteração de código no app.
+- Artefato pontual; se quiser uma página de admin para exportar isso recorrentemente, posso planejar separado.
