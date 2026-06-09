@@ -187,7 +187,7 @@ Deno.serve(async (req) => {
     const expiredEndpoints: string[] = [];
     const BATCH_SIZE = 50;
 
-    type PushTask = () => Promise<{ ok: boolean; endpoint: string }>;
+    type PushTask = () => Promise<{ ok: boolean; expired: boolean; endpoint: string }>;
     const pushTasks: PushTask[] = [];
 
     for (const match of matches) {
