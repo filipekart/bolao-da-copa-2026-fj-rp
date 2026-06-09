@@ -76,6 +76,7 @@ Deno.serve(async (req) => {
     });
 
     const results: any[] = [];
+    const expiredEndpoints: string[] = [];
     for (const sub of subs) {
       try {
         const result = await webpush.sendNotification(
@@ -88,15 +89,26 @@ Deno.serve(async (req) => {
           ok: true,
         });
       } catch (e: any) {
+        if (e.statusCode === 404 || e.statusCode === 410) {
+          expiredEndpoints.push(sub.endpoint);
+        }
         results.push({
           endpoint: sub.endpoint.substring(0, 60) + '...',
           status: e.statusCode,
           error: e.body || e.message,
+          removed: e.statusCode === 404 || e.statusCode === 410,
         });
       }
     }
 
-    return new Response(JSON.stringify({ results }, null, 2), {
+    if (expiredEndpoints.length > 0) {
+      await supabase
+        .from('push_subscriptions')
+        .delete()
+        .in('endpoint', expiredEndpoints);
+    }
+
+    return new Response(JSON.stringify({ results, expired: expiredEndpoints.length }, null, 2), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err: any) {
