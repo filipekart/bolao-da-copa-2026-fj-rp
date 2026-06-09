@@ -83,7 +83,7 @@ async function sendWebPush(
   vapidPrivateKey: string,
   vapidPublicKey: string,
   vapidSubject: string
-): Promise<boolean> {
+): Promise<{ ok: boolean; expired: boolean; status: number }> {
   const url = new URL(subscription.endpoint);
   const audience = `${url.protocol}//${url.host}`;
   const expiry = Math.floor(Date.now() / 1000) + 12 * 60 * 60;
@@ -103,12 +103,11 @@ async function sendWebPush(
     body: payload,
   });
 
-  if (response.status === 410 || response.status === 404) {
-    // Subscription expired, should be removed
-    return false;
-  }
-
-  return response.ok;
+  // Only 404/410 mean the subscription is gone and must be removed.
+  // Any other non-ok status (5xx, 429, 403, etc.) is a transient/send failure
+  // — count as failure but keep the subscription.
+  const expired = response.status === 404 || response.status === 410;
+  return { ok: response.ok, expired, status: response.status };
 }
 
 Deno.serve(async (req) => {
@@ -223,8 +222,8 @@ Deno.serve(async (req) => {
               vapidPublicKey,
               vapidSubject
             )
-              .then(ok => ({ ok, endpoint: sub.endpoint }))
-              .catch(() => ({ ok: false, endpoint: sub.endpoint }))
+              .then(r => ({ ok: r.ok, expired: r.expired, endpoint: sub.endpoint }))
+              .catch(() => ({ ok: false, expired: false, endpoint: sub.endpoint }))
           );
         }
       }
@@ -288,8 +287,8 @@ Deno.serve(async (req) => {
                 vapidPublicKey,
                 vapidSubject
               )
-                .then(ok => ({ ok, endpoint: sub.endpoint }))
-                .catch(() => ({ ok: false, endpoint: sub.endpoint }))
+                .then(r => ({ ok: r.ok, expired: r.expired, endpoint: sub.endpoint }))
+                .catch(() => ({ ok: false, expired: false, endpoint: sub.endpoint }))
             );
           }
         }
@@ -303,7 +302,7 @@ Deno.serve(async (req) => {
       for (const r of results) {
         if (r.status === 'fulfilled') {
           if (r.value.ok) sent++;
-          else expiredEndpoints.push(r.value.endpoint);
+          else if ((r.value as any).expired) expiredEndpoints.push(r.value.endpoint);
         }
       }
     }
