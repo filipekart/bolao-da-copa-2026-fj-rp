@@ -14,7 +14,7 @@ export function useMatchPredictions(matchId: string, enabled: boolean) {
   return useQuery({
     queryKey: ["match-predictions", matchId],
     enabled,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
     queryFn: async (): Promise<MatchPrediction[]> => {
       const [predsRes, profilesRes] = await Promise.all([
         supabase
