@@ -4,6 +4,19 @@ import { useAuth } from '@/lib/auth';
 import { useActiveProfile } from '@/lib/activeProfile';
 import { toast } from 'sonner';
 
+/**
+ * Erro transiente = sem `code` PostgREST definido (timeout, fetch fail, 5xx sem corpo).
+ * Erro definitivo = qualquer coisa com `code` (P0001 regra de negócio, 23505, 42501, etc.).
+ * Nunca usamos match de string da mensagem (i18n + mudanças de copy quebrariam).
+ */
+function isTransientError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return true;
+  const e = error as { code?: unknown; name?: unknown; status?: unknown };
+  if (typeof e.code === 'string' && e.code.length > 0) return false;
+  if (typeof e.status === 'number' && e.status >= 400 && e.status < 500) return false;
+  return true;
+}
+
 export function useMyPredictions() {
   const { user } = useAuth();
   const { activeUserId } = useActiveProfile();
@@ -70,6 +83,7 @@ export function useSubmitPrediction() {
   const { user } = useAuth();
   const { activeUserId, isActingAsOther } = useActiveProfile();
   return useMutation({
+    mutationKey: ['submit-prediction', activeUserId],
     mutationFn: async ({
       matchId,
       homeScore,
@@ -88,7 +102,10 @@ export function useSubmitPrediction() {
       if (error) throw error;
       return data;
     },
-    retry: 2,
+    retry: (failureCount, error) => {
+      if (!isTransientError(error)) return false;
+      return failureCount < 4;
+    },
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 5000),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['prediction', variables.matchId] });
@@ -96,8 +113,27 @@ export function useSubmitPrediction() {
       queryClient.invalidateQueries({ queryKey: ['all-predictions'] });
       toast.success('Palpite salvo!');
     },
-    onError: (error: Error) => {
-      toast.error(error.message);
+    onError: (error: Error, variables) => {
+      const transient = isTransientError(error);
+      const msg = error.message || 'Erro ao salvar palpite';
+      if (transient) {
+        toast.error(msg, {
+          action: {
+            label: 'Tentar de novo',
+            onClick: () => {
+              // mesma assinatura do mutationFn — payload idêntico
+              submitPredictionRef.current?.(variables);
+            },
+          },
+        });
+      } else {
+        toast.error(msg);
+      }
     },
   });
 }
+
+// Ref interna para permitir retry manual a partir do toast sem dependência circular.
+const submitPredictionRef: { current: ((vars: { matchId: string; homeScore: number; awayScore: number }) => void) | null } = {
+  current: null,
+};
