@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/auth';
@@ -82,17 +83,13 @@ export function useSubmitPrediction() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { activeUserId, isActingAsOther } = useActiveProfile();
-  return useMutation({
+  type Vars = { matchId: string; homeScore: number; awayScore: number };
+  // Ref atualizada a cada render para permitir retry manual a partir do toast
+  // sem dependência circular com o objeto da mutation.
+  const mutateRef = useRef<((vars: Vars) => void) | null>(null);
+  const mutation = useMutation({
     mutationKey: ['submit-prediction', activeUserId],
-    mutationFn: async ({
-      matchId,
-      homeScore,
-      awayScore,
-    }: {
-      matchId: string;
-      homeScore: number;
-      awayScore: number;
-    }) => {
+    mutationFn: async ({ matchId, homeScore, awayScore }: Vars) => {
       const { data, error } = await supabase.rpc('submit_match_prediction', {
         p_match_id: matchId,
         p_predicted_home_score: homeScore,
@@ -122,7 +119,7 @@ export function useSubmitPrediction() {
             label: 'Tentar de novo',
             onClick: () => {
               // mesma assinatura do mutationFn — payload idêntico
-              submitPredictionRef.current?.(variables);
+              mutateRef.current?.(variables);
             },
           },
         });
@@ -131,9 +128,6 @@ export function useSubmitPrediction() {
       }
     },
   });
+  mutateRef.current = mutation.mutate;
+  return mutation;
 }
-
-// Ref interna para permitir retry manual a partir do toast sem dependência circular.
-const submitPredictionRef: { current: ((vars: { matchId: string; homeScore: number; awayScore: number }) => void) | null } = {
-  current: null,
-};
