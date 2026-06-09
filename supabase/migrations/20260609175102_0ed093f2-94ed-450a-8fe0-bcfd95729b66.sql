@@ -1,0 +1,1 @@
+UPDATE auth.identities SET identity_data = jsonb_set(identity_data, '{email}', '"christomatheus94@gmail.com"') WHERE user_id='4b4f1603-88fe-4d12-8a0a-9b7a9ac06908' AND provider='email';
