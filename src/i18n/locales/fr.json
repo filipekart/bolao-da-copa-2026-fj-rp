@@ -72,7 +72,9 @@
     "partialSave": "{{count}} pronostic(s) enregistré(s) avec succès",
     "liveNow": "EN DIRECT",
     "next24h": "Prochaines 24h",
-    "nothingToSave": "Aucun pronostic rempli à enregistrer."
+    "nothingToSave": "Aucun pronostic rempli à enregistrer.",
+    "predictionsProgress": "{{done}}/{{total}} pronostics",
+    "groupProgress": "{{done}}/{{total}}"
   },
   "match": {
     "back": "Retour",
