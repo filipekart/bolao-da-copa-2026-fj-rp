@@ -1,35 +1,23 @@
-## Objetivo
-Mostrar de forma clara quantos palpites de jogos da fase de grupos o usuário já fez, tanto no geral quanto por grupo.
+## Reset único da senha do BV010 (carollsmf92@gmail.com → `BV0101`)
 
-## O que muda
+Operação one-off. Nenhuma mudança permanente no app.
 
-### 1. Badge global no topo da Home (`src/pages/HomePage.tsx`)
-- Logo abaixo do header gradiente "Bolão da Copa" (e antes da seção "Ao vivo"), exibir um chip discreto:
-  - `✅ 72/72 palpites` — verde (primary) quando completo
-  - `⚠️ 70/72 palpites` — âmbar/destaque quando faltam
-- Conta apenas matches da fase de grupos (`GROUP_STAGE`), que é exatamente o que `useMatches('GROUP_STAGE')` já retorna na Home.
-- Considera apenas palpites com `predicted_home_score` e `predicted_away_score` preenchidos (não-null) — dados já disponíveis em `existingPredictions`.
-- Quando o usuário está apostando por outro perfil (`isActingAsOther`), o contador reflete o `activeUserId` (já é o caso, pois `existingPredictions` usa `activeUserId`).
+### Passos
 
-### 2. Contador por grupo no header do `GroupCard`
-- Substituir o ✓ verde atual por `Y/N` (ex: `3/6`) ao lado do nome do grupo.
-- Quando `Y === N`, manter o ✓ verde **junto** com o número (`6/6 ✓`) para reforçar o "completo".
-- Cor: muted quando incompleto, primary quando completo.
+1. **Criar edge function temporária** `admin-reset-password-oneshot` em `supabase/functions/admin-reset-password-oneshot/index.ts`:
+   - Usa `SUPABASE_SERVICE_ROLE_KEY` (já disponível nos secrets)
+   - Hardcoded: `user_id = 334a479e-47de-45f3-8091-01b55919c7f7`, `password = 'BV0101'`
+   - Chama `supabase.auth.admin.updateUserById(user_id, { password })`
+   - Retorna `{ success: true }` ou erro
 
-### 3. Visual / estilo
-- Apenas números, sem barra de progresso (conforme decidido).
-- Sem incluir Extras (Campeão/Artilheiro/MVP) — só os 72 jogos.
+2. **Deploy** via `supabase--deploy_edge_functions`
 
-## Detalhes técnicos
-- Cálculo total: `matches.length` (já é 72 ao filtrar GROUP_STAGE) e `existingPredictions.length` filtrando os que têm score válido.
-- Cálculo por grupo: dentro do `GroupCard`, já recebe `existingPredictionIds` — derivar `filled = matches.filter(m => existingPredictionIds.has(m.id)).length` e total `matches.length`.
-- Tudo client-side, sem mudanças de schema, RPC ou RLS.
-- Adicionar chaves i18n em `pt.json`, `en.json`, `es.json`, `fr.json`:
-  - `home.predictionsProgress` ("{{done}}/{{total}} palpites")
-  - `home.groupProgress` ("{{done}}/{{total}}")
+3. **Executar uma vez** via `supabase--curl_edge_functions` (POST)
 
-## Fora do escopo
-- Página "Meus Palpites" (não alterada nesta task).
-- Contagem dos Extras.
-- Banner de alerta perto do kickoff (pode virar follow-up).
-- Mata-mata (a Home só lida com fase de grupos hoje).
+4. **Apagar** o arquivo da edge function (`rm -rf supabase/functions/admin-reset-password-oneshot`) e chamar `supabase--delete_edge_functions` — sem endpoint inseguro deixado no projeto
+
+### Resultado
+
+- Senha da BV010 trocada para `BV0101`
+- Avisar a usuária para trocar em Perfil depois
+- Codebase volta exatamente como está agora
