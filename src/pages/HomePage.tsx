@@ -194,7 +194,8 @@ const GroupCard = React.forwardRef<HTMLDivElement, {
   const [expanded, setExpanded] = useState(!!hasUpcoming24h);
 
   const allLocked = matches.every(m => new Date(m.kickoff_at) <= now);
-  const allHavePredictions = matches.every(m => existingPredictionIds.has(m.id));
+  const filledCount = matches.filter(m => existingPredictionIds.has(m.id)).length;
+  const allHavePredictions = filledCount === matches.length;
 
   // Calculate predicted standings from current scores (skip matches without a filled prediction)
   const predictedMatches: PredictedMatch[] = matches
@@ -248,6 +249,9 @@ const GroupCard = React.forwardRef<HTMLDivElement, {
             ))}
           </div>
           <span className="text-muted-foreground text-xs shrink-0">)</span>
+          <span className={`text-[11px] font-semibold shrink-0 ${allHavePredictions ? 'text-primary' : 'text-muted-foreground'}`}>
+            {t('home.groupProgress', { done: filledCount, total: matches.length })}
+          </span>
           {allHavePredictions && (
             <Check className="w-4 h-4 text-primary shrink-0" />
           )}
