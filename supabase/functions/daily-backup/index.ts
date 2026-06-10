@@ -6,23 +6,17 @@ const corsHeaders = {
 };
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+// CRÍTICO: usa SERVICE_ROLE_KEY para ler tabelas sob RLS e escrever no bucket privado.
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const BUCKET = "daily-backups";
 const RETENTION_DAYS = 30;
 
 const TABLES = [
-  "profiles",
-  "user_roles",
-  "managed_profiles",
-  "teams",
-  "players",
-  "matches",
   "match_predictions",
   "extra_predictions",
   "knockout_predictions",
-  "knockout_results",
+  "profiles",
   "leaderboard",
-  "match_export_log",
 ];
 
 function csvCell(v: any): string {
@@ -40,7 +34,7 @@ async function exportTableCsv(admin: any, table: string, today: string): Promise
   const parts: string[] = [];
   while (true) {
     const { data, error } = await admin.from(table).select("*").range(from, from + pageSize - 1);
-    if (error) throw new Error(`${table}: ${error.message}`);
+    if (error) throw new Error(`READ_ERROR ${table}: ${error.message}`);
     if (!data?.length) break;
     if (!header) {
       header = Object.keys(data[0]);
@@ -51,13 +45,17 @@ async function exportTableCsv(admin: any, table: string, today: string): Promise
     if (data.length < pageSize) break;
     from += pageSize;
   }
-  const body = parts.length ? parts.join("") : "(empty)\n";
+  // Não grava arquivo vazio silenciosamente: aborta com erro claro.
+  if (total === 0) {
+    throw new Error(`EMPTY_TABLE ${table}: nenhum registro retornado — backup abortado`);
+  }
+  const body = parts.join("");
   const path = `${today}/${table}.csv`;
   const { error: upErr } = await admin.storage.from(BUCKET).upload(path, new TextEncoder().encode(body), {
     contentType: "text/csv; charset=utf-8",
     upsert: true,
   });
-  if (upErr) throw upErr;
+  if (upErr) throw new Error(`UPLOAD_ERROR ${table}: ${upErr.message}`);
   return total;
 }
 
