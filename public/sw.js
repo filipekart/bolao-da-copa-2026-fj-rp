@@ -59,7 +59,11 @@ self.addEventListener('fetch', (event) => {
   // 4) Navegação HTML — network-first
   if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(req).catch(() => caches.match(req))
+      fetch(req).catch(async () =>
+        (await caches.match(req)) ||
+        (await caches.match('/')) ||
+        Response.error()
+      )
     );
   }
 });
