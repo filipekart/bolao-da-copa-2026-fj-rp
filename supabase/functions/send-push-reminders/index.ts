@@ -122,6 +122,7 @@ Deno.serve(async (req) => {
     const allowedPublicKeys = [
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? '',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkc29zZ2d2bHVyc2RuZ3RleWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MTQxNDEsImV4cCI6MjA5MDQ5MDE0MX0.OSyYvCOn7uhlOse9Gne1Ovmd8AC_iU0nQEXwJR2p1HM',
     ].filter(Boolean);
 
     // Restrict to cron/service-role callers (pg_cron passes the anon key as Bearer)
