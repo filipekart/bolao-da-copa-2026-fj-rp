@@ -42,9 +42,17 @@ Deno.serve(async (req) => {
 
     // Target user defaults to the caller; admins may specify another user via body.user_id
     let targetUserId = userData.user.id;
+    let customTitle: string | null = null;
+    let customBody: string | null = null;
+    let customUrl: string | null = null;
+    let customTag: string | null = null;
     try {
       const body = await req.json();
       if (body?.user_id && typeof body.user_id === 'string') targetUserId = body.user_id;
+      if (typeof body?.title === 'string') customTitle = body.title;
+      if (typeof body?.body === 'string') customBody = body.body;
+      if (typeof body?.url === 'string') customUrl = body.url;
+      if (typeof body?.tag === 'string') customTag = body.tag;
     } catch (_) {}
 
     const vapidPublicKey = 'BDxV6g8V9OvsPS2eGrz5U9LDXm9w3vkcgqsDMf_GxsXkRiinDopX0Nu7rcIvd3qTFkDhumAb5q5lzIs8JADavuU';
@@ -69,10 +77,10 @@ Deno.serve(async (req) => {
     }
 
     const payload = JSON.stringify({
-      title: '🧪 Teste Push',
-      body: 'Notificação de teste do Bolão Copa 2026!',
-      tag: `test-${Date.now()}`,
-      url: '/',
+      title: customTitle ?? '🧪 Teste Push',
+      body: customBody ?? 'Notificação de teste do Bolão Copa 2026!',
+      tag: customTag ?? `test-${Date.now()}`,
+      url: customUrl ?? '/',
     });
 
     const results: any[] = [];
