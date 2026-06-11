@@ -1,0 +1,1 @@
+UPDATE auth.users SET email_change = '' WHERE id = 'be45b694-8766-4383-a1aa-94e2f24d6ba7' AND email_change IS NULL;
