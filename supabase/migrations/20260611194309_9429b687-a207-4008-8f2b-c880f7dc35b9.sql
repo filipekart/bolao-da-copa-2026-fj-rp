@@ -1,0 +1,1 @@
+ALTER VIEW public.v_extra_predictions_stats SET (security_invoker = true);

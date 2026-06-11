@@ -721,6 +721,18 @@ export type Database = {
       }
     }
     Views: {
+      v_extra_predictions_stats: {
+        Row: {
+          categoria: string | null
+          flag_url: string | null
+          opcao_id: string | null
+          opcao_nome: string | null
+          team_name: string | null
+          total_apostas: number | null
+          total_categoria: number | null
+        }
+        Relationships: []
+      }
       v_group_standings: {
         Row: {
           draws: number | null
