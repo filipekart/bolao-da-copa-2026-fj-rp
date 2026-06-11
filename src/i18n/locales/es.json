@@ -158,8 +158,11 @@
     "championSaved": "¡Pronóstico de campeón guardado!",
     "noGroup": "Sin grupo",
     "stats": {
-      "heading": "Cómo se distribuyeron los pronósticos (top 5)",
+      "distributionTitle": "Cómo votaron en {{category}}",
+      "trendTitle": "Tendencia de pronósticos",
+      "topList": "Top {{count}} más elegidos",
       "totalBets": "{{count}} pronósticos",
+      "others": "Otros",
       "noData": "Sin pronósticos registrados."
     }
   },
