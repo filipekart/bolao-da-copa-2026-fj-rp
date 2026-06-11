@@ -74,6 +74,18 @@ export function usePushSubscription() {
       const auth = subscription.getKey('auth');
       if (!key || !auth) return;
 
+      // Skip upsert if we already saved this exact endpoint for this user.
+      // Endpoints can rotate (browser renews subscription), so we still upsert
+      // when the endpoint changes OR when there's no local record yet.
+      const cacheKey = `push-sub:${user.id}`;
+      const cachedEndpoint = (() => {
+        try { return localStorage.getItem(cacheKey); } catch { return null; }
+      })();
+
+      if (cachedEndpoint === subscription.endpoint) {
+        return; // unchanged — nothing to do
+      }
+
       const { error } = await supabase
         .from('push_subscriptions' as any)
         .upsert({
@@ -83,7 +95,12 @@ export function usePushSubscription() {
           auth: arrayBufferToBase64(auth),
         }, { onConflict: 'user_id,endpoint' });
 
-      if (error) console.error('Failed to save push subscription:', error);
+      if (error) {
+        console.error('Failed to save push subscription:', error);
+        return;
+      }
+
+      try { localStorage.setItem(cacheKey, subscription.endpoint); } catch {}
     } catch (err) {
       console.error('Push subscription error:', err);
     }
