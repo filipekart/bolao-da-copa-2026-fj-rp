@@ -31,9 +31,30 @@ export function MatchPredictionsList({ matchId, isFinished, homeFlagUrl, awayFla
 
   const filtered = useMemo(() => {
     if (!data) return [];
-    if (!search.trim()) return data;
-    const q = search.toLowerCase();
-    return data.filter((p) => p.display_name.toLowerCase().includes(q));
+    const raw = search.trim();
+    if (!raw) return data;
+    const q = raw.toLowerCase();
+
+    // Extrai números da busca (ex: "2x1", "2-1", "2:1", "2 1" → [2,1]; "2" → [2])
+    const nums = raw.match(/\d+/g)?.map(Number) ?? [];
+    const hasLetters = /[a-zà-ÿ]/i.test(raw);
+
+    return data.filter((p) => {
+      const nameMatch = p.display_name.toLowerCase().includes(q);
+      let scoreMatch = false;
+      if (nums.length >= 2) {
+        scoreMatch =
+          p.predicted_home_score === nums[0] && p.predicted_away_score === nums[1];
+      } else if (nums.length === 1) {
+        scoreMatch =
+          p.predicted_home_score === nums[0] || p.predicted_away_score === nums[0];
+      }
+      // Se só tem números, filtra por placar. Se só letras, por nome.
+      // Se mistura, união (nome OU placar).
+      if (nums.length > 0 && !hasLetters) return scoreMatch;
+      if (hasLetters && nums.length === 0) return nameMatch;
+      return nameMatch || scoreMatch;
+    });
   }, [data, search]);
 
   if (isLoading) {
@@ -60,7 +81,7 @@ export function MatchPredictionsList({ matchId, isFinished, homeFlagUrl, awayFla
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder={t('match.searchParticipant', 'Buscar participante...')}
+          placeholder={t('match.searchParticipantOrScore', 'Buscar participante ou placar (ex: 2x1)')}
           className="pl-9 pr-9 h-9 text-sm"
         />
         {search && (
