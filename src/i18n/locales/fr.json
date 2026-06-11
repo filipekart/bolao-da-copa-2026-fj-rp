@@ -158,8 +158,11 @@
     "championSaved": "Pronostic du champion enregistré !",
     "noGroup": "Sans groupe",
     "stats": {
-      "heading": "Répartition des pronostics (top 5)",
+      "distributionTitle": "Comment ont voté pour {{category}}",
+      "trendTitle": "Tendance des pronostics",
+      "topList": "Top {{count}} les plus choisis",
       "totalBets": "{{count}} pronostics",
+      "others": "Autres",
       "noData": "Aucun pronostic enregistré."
     }
   },
