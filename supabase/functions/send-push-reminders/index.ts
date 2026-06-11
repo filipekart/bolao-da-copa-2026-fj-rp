@@ -119,16 +119,19 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const cronSecret = Deno.env.get('CRON_SECRET') ?? '';
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    const allowedPublicKeys = [
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? '',
+    ].filter(Boolean);
 
     // Restrict to cron/service-role callers (pg_cron passes the anon key as Bearer)
     const authHeader = req.headers.get('Authorization') ?? '';
     const apiKeyHeader = req.headers.get('apikey') ?? '';
     const headerSecret = req.headers.get('x-cron-secret') ?? '';
     const isServiceRole = authHeader === `Bearer ${serviceRoleKey}`;
-    const isAnonCron = anonKey.length > 0 && (
-      authHeader === `Bearer ${anonKey}` ||
-      apiKeyHeader === anonKey
+    const isAnonCron = allowedPublicKeys.some((key) =>
+      authHeader === `Bearer ${key}` ||
+      apiKeyHeader === key
     );
     const isCron = cronSecret.length > 0 && headerSecret === cronSecret;
     if (!isServiceRole && !isCron && !isAnonCron) {
@@ -136,7 +139,7 @@ Deno.serve(async (req) => {
         hasAuthHeader: authHeader.length > 0,
         hasApiKeyHeader: apiKeyHeader.length > 0,
         hasCronSecret: headerSecret.length > 0,
-        hasAnonKeyEnv: anonKey.length > 0,
+        publicKeysConfigured: allowedPublicKeys.length,
         hasCronSecretEnv: cronSecret.length > 0,
       });
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
