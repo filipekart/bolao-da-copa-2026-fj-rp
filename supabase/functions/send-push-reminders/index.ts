@@ -119,13 +119,15 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const cronSecret = Deno.env.get('CRON_SECRET') ?? '';
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
 
-    // Restrict to cron/service-role callers
+    // Restrict to cron/service-role callers (pg_cron passes the anon key as Bearer)
     const authHeader = req.headers.get('Authorization') ?? '';
     const headerSecret = req.headers.get('x-cron-secret') ?? '';
     const isServiceRole = authHeader === `Bearer ${serviceRoleKey}`;
+    const isAnonCron = anonKey.length > 0 && authHeader === `Bearer ${anonKey}`;
     const isCron = cronSecret.length > 0 && headerSecret === cronSecret;
-    if (!isServiceRole && !isCron) {
+    if (!isServiceRole && !isCron && !isAnonCron) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
