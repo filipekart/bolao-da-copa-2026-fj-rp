@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Star, Trophy, Target, Award } from 'lucide-react';
 import ChampionTab from '@/components/extras/ChampionTab';
 import PlayerPredictionTab from '@/components/extras/PlayerPredictionTab';
+import ExtrasStatsPanel from '@/components/extras/ExtrasStatsPanel';
 import { useTranslation } from 'react-i18next';
 
 export default function ExtrasPage() {
@@ -20,6 +21,8 @@ export default function ExtrasPage() {
       <h1 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
         <Star className="w-5 h-5 text-accent" /> {t('extras.title')}
       </h1>
+
+      <ExtrasStatsPanel />
 
       <div className="flex gap-1 p-1 bg-secondary rounded-xl">
         {SUB_TABS.map(tab => (

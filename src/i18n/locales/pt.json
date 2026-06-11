@@ -156,7 +156,12 @@
     "confirm": "Confirmar {{title}}",
     "predictionSaved": "Palpite de {{title}} salvo!",
     "championSaved": "Palpite de campeão salvo!",
-    "noGroup": "Sem grupo"
+    "noGroup": "Sem grupo",
+    "stats": {
+      "heading": "Como os palpites se distribuíram (top 5)",
+      "totalBets": "{{count}} palpites",
+      "noData": "Sem palpites registrados."
+    }
   },
   "ranking": {
     "title": "Ranking",
