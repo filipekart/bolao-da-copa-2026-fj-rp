@@ -22,8 +22,6 @@ export default function ExtrasPage() {
         <Star className="w-5 h-5 text-accent" /> {t('extras.title')}
       </h1>
 
-      <ExtrasStatsPanel />
-
       <div className="flex gap-1 p-1 bg-secondary rounded-xl">
         {SUB_TABS.map(tab => (
           <button
@@ -41,22 +39,33 @@ export default function ExtrasPage() {
         ))}
       </div>
 
-      {activeTab === 'champion' && <ChampionTab />}
+      {activeTab === 'champion' && (
+        <>
+          <ChampionTab />
+          <ExtrasStatsPanel category="champion" />
+        </>
+      )}
       {activeTab === 'top_scorer' && (
-        <PlayerPredictionTab
-          category="top_scorer"
-          title={t('extras.topScorer')}
-          description={t('extras.topScorerDesc')}
-          icon={<Target className="w-5 h-5 text-accent" />}
-        />
+        <>
+          <PlayerPredictionTab
+            category="top_scorer"
+            title={t('extras.topScorer')}
+            description={t('extras.topScorerDesc')}
+            icon={<Target className="w-5 h-5 text-accent" />}
+          />
+          <ExtrasStatsPanel category="top_scorer" />
+        </>
       )}
       {activeTab === 'mvp' && (
-        <PlayerPredictionTab
-          category="mvp"
-          title={t('extras.mvp')}
-          description={t('extras.mvpDesc')}
-          icon={<Award className="w-5 h-5 text-accent" />}
-        />
+        <>
+          <PlayerPredictionTab
+            category="mvp"
+            title={t('extras.mvp')}
+            description={t('extras.mvpDesc')}
+            icon={<Award className="w-5 h-5 text-accent" />}
+          />
+          <ExtrasStatsPanel category="mvp" />
+        </>
       )}
     </div>
   );
