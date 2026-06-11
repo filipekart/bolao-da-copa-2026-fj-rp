@@ -158,8 +158,11 @@
     "championSaved": "Champion prediction saved!",
     "noGroup": "No group",
     "stats": {
-      "heading": "How predictions are distributed (top 5)",
+      "distributionTitle": "How people voted on {{category}}",
+      "trendTitle": "Prediction trend",
+      "topList": "Top {{count}} most picked",
       "totalBets": "{{count}} predictions",
+      "others": "Others",
       "noData": "No predictions yet."
     }
   },
