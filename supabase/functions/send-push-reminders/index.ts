@@ -123,9 +123,13 @@ Deno.serve(async (req) => {
 
     // Restrict to cron/service-role callers (pg_cron passes the anon key as Bearer)
     const authHeader = req.headers.get('Authorization') ?? '';
+    const apiKeyHeader = req.headers.get('apikey') ?? '';
     const headerSecret = req.headers.get('x-cron-secret') ?? '';
     const isServiceRole = authHeader === `Bearer ${serviceRoleKey}`;
-    const isAnonCron = anonKey.length > 0 && authHeader === `Bearer ${anonKey}`;
+    const isAnonCron = anonKey.length > 0 && (
+      authHeader === `Bearer ${anonKey}` ||
+      apiKeyHeader === anonKey
+    );
     const isCron = cronSecret.length > 0 && headerSecret === cronSecret;
     if (!isServiceRole && !isCron && !isAnonCron) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
