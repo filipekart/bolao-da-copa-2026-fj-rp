@@ -30,7 +30,6 @@ function useExtrasRevealed() {
 
 const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points' | 'round_points'; t: any; extrasRevealed: boolean }>(({ ranking, userId, showField, t, extrasRevealed }, ref) => {
   const [search, setSearch] = useState('');
-  const highlightRef = useRef<HTMLDivElement>(null);
   const myRef = useRef<HTMLDivElement>(null);
 
   const sorted = useMemo(
@@ -44,12 +43,6 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
     [ranking, showField]
   );
 
-  useEffect(() => {
-    if (search && highlightRef.current) {
-      highlightRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [search]);
-
   if (!ranking?.length) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -59,9 +52,11 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
     );
   }
   const searchLower = search.toLowerCase().trim();
-  const matchedId = searchLower
-    ? sorted.find(e => e.display_name?.toLowerCase().includes(searchLower))?.user_id
-    : null;
+  const visible = searchLower
+    ? sorted
+        .map((entry, idx) => ({ entry, position: idx + 1 }))
+        .filter(({ entry }) => entry.display_name?.toLowerCase().includes(searchLower))
+    : sorted.map((entry, idx) => ({ entry, position: idx + 1 }));
 
   return (
     <div className="space-y-2">
@@ -95,17 +90,19 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
           </button>
         )}
       </div>
-      {sorted.map((entry, idx) => {
+      {visible.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground text-sm">
+          {t('ranking.noSearchResults', 'Nenhum participante encontrado')}
+        </div>
+      )}
+      {visible.map(({ entry, position }) => {
         const isMe = entry.user_id === userId;
-        const isHighlighted = entry.user_id === matchedId;
-        const position = idx + 1;
         const points = entry[showField] ?? 0;
-        const nameMatch = searchLower && entry.display_name?.toLowerCase().includes(searchLower);
         return (
           <div
             key={entry.user_id}
-            ref={isHighlighted ? highlightRef : isMe ? myRef : undefined}
-            className={`glass rounded-xl p-4 flex items-center gap-3 transition-all ${isMe ? 'ring-1 ring-primary' : ''} ${isHighlighted ? 'ring-2 ring-accent shadow-lg' : ''} ${searchLower && !nameMatch ? 'opacity-40' : ''}`}
+            ref={isMe ? myRef : undefined}
+            className={`glass rounded-xl p-4 flex items-center gap-3 transition-all ${isMe ? 'ring-1 ring-primary' : ''}`}
           >
             <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-sm ${
               position === 1 ? 'gradient-gold text-accent-foreground' :
