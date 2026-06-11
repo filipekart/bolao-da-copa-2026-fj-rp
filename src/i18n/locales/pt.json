@@ -158,8 +158,11 @@
     "championSaved": "Palpite de campeão salvo!",
     "noGroup": "Sem grupo",
     "stats": {
-      "heading": "Como os palpites se distribuíram (top 5)",
+      "distributionTitle": "Como apostaram em {{category}}",
+      "trendTitle": "Tendência dos palpites",
+      "topList": "Top {{count}} mais apostados",
       "totalBets": "{{count}} palpites",
+      "others": "Outros",
       "noData": "Sem palpites registrados."
     }
   },
