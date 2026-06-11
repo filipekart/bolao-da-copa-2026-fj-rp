@@ -156,7 +156,12 @@
     "confirm": "Confirmar {{title}}",
     "predictionSaved": "¡Pronóstico de {{title}} guardado!",
     "championSaved": "¡Pronóstico de campeón guardado!",
-    "noGroup": "Sin grupo"
+    "noGroup": "Sin grupo",
+    "stats": {
+      "heading": "Cómo se distribuyeron los pronósticos (top 5)",
+      "totalBets": "{{count}} pronósticos",
+      "noData": "Sin pronósticos registrados."
+    }
   },
   "ranking": {
     "title": "Ranking",
