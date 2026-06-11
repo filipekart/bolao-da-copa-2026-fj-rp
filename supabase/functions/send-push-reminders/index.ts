@@ -132,6 +132,13 @@ Deno.serve(async (req) => {
     );
     const isCron = cronSecret.length > 0 && headerSecret === cronSecret;
     if (!isServiceRole && !isCron && !isAnonCron) {
+      console.warn('Forbidden push reminder invocation', {
+        hasAuthHeader: authHeader.length > 0,
+        hasApiKeyHeader: apiKeyHeader.length > 0,
+        hasCronSecret: headerSecret.length > 0,
+        hasAnonKeyEnv: anonKey.length > 0,
+        hasCronSecretEnv: cronSecret.length > 0,
+      });
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
