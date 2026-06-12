@@ -1,0 +1,1 @@
+UPDATE public.public_ranking_tokens SET is_active = false;
