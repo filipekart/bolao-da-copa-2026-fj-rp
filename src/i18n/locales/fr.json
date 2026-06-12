@@ -120,7 +120,9 @@
       "exact": "Score exact",
       "partial": "Acquis partiel",
       "miss": "Raté",
-      "clear": "Effacer"
+      "clear": "Effacer",
+      "stage": "Filtrer par phase",
+      "allStages": "Toutes les phases"
     },
     "rules": {
       "EXACT_SCORE": "🎯 Score exact ! +25",
