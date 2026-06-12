@@ -1,46 +1,23 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import webpush from "npm:web-push@3.6.7";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-async function generateJWT(claims: Record<string, any>, privateKeyBase64: string): Promise<string> {
-  const header = { alg: 'ES256', typ: 'JWT' };
-  const encode = (obj: any) => btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  const headerB64 = encode(header);
-  const claimsB64 = encode(claims);
-  const signingInput = `${headerB64}.${claimsB64}`;
-  const padding = '='.repeat((4 - (privateKeyBase64.length % 4)) % 4);
-  const b64 = (privateKeyBase64 + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawKey = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-  const pkcs8Prefix = new Uint8Array([
-    0x30, 0x41, 0x02, 0x01, 0x00, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48,
-    0xce, 0x3d, 0x02, 0x01, 0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03,
-    0x01, 0x07, 0x04, 0x27, 0x30, 0x25, 0x02, 0x01, 0x01, 0x04, 0x20,
-  ]);
-  const pkcs8 = new Uint8Array(pkcs8Prefix.length + rawKey.length);
-  pkcs8.set(pkcs8Prefix); pkcs8.set(rawKey, pkcs8Prefix.length);
-  const key = await crypto.subtle.importKey('pkcs8', pkcs8.buffer, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
-  const signature = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, key, new TextEncoder().encode(signingInput));
-  const sigArray = new Uint8Array(signature);
-  let rawSig: Uint8Array;
-  if (sigArray.length === 64) { rawSig = sigArray; }
-  else {
-    const rLen = sigArray[3]; const r = sigArray.slice(4, 4 + rLen);
-    const sOff = 4 + rLen + 2; const sLen = sigArray[sOff - 1]; const s = sigArray.slice(sOff, sOff + sLen);
-    const pad = (b: Uint8Array) => { if (b.length === 32) return b; if (b.length > 32) return b.slice(b.length - 32); const o = new Uint8Array(32); o.set(b, 32 - b.length); return o; };
-    rawSig = new Uint8Array(64); rawSig.set(pad(r), 0); rawSig.set(pad(s), 32);
+async function sendWebPush(sub: { endpoint: string; p256dh: string; auth: string }, payload: string) {
+  try {
+    const r: any = await webpush.sendNotification(
+      { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+      payload,
+      { TTL: 86400 }
+    );
+    return { ok: true, expired: false, status: r?.statusCode ?? 201 };
+  } catch (e: any) {
+    const status = e?.statusCode ?? 0;
+    return { ok: false, expired: status === 404 || status === 410, status, err: e?.body || e?.message };
   }
-  const sigB64 = btoa(String.fromCharCode(...rawSig)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  return `${signingInput}.${sigB64}`;
-}
-
-async function sendWebPush(sub: { endpoint: string; p256dh: string; auth: string }, payload: string, vapidPrivateKey: string, vapidPublicKey: string, vapidSubject: string) {
-  const u = new URL(sub.endpoint);
-  const jwt = await generateJWT({ aud: `${u.protocol}//${u.host}`, exp: Math.floor(Date.now()/1000) + 12*60*60, sub: vapidSubject }, vapidPrivateKey);
-  const r = await fetch(sub.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `vapid t=${jwt}, k=${vapidPublicKey}`, 'TTL': '86400' }, body: payload });
-  return { ok: r.ok, expired: r.status === 404 || r.status === 410, status: r.status };
 }
 
 Deno.serve(async (req) => {
@@ -80,9 +57,8 @@ Deno.serve(async (req) => {
     const targets = (subs ?? []).filter((s: any) => force.has(s.user_id) || !predicted.has(s.user_id));
 
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;
-    console.log('vapid key len:', vapidPrivateKey?.length, 'prefix:', vapidPrivateKey?.slice(0, 20));
     const vapidPublicKey = 'BDxV6g8V9OvsPS2eGrz5U9LDXm9w3vkcgqsDMf_GxsXkRiinDopX0Nu7rcIvd3qTFkDhumAb5q5lzIs8JADavuU';
-    const vapidSubject = 'mailto:admin@bolao-copa.app';
+    webpush.setVapidDetails('mailto:admin@bolao-copa.app', vapidPublicKey, vapidPrivateKey);
 
     const payload = JSON.stringify({
       title: title || `⚽ ${match.home_team_name} × ${match.away_team_name}`,
@@ -95,7 +71,7 @@ Deno.serve(async (req) => {
     const BATCH = 50;
     for (let i = 0; i < targets.length; i += BATCH) {
       const batch = targets.slice(i, i + BATCH);
-      const res = await Promise.allSettled(batch.map((s: any) => sendWebPush({ endpoint: s.endpoint, p256dh: s.p256dh, auth: s.auth }, payload, vapidPrivateKey, vapidPublicKey, vapidSubject).then(r => ({ ...r, endpoint: s.endpoint })).catch((e) => ({ ok: false, expired: false, endpoint: s.endpoint, status: 0, err: String(e) }))));
+      const res = await Promise.allSettled(batch.map((s: any) => sendWebPush({ endpoint: s.endpoint, p256dh: s.p256dh, auth: s.auth }, payload).then(r => ({ ...r, endpoint: s.endpoint })).catch((e) => ({ ok: false, expired: false, endpoint: s.endpoint, status: 0, err: String(e) }))));
       for (const r of res) {
         if (r.status === 'fulfilled') {
           statuses.push((r.value as any).status ?? 0);
