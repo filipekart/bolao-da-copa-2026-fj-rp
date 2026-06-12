@@ -14,6 +14,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 
 import { Flag } from '@/components/Flag';
+import { computePositions } from '@/lib/rankingPositions';
 // Inline filtered ranking list (simplified)
 function FilteredRankingList({ ranking, memberIds, userId, t, extrasRevealed }: any) {
   const filtered = ranking?.filter((r: any) => memberIds.includes(r.user_id))
@@ -27,11 +28,13 @@ function FilteredRankingList({ ranking, memberIds, userId, t, extrasRevealed }: 
 
   if (!filtered.length) return <p className="text-sm text-muted-foreground py-4 text-center">{t('ranking.noParticipants')}</p>;
 
+  const positions = computePositions(filtered, ['points_total', 'exact_hits']);
+
   return (
     <div className="space-y-2 mt-2">
       {filtered.map((entry: any, idx: number) => {
         const isMe = entry.user_id === userId;
-        const position = idx + 1;
+        const position = positions[idx];
         return (
           <div key={entry.user_id} className={`glass rounded-xl p-3 flex items-center gap-3 ${isMe ? 'ring-1 ring-primary' : ''}`}>
             <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-display font-bold text-xs ${
