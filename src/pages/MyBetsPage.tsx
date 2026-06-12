@@ -340,11 +340,8 @@ export default function MyBetsPage() {
         return db - da;
       });
 
-    // Available stages in finished bucket (preserve canonical order)
-    const stageOrder = ['GROUP_STAGE', 'ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINAL', 'SEMI_FINAL', 'FINAL'];
-    const availableStages = stageOrder.filter(s =>
-      buckets.finished.some(p => p.match?.stage === s)
-    );
+    // Stage filter options (always visible, even before any finished games exist)
+    const stageOptions = ['GROUP_STAGE', 'ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINAL', 'SEMI_FINAL', 'FINAL'];
 
     const chip = (key: RuleFilter, label: string, activeCls: string) => {
       const active = ruleFilters.has(key);
@@ -363,21 +360,19 @@ export default function MyBetsPage() {
 
     return (
       <div className="space-y-4">
-        {availableStages.length > 1 && (
-          <Select value={stageFilter} onValueChange={setStageFilter}>
-            <SelectTrigger className="w-full sm:w-64">
-              <SelectValue placeholder={t('bets.filters.stage', 'Filtrar por fase')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">{t('bets.filters.allStages', 'Todas as fases')}</SelectItem>
-              {availableStages.map(s => (
-                <SelectItem key={s} value={s}>
-                  {t(`match.stages.${s}`, s.replace(/_/g, ' '))}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        <Select value={stageFilter} onValueChange={setStageFilter}>
+          <SelectTrigger className="w-full sm:w-64">
+            <SelectValue placeholder={t('bets.filters.stage', 'Filtrar por fase')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">{t('bets.filters.allStages', 'Todas as fases')}</SelectItem>
+            {stageOptions.map(s => (
+              <SelectItem key={s} value={s}>
+                {t(`match.stages.${s}`, s.replace(/_/g, ' '))}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <div className="flex flex-wrap gap-2">
           {chip('exact', t('bets.filters.exact', 'Placar exato'), 'border-primary bg-primary/15 text-primary')}
