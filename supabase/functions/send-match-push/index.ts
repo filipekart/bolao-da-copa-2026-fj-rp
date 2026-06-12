@@ -56,9 +56,9 @@ Deno.serve(async (req) => {
     const isServiceRole = token === serviceRoleKey;
     if (!isServiceRole) {
       const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, { global: { headers: { Authorization: authHeader } } });
-      const { data: claims, error: cErr } = await userClient.auth.getClaims(token);
-      if (cErr || !claims?.claims?.sub) return new Response(JSON.stringify({ error: 'Unauthorized', detail: cErr?.message }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-      const { data: isAdmin } = await admin.rpc('has_role', { _user_id: claims.claims.sub, _role: 'admin' });
+      const { data: u, error: uErr } = await userClient.auth.getUser(token);
+      if (uErr || !u?.user) return new Response(JSON.stringify({ error: 'Unauthorized', detail: uErr?.message }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      const { data: isAdmin } = await admin.rpc('has_role', { _user_id: u.user.id, _role: 'admin' });
       if (!isAdmin) return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
