@@ -99,9 +99,29 @@
   "bets": {
     "title": "Mes Paris",
     "searchPlaceholder": "Rechercher par équipe...",
+    "searchPlaceholderExt": "Rechercher par équipe ou score (ex: 2x1)",
     "noPredictions": "Vous n'avez fait aucun pronostic.",
     "group": "Groupe",
     "yourPrediction": "Votre pronostic",
+    "in": "dans",
+    "now": "maintenant",
+    "live": "EN DIRECT",
+    "tabs": {
+      "upcoming": "À venir",
+      "today": "Aujourd'hui",
+      "finished": "Terminés"
+    },
+    "empty": {
+      "upcoming": "Aucun match en attente — tout est à jour ! 🎯",
+      "today": "Aucun match dans les 24h à venir",
+      "finished": "Aucun match terminé pour l'instant"
+    },
+    "filters": {
+      "exact": "Score exact",
+      "partial": "Acquis partiel",
+      "miss": "Raté",
+      "clear": "Effacer"
+    },
     "rules": {
       "EXACT_SCORE": "🎯 Score exact ! +25",
       "WINNER_AND_WINNER_GOALS": "✅ Vainqueur + buts du vainqueur +18",

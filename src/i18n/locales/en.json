@@ -99,9 +99,29 @@
   "bets": {
     "title": "My Bets",
     "searchPlaceholder": "Search by team...",
+    "searchPlaceholderExt": "Search by team or score (e.g. 2x1)",
     "noPredictions": "You haven't made any predictions yet.",
     "group": "Group",
     "yourPrediction": "Your prediction",
+    "in": "in",
+    "now": "now",
+    "live": "LIVE",
+    "tabs": {
+      "upcoming": "Upcoming",
+      "today": "Today",
+      "finished": "Finished"
+    },
+    "empty": {
+      "upcoming": "No pending matches — you're all set! 🎯",
+      "today": "No matches in the next 24h",
+      "finished": "No finished matches yet"
+    },
+    "filters": {
+      "exact": "Exact score",
+      "partial": "Partial hit",
+      "miss": "Miss",
+      "clear": "Clear"
+    },
     "rules": {
       "EXACT_SCORE": "🎯 Exact score! +25",
       "WINNER_AND_WINNER_GOALS": "✅ Winner + winner's goals +18",
