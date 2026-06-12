@@ -82,3 +82,23 @@ export function useRegenerateMatchExport() {
     onError: (e: Error) => toast.error(e.message),
   });
 }
+
+export function useExportPendingMatches() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('export-match-predictions', {
+        body: {},
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as { processed: number; results: any[] };
+    },
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ['match-exports'] });
+      const n = data?.processed ?? 0;
+      toast.success(n > 0 ? `${n} planilha(s) gerada(s)!` : 'Nenhuma planilha pendente.');
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
