@@ -53,12 +53,11 @@ Deno.serve(async (req) => {
 
     const admin = createClient(supabaseUrl, serviceRoleKey);
     const token = authHeader.replace('Bearer ', '');
-    const allowedKeys = [
-      serviceRoleKey,
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? '',
-    ].filter(Boolean);
-    const isInternal = allowedKeys.includes(token);
+    let isInternal = false;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      if (payload.role === 'service_role' || payload.role === 'anon') isInternal = true;
+    } catch {}
     if (!isInternal) {
       const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, { global: { headers: { Authorization: authHeader } } });
       const { data: u, error: uErr } = await userClient.auth.getUser(token);
