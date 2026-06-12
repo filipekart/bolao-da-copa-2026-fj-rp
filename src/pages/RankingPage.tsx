@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
 import CustomRankingsTab from '@/components/ranking/CustomRankingsTab';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { computePositions } from '@/lib/rankingPositions';
 
 import { Flag } from '@/components/Flag';
 function useExtrasRevealed() {
@@ -45,6 +46,11 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
     [ranking, showField]
   );
 
+  const positions = useMemo(
+    () => computePositions(sorted, [showField, 'exact_hits']),
+    [sorted, showField]
+  );
+
   if (!ranking?.length) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -56,9 +62,9 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
   const searchLower = search.toLowerCase().trim();
   const visible = searchLower
     ? sorted
-        .map((entry, idx) => ({ entry, position: idx + 1 }))
+        .map((entry, idx) => ({ entry, position: positions[idx] }))
         .filter(({ entry }) => entry.display_name?.toLowerCase().includes(searchLower))
-    : sorted.map((entry, idx) => ({ entry, position: idx + 1 }));
+    : sorted.map((entry, idx) => ({ entry, position: positions[idx] }));
 
   return (
     <div className="space-y-2">

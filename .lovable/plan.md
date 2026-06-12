@@ -1,47 +1,62 @@
 ## Objetivo
+Trocar a numeração de posição do ranking (atualmente `idx + 1`) por "standard competition ranking" (1,1,1,4). Empate definido apenas por pontos + exact_hits. Ordenação visual intacta. Sem mexer em RPCs nem banco.
 
-Fechar as 2 sugestões pendentes da última rodada de melhorias no push de lembretes:
-- Logs de auditoria (quantos extras/matches enviados, para quem).
-- Dedupe via tabela `notification_log` para evitar reenvio se a função cron rodar duas vezes na mesma janela.
+## Implementação
 
-## Mudanças
+### 1. Criar helper único
+Novo arquivo `src/lib/rankingPositions.ts`:
 
-### 1. Nova tabela `notification_log` (migration)
-
-Schema mínimo para registrar cada push enviado e servir de chave de dedupe.
-
-```text
-notification_log
-├─ id          uuid pk default gen_random_uuid()
-├─ user_id     uuid not null references auth.users(id) on delete cascade
-├─ kind        text not null         -- 'match' | 'extras'
-├─ ref_key     text not null         -- match_id ou 'extras'
-├─ window_label text not null        -- '1 hora' | '10 minutos'
-├─ sent_at     timestamptz default now()
-└─ UNIQUE (user_id, kind, ref_key, window_label)
+```ts
+// Recebe lista JÁ ordenada e os campos que definem empate.
+// Retorna array paralelo de posições (1,1,1,4,...).
+export function computePositions<T>(
+  rows: T[],
+  tieKeys: (keyof T)[]
+): number[] {
+  const positions: number[] = [];
+  rows.forEach((row, idx) => {
+    if (idx === 0) {
+      positions.push(1);
+      return;
+    }
+    const prev = rows[idx - 1];
+    const tied = tieKeys.every(k => (row[k] ?? 0) === (prev[k] ?? 0));
+    positions.push(tied ? positions[idx - 1] : idx + 1);
+  });
+  return positions;
+}
 ```
 
-- RLS ligada, nenhuma policy para `anon`/`authenticated` (uso interno do edge function via service_role).
-- GRANT ALL para `service_role`.
+### 2. `src/pages/RankingPage.tsx` — `RankingList`
+- Manter o `sorted` (ordem: `showField` DESC → `exact_hits` DESC → `display_name` ASC).
+- Calcular `positions = computePositions(sorted, [showField, 'exact_hits'])` — onde `showField` é `points_total`, `group_points` ou `round_points` conforme a aba.
+- Substituir o atual `idx + 1` (tanto no branch com busca quanto no sem) por `positions[idx]`.
+- O badge dourado/medalha continua reagindo ao número exibido (`position === 1/2/3`), então o estilo de empates segue natural (três "1" recebem badge gold).
 
-### 2. Atualizar `supabase/functions/send-push-reminders/index.ts`
+### 3. `src/components/ranking/CustomRankingsTab.tsx` — `FilteredRankingList`
+- Manter o `.filter(...).sort(...)` atual (filtra antes de ordenar).
+- Calcular `positions = computePositions(filtered, ['points_total', 'exact_hits'])` SOBRE a lista já filtrada — posição é relativa ao grupo exibido.
+- Substituir `idx + 1` por `positions[idx]`.
 
-- Antes de enfileirar cada push (match ou extras), consultar `notification_log` e pular usuários que já têm registro `(user_id, kind, ref_key, window_label)`.
-- Após cada envio bem-sucedido, inserir em `notification_log` (batch insert no fim, com `on conflict do nothing` para segurança).
-- Adicionar `console.log` no fim com: total candidatos, enviados de match, enviados de extras, expirados, deduplicados.
+### 4. Campo de empate por aba
+| Aba | Campo de pontos (já é o `showField`) | tieKeys |
+|---|---|---|
+| Geral | `points_total` | `['points_total','exact_hits']` |
+| Grupos | `group_points` | `['group_points','exact_hits']` |
+| Rodadas 1/2/3 | `round_points` | `['round_points','exact_hits']` |
+| Mata-mata | `round_points` | `['round_points','exact_hits']` |
+| Custom | `points_total` | `['points_total','exact_hits']` |
 
-### 3. Sem mudanças em UI ou outras funções
+Basta passar `[showField, 'exact_hits']` em `RankingList`.
 
-Apenas o edge function `send-push-reminders` e a nova tabela. `send-match-push` (envio manual pelo admin) continua sem dedupe, por ser disparo intencional.
+## Não será alterado
+- RPCs `get_general_ranking`, `get_round_ranking`, `get_group_ranking`.
+- Critérios de ordenação (alfabético continua só como desempate visual).
+- Estilo das medalhas (1º/2º/3º) — herda naturalmente do número calculado.
+- Nenhuma migration, nenhuma alteração em `leaderboard`.
 
-## Detalhes técnicos
-
-- `window_label` usa as mesmas strings já existentes (`'1 hora'`, `'10 minutos'`) para casar com o `tag` do payload.
-- `ref_key` é `match.id` para lembrete de jogo e a constante `'extras'` para o lembrete de Campeão/Artilheiro/MVP (uma entrada por janela, independente de quais extras faltam).
-- Dedupe é por **usuário + janela**, não por subscription — evita reenviar quando o mesmo usuário tem múltiplos devices, mas continua mandando para todos os devices na primeira vez.
-- Insert em lote ao final, agrupando só os `(userId, kind, ref_key, window_label)` cujos pushes retornaram `ok: true`.
-
-## Resultado esperado
-
-- Cron pode rodar a cada minuto sem risco de spam: cada usuário recebe no máximo 1 push por janela.
-- Logs no painel mostram contagem clara por execução, facilitando diagnóstico futuro.
+## Verificação (após implementar)
+- Caso 3 empatados no topo (mesmos pontos e exact_hits): exibe 1,1,1,4.
+- Caso empate no meio (ex.: posições 5,5,7): exibe 5,5,7 corretamente.
+- Dois usuários com mesmos pontos mas exact_hits diferentes: posições distintas (não empatam).
+- Custom ranking com 5 membros filtrados: numeração 1..N relativa ao grupo, não ao geral.
