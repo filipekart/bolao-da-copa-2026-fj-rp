@@ -333,15 +333,23 @@ export default function MyBetsPage() {
     const list = buckets.finished
       .filter(matchesSearch)
       .filter(p => matchesRuleFilter(p.rule_applied))
-      .filter(p => stageFilter === 'ALL' || p.match?.stage === stageFilter)
+      .filter(p => {
+        if (stageFilter === 'ALL') return true;
+        if (stageFilter.startsWith('GROUP:')) {
+          const g = stageFilter.slice(6);
+          return p.match?.stage === 'GROUP_STAGE' && (p.match as any)?.group_name === g;
+        }
+        return p.match?.stage === stageFilter;
+      })
       .sort((a, b) => {
         const da = a.match?.kickoff_at ? new Date(a.match.kickoff_at).getTime() : 0;
         const db = b.match?.kickoff_at ? new Date(b.match.kickoff_at).getTime() : 0;
         return db - da;
       });
 
-    // Stage filter options (always visible, even before any finished games exist)
-    const stageOptions = ['GROUP_STAGE', 'ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINAL', 'SEMI_FINAL', 'FINAL'];
+    // Stage filter options. FIFA 2026 has 12 groups (A–L).
+    const groupLetters = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+    const knockoutStages = ['ROUND_OF_32', 'ROUND_OF_16', 'QUARTER_FINAL', 'SEMI_FINAL', 'FINAL'];
 
     const chip = (key: RuleFilter, label: string, activeCls: string) => {
       const active = ruleFilters.has(key);
@@ -366,7 +374,12 @@ export default function MyBetsPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">{t('bets.filters.allStages', 'Todas as fases')}</SelectItem>
-            {stageOptions.map(s => (
+            {groupLetters.map(g => (
+              <SelectItem key={`GROUP:${g}`} value={`GROUP:${g}`}>
+                {t('bets.group')} {g}
+              </SelectItem>
+            ))}
+            {knockoutStages.map(s => (
               <SelectItem key={s} value={s}>
                 {t(`match.stages.${s}`, s.replace(/_/g, ' '))}
               </SelectItem>
