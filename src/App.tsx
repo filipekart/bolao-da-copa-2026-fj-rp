@@ -18,6 +18,7 @@ import ExtrasPage from "./pages/ExtrasPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import PublicRankingPage from "./pages/PublicRankingPage";
 import NotFound from "./pages/NotFound";
 import { Loader2, ShieldAlert, Copy, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -143,6 +144,7 @@ function AppRoutes() {
       <Route path="/auth" element={<AuthGuard />} />
       <Route path="/boladavez" element={<BolaDaVezAuthGuard />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/r/:token" element={<PublicRankingPage />} />
       <Route path="/*" element={<ProtectedRoutes />} />
     </Routes>
   );
