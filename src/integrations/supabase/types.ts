@@ -653,6 +653,27 @@ export type Database = {
         }
         Relationships: []
       }
+      public_ranking_tokens: {
+        Row: {
+          created_at: string
+          is_active: boolean
+          label: string | null
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          is_active?: boolean
+          label?: string | null
+          token: string
+        }
+        Update: {
+          created_at?: string
+          is_active?: boolean
+          label?: string | null
+          token?: string
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string
