@@ -17,7 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Shield, Users, Trophy, RefreshCw, Globe, Loader2, Check, X, Wallet, Copy, Pencil, Trash2, Link2, Users2, Star, Award, Target, Search, FileSpreadsheet, Download } from 'lucide-react';
-import { useMatchExports, useDownloadMatchExport, useRegenerateMatchExport } from '@/hooks/useMatchExports';
+import { useMatchExports, useDownloadMatchExport, useRegenerateMatchExport, useExportPendingMatches } from '@/hooks/useMatchExports';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useTranslatedTeamName, useTeamNameByCode } from '@/hooks/useTranslatedTeamName';
@@ -1026,6 +1026,7 @@ function MatchExportsSection() {
   const { data: exports, isLoading } = useMatchExports();
   const download = useDownloadMatchExport();
   const regenerate = useRegenerateMatchExport();
+  const exportPending = useExportPendingMatches();
 
   const fmt = (iso: string) =>
     iso
@@ -1042,8 +1043,22 @@ function MatchExportsSection() {
         <FileSpreadsheet className="w-5 h-5 text-accent" /> Planilhas de palpites por jogo
       </h2>
       <p className="text-xs text-muted-foreground">
-        Geradas automaticamente no kickoff de cada jogo. Clique em Baixar para obter o arquivo .xlsx.
+        Geradas automaticamente a cada 5 minutos para jogos já iniciados. Se algo não aparecer, clique em "Gerar pendentes" para forçar uma varredura.
       </p>
+
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => exportPending.mutate()}
+        disabled={exportPending.isPending}
+        className="w-full"
+      >
+        {exportPending.isPending ? (
+          <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Gerando...</>
+        ) : (
+          <><RefreshCw className="w-4 h-4 mr-1" /> Gerar pendentes</>
+        )}
+      </Button>
 
       {isLoading && (
         <div className="flex justify-center py-4">

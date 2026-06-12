@@ -94,12 +94,21 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    // Require service-role token (internal/cron), admin JWT, or a valid cron secret header
+    let body: any = {};
+    try { body = await req.json(); } catch (_) {}
+    const forceMatchId: string | undefined = body?.match_id;
+
+    // Auth rules:
+    // - Auto-scan mode (no match_id): callable by cron without auth. It only
+    //   exports predictions for matches that already kicked off and writes to
+    //   a private bucket, so this is safe to leave open.
+    // - Forced single-match mode (match_id provided): requires service-role
+    //   token, valid cron secret, or an authenticated admin JWT.
     const cronHeader = req.headers.get("x-cron-secret") ?? "";
     const isCron = CRON_SECRET.length > 0 && cronHeader === CRON_SECRET;
     const authHeader = req.headers.get("Authorization") ?? "";
     const isServiceRole = authHeader === `Bearer ${SERVICE_KEY}`;
-    if (!isCron && !isServiceRole) {
+    if (forceMatchId && !isCron && !isServiceRole) {
       if (!authHeader) {
         return new Response(JSON.stringify({ error: "Não autenticado" }), {
           status: 401,
@@ -131,9 +140,6 @@ Deno.serve(async (req) => {
     }
 
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
-    let body: any = {};
-    try { body = await req.json(); } catch (_) {}
-    const forceMatchId: string | undefined = body?.match_id;
 
     let matchesToExport: any[] = [];
     if (forceMatchId) {
