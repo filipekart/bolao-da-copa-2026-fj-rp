@@ -80,6 +80,7 @@ Deno.serve(async (req) => {
     const targets = (subs ?? []).filter((s: any) => force.has(s.user_id) || !predicted.has(s.user_id));
 
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;
+    console.log('vapid key len:', vapidPrivateKey?.length, 'prefix:', vapidPrivateKey?.slice(0, 20));
     const vapidPublicKey = 'BDxV6g8V9OvsPS2eGrz5U9LDXm9w3vkcgqsDMf_GxsXkRiinDopX0Nu7rcIvd3qTFkDhumAb5q5lzIs8JADavuU';
     const vapidSubject = 'mailto:admin@bolao-copa.app';
 
