@@ -51,13 +51,16 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get('Authorization') ?? '';
     if (!authHeader.startsWith('Bearer ')) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
-    const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, { global: { headers: { Authorization: authHeader } } });
-    const { data: claims } = await userClient.auth.getClaims(authHeader.replace('Bearer ', ''));
-    if (!claims?.claims?.sub) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-
     const admin = createClient(supabaseUrl, serviceRoleKey);
-    const { data: isAdmin } = await admin.rpc('has_role', { _user_id: claims.claims.sub, _role: 'admin' });
-    if (!isAdmin) return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const token = authHeader.replace('Bearer ', '');
+    const isServiceRole = token === serviceRoleKey;
+    if (!isServiceRole) {
+      const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, { global: { headers: { Authorization: authHeader } } });
+      const { data: claims, error: cErr } = await userClient.auth.getClaims(token);
+      if (cErr || !claims?.claims?.sub) return new Response(JSON.stringify({ error: 'Unauthorized', detail: cErr?.message }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      const { data: isAdmin } = await admin.rpc('has_role', { _user_id: claims.claims.sub, _role: 'admin' });
+      if (!isAdmin) return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
     const { match_id, title, body, url, include_user_ids = [] } = await req.json();
     if (!match_id) return new Response(JSON.stringify({ error: 'match_id required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
