@@ -99,9 +99,29 @@
   "bets": {
     "title": "Mis Apuestas",
     "searchPlaceholder": "Buscar por equipo...",
+    "searchPlaceholderExt": "Buscar por equipo o marcador (ej: 2x1)",
     "noPredictions": "Aún no has hecho ningún pronóstico.",
     "group": "Grupo",
     "yourPrediction": "Tu pronóstico",
+    "in": "en",
+    "now": "ahora",
+    "live": "EN VIVO",
+    "tabs": {
+      "upcoming": "Próximos",
+      "today": "Hoy",
+      "finished": "Finalizados"
+    },
+    "empty": {
+      "upcoming": "¡Sin partidos pendientes — estás al día! 🎯",
+      "today": "Sin partidos en las próximas 24h",
+      "finished": "Aún no hay partidos finalizados"
+    },
+    "filters": {
+      "exact": "Marcador exacto",
+      "partial": "Acierto parcial",
+      "miss": "Falló",
+      "clear": "Limpiar"
+    },
     "rules": {
       "EXACT_SCORE": "🎯 ¡Marcador exacto! +25",
       "WINNER_AND_WINNER_GOALS": "✅ Ganador + goles del ganador +18",
