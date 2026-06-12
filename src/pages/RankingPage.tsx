@@ -37,7 +37,9 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
       ? [...ranking].sort((a, b) => {
           const pointsDiff = (b[showField] ?? 0) - (a[showField] ?? 0);
           if (pointsDiff !== 0) return pointsDiff;
-          return (b.exact_hits ?? 0) - (a.exact_hits ?? 0);
+          const exactDiff = (b.exact_hits ?? 0) - (a.exact_hits ?? 0);
+          if (exactDiff !== 0) return exactDiff;
+          return (a.display_name ?? '').localeCompare(b.display_name ?? '', 'pt', { sensitivity: 'base' });
         })
       : [],
     [ranking, showField]
