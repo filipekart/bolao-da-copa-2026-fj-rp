@@ -99,9 +99,29 @@
   "bets": {
     "title": "Meus Palpites",
     "searchPlaceholder": "Buscar por time...",
+    "searchPlaceholderExt": "Buscar por time ou placar (ex: 2x1)",
     "noPredictions": "Você ainda não fez nenhum palpite.",
     "group": "Grupo",
     "yourPrediction": "Seu palpite",
+    "in": "em",
+    "now": "agora",
+    "live": "AO VIVO",
+    "tabs": {
+      "upcoming": "Próximos",
+      "today": "Hoje",
+      "finished": "Finalizados"
+    },
+    "empty": {
+      "upcoming": "Nenhum jogo pendente — você está em dia! 🎯",
+      "today": "Nenhum jogo nas próximas 24h",
+      "finished": "Nenhum jogo finalizado ainda"
+    },
+    "filters": {
+      "exact": "Placar exato",
+      "partial": "Acerto parcial",
+      "miss": "Errou",
+      "clear": "Limpar"
+    },
     "rules": {
       "EXACT_SCORE": "🎯 Placar exato! +25",
       "WINNER_AND_WINNER_GOALS": "✅ Vencedor + gols do vencedor +18",
