@@ -1,113 +1,30 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import webpush from "npm:web-push@3.6.7";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Web Push crypto helpers
-async function generateJWT(claims: Record<string, any>, privateKeyBase64: string): Promise<string> {
-  const header = { alg: 'ES256', typ: 'JWT' };
-  const encode = (obj: any) => btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  const headerB64 = encode(header);
-  const claimsB64 = encode(claims);
-  const signingInput = `${headerB64}.${claimsB64}`;
-
-  // Import private key
-  const padding = '='.repeat((4 - (privateKeyBase64.length % 4)) % 4);
-  const b64 = (privateKeyBase64 + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawKey = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-
-  const key = await crypto.subtle.importKey(
-    'pkcs8',
-    await convertECPrivateKeyToPKCS8(rawKey),
-    { name: 'ECDSA', namedCurve: 'P-256' },
-    false,
-    ['sign']
-  );
-
-  const signature = await crypto.subtle.sign(
-    { name: 'ECDSA', hash: 'SHA-256' },
-    key,
-    new TextEncoder().encode(signingInput)
-  );
-
-  // Convert DER signature to raw r||s
-  const sigArray = new Uint8Array(signature);
-  let rawSig: Uint8Array;
-  if (sigArray.length === 64) {
-    rawSig = sigArray;
-  } else {
-    // DER encoded
-    const r = parseDERInteger(sigArray, 2);
-    const sOffset = 2 + sigArray[3] + 2;
-    const s = parseDERInteger(sigArray, sOffset);
-    rawSig = new Uint8Array(64);
-    rawSig.set(padTo32(r), 0);
-    rawSig.set(padTo32(s), 32);
-  }
-
-  const sigB64 = btoa(String.fromCharCode(...rawSig)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  return `${signingInput}.${sigB64}`;
-}
-
-function parseDERInteger(buf: Uint8Array, offset: number): Uint8Array {
-  const len = buf[offset + 1];
-  return buf.slice(offset + 2, offset + 2 + len);
-}
-
-function padTo32(bytes: Uint8Array): Uint8Array {
-  if (bytes.length === 32) return bytes;
-  if (bytes.length > 32) return bytes.slice(bytes.length - 32);
-  const padded = new Uint8Array(32);
-  padded.set(bytes, 32 - bytes.length);
-  return padded;
-}
-
-async function convertECPrivateKeyToPKCS8(rawKey: Uint8Array): Promise<ArrayBuffer> {
-  // Wrap raw 32-byte EC private key in PKCS8 DER structure
-  const pkcs8Prefix = new Uint8Array([
-    0x30, 0x41, 0x02, 0x01, 0x00, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48,
-    0xce, 0x3d, 0x02, 0x01, 0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03,
-    0x01, 0x07, 0x04, 0x27, 0x30, 0x25, 0x02, 0x01, 0x01, 0x04, 0x20,
-  ]);
-  const result = new Uint8Array(pkcs8Prefix.length + rawKey.length);
-  result.set(pkcs8Prefix);
-  result.set(rawKey, pkcs8Prefix.length);
-  return result.buffer;
-}
-
+// Send a Web Push notification via the npm:web-push library.
+// The manual ES256 JWT path using crypto.subtle.importKey('pkcs8', …) fails
+// with InvalidEncoding in the current Deno runtime, so we delegate.
 async function sendWebPush(
   subscription: { endpoint: string; p256dh: string; auth: string },
   payload: string,
-  vapidPrivateKey: string,
-  vapidPublicKey: string,
-  vapidSubject: string
 ): Promise<{ ok: boolean; expired: boolean; status: number }> {
-  const url = new URL(subscription.endpoint);
-  const audience = `${url.protocol}//${url.host}`;
-  const expiry = Math.floor(Date.now() / 1000) + 12 * 60 * 60;
-
-  const jwt = await generateJWT(
-    { aud: audience, exp: expiry, sub: vapidSubject },
-    vapidPrivateKey
-  );
-
-  const response = await fetch(subscription.endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `vapid t=${jwt}, k=${vapidPublicKey}`,
-      'TTL': '86400',
-    },
-    body: payload,
-  });
-
-  // Only 404/410 mean the subscription is gone and must be removed.
-  // Any other non-ok status (5xx, 429, 403, etc.) is a transient/send failure
-  // — count as failure but keep the subscription.
-  const expired = response.status === 404 || response.status === 410;
-  return { ok: response.ok, expired, status: response.status };
+  try {
+    const r: any = await webpush.sendNotification(
+      { endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth } },
+      payload,
+      { TTL: 86400 },
+    );
+    const status = r?.statusCode ?? 201;
+    return { ok: true, expired: false, status };
+  } catch (e: any) {
+    const status = e?.statusCode ?? 0;
+    return { ok: false, expired: status === 404 || status === 410, status };
+  }
 }
 
 Deno.serve(async (req) => {
@@ -145,6 +62,7 @@ Deno.serve(async (req) => {
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;
     const vapidPublicKey = 'BDxV6g8V9OvsPS2eGrz5U9LDXm9w3vkcgqsDMf_GxsXkRiinDopX0Nu7rcIvd3qTFkDhumAb5q5lzIs8JADavuU';
     const vapidSubject = 'mailto:admin@bolao-copa.app';
+    webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
@@ -228,9 +146,6 @@ Deno.serve(async (req) => {
             sendWebPush(
               { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
               payload,
-              vapidPrivateKey,
-              vapidPublicKey,
-              vapidSubject
             )
               .then(r => ({ ok: r.ok, expired: r.expired, endpoint: sub.endpoint }))
               .catch(() => ({ ok: false, expired: false, endpoint: sub.endpoint }))
@@ -293,9 +208,6 @@ Deno.serve(async (req) => {
               sendWebPush(
                 { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
                 payload,
-                vapidPrivateKey,
-                vapidPublicKey,
-                vapidSubject
               )
                 .then(r => ({ ok: r.ok, expired: r.expired, endpoint: sub.endpoint }))
                 .catch(() => ({ ok: false, expired: false, endpoint: sub.endpoint }))
