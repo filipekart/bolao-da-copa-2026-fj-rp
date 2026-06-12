@@ -39,7 +39,13 @@ export function useGroupRanking(enabled = true) {
           };
         });
 
-      return result.sort((a, b) => b.group_points - a.group_points);
+      return result.sort((a, b) => {
+        const pointsDiff = b.group_points - a.group_points;
+        if (pointsDiff !== 0) return pointsDiff;
+        const exactDiff = b.exact_hits - a.exact_hits;
+        if (exactDiff !== 0) return exactDiff;
+        return (a.display_name ?? '').localeCompare(b.display_name ?? '', 'pt', { sensitivity: 'base' });
+      });
     },
   });
 }
