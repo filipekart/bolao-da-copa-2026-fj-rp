@@ -1,0 +1,1 @@
+UPDATE public.matches SET kickoff_at = '2026-06-14 04:00:00+00', updated_at = now() WHERE id = '72d92615-719d-4bfa-8230-47b3d0c0658e';
