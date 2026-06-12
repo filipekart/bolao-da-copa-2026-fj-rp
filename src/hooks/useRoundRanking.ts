@@ -49,7 +49,13 @@ export function useRoundRanking(round: 'round1' | 'round2' | 'round3' | 'knockou
           };
         });
 
-      return result.sort((a, b) => b.round_points - a.round_points);
+      return result.sort((a, b) => {
+        const pointsDiff = b.round_points - a.round_points;
+        if (pointsDiff !== 0) return pointsDiff;
+        const exactDiff = b.exact_hits - a.exact_hits;
+        if (exactDiff !== 0) return exactDiff;
+        return (a.display_name ?? '').localeCompare(b.display_name ?? '', 'pt', { sensitivity: 'base' });
+      });
     },
   });
 }

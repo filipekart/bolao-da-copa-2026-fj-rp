@@ -20,7 +20,9 @@ function FilteredRankingList({ ranking, memberIds, userId, t, extrasRevealed }: 
     .sort((a: any, b: any) => {
       const pointsDiff = (b.points_total ?? 0) - (a.points_total ?? 0);
       if (pointsDiff !== 0) return pointsDiff;
-      return (b.exact_hits ?? 0) - (a.exact_hits ?? 0);
+      const exactDiff = (b.exact_hits ?? 0) - (a.exact_hits ?? 0);
+      if (exactDiff !== 0) return exactDiff;
+      return (a.display_name ?? '').localeCompare(b.display_name ?? '', 'pt', { sensitivity: 'base' });
     }) ?? [];
 
   if (!filtered.length) return <p className="text-sm text-muted-foreground py-4 text-center">{t('ranking.noParticipants')}</p>;
