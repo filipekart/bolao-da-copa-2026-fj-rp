@@ -155,16 +155,17 @@ Deno.serve(async (req) => {
     }
 
     // --- Extras reminders (champion, top scorer, MVP) ---
-    // Find the first scheduled match (earliest kickoff)
+    // Só faz sentido antes do 1º jogo da Copa. Depois disso, extras estão travados.
+    const { data: tournamentOpen } = await supabase.rpc('is_tournament_open');
+
+    // Primeiro jogo absoluto da Copa (match_number = 1), não o próximo agendado.
     const { data: firstMatch } = await supabase
       .from('matches')
       .select('kickoff_at')
-      .eq('status', 'SCHEDULED')
-      .order('kickoff_at', { ascending: true })
-      .limit(1)
-      .single();
+      .eq('match_number', 1)
+      .maybeSingle();
 
-    if (firstMatch) {
+    if (tournamentOpen && firstMatch) {
       const firstKickoff = new Date(firstMatch.kickoff_at);
       const minutesUntilFirst = (firstKickoff.getTime() - now.getTime()) / (1000 * 60);
 
