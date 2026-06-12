@@ -115,8 +115,23 @@ Deno.serve(async (req) => {
     const expiredEndpoints: string[] = [];
     const BATCH_SIZE = 50;
 
-    type PushTask = () => Promise<{ ok: boolean; expired: boolean; endpoint: string }>;
+    type PushTask = () => Promise<{ ok: boolean; expired: boolean; endpoint: string; logKey?: { user_id: string; kind: string; ref_key: string; window_label: string } }>;
     const pushTasks: PushTask[] = [];
+    let matchCandidates = 0;
+    let extrasCandidates = 0;
+    let matchDeduped = 0;
+    let extrasDeduped = 0;
+    let matchSent = 0;
+    let extrasSent = 0;
+
+    // Pre-load existing notification_log entries for current windows to dedupe
+    const { data: existingLog } = await supabase
+      .from('notification_log')
+      .select('user_id, kind, ref_key, window_label')
+      .in('window_label', ['1 hora', '10 minutos']);
+    const logSet = new Set(
+      (existingLog ?? []).map((r: any) => `${r.user_id}:${r.kind}:${r.ref_key}:${r.window_label}`)
+    );
 
     for (const match of matches) {
       const kickoff = new Date(match.kickoff_at);
@@ -133,6 +148,10 @@ Deno.serve(async (req) => {
 
       for (const [userId, subs] of subsByUser) {
         if (predictionSet.has(`${userId}:${match.id}`)) continue;
+        matchCandidates++;
+        const logKeyStr = `${userId}:match:${match.id}:${timeLabel}`;
+        if (logSet.has(logKeyStr)) { matchDeduped++; continue; }
+        const logKey = { user_id: userId, kind: 'match', ref_key: match.id, window_label: timeLabel };
 
         const payload = JSON.stringify({
           title: `⚽ Falta ${timeLabel}!`,
@@ -147,8 +166,8 @@ Deno.serve(async (req) => {
               { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
               payload,
             )
-              .then(r => ({ ok: r.ok, expired: r.expired, endpoint: sub.endpoint }))
-              .catch(() => ({ ok: false, expired: false, endpoint: sub.endpoint }))
+              .then(r => ({ ok: r.ok, expired: r.expired, endpoint: sub.endpoint, logKey }))
+              .catch(() => ({ ok: false, expired: false, endpoint: sub.endpoint, logKey }))
           );
         }
       }
@@ -195,6 +214,10 @@ Deno.serve(async (req) => {
           if (!extraSet.has(`${userId}:mvp`)) missing.push(missingLabels.mvp);
 
           if (missing.length === 0) continue;
+          extrasCandidates++;
+          const logKeyStr = `${userId}:extras:extras:${extrasTimeLabel}`;
+          if (logSet.has(logKeyStr)) { extrasDeduped++; continue; }
+          const logKey = { user_id: userId, kind: 'extras', ref_key: 'extras', window_label: extrasTimeLabel };
 
           const missingText = missing.join(', ');
           const payload = JSON.stringify({
@@ -210,8 +233,8 @@ Deno.serve(async (req) => {
                 { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
                 payload,
               )
-                .then(r => ({ ok: r.ok, expired: r.expired, endpoint: sub.endpoint }))
-                .catch(() => ({ ok: false, expired: false, endpoint: sub.endpoint }))
+                .then(r => ({ ok: r.ok, expired: r.expired, endpoint: sub.endpoint, logKey }))
+                .catch(() => ({ ok: false, expired: false, endpoint: sub.endpoint, logKey }))
             );
           }
         }
@@ -219,15 +242,32 @@ Deno.serve(async (req) => {
     }
 
     // Process push tasks in batches of BATCH_SIZE
+    const logInserts = new Map<string, { user_id: string; kind: string; ref_key: string; window_label: string }>();
     for (let i = 0; i < pushTasks.length; i += BATCH_SIZE) {
       const batch = pushTasks.slice(i, i + BATCH_SIZE);
       const results = await Promise.allSettled(batch.map(fn => fn()));
       for (const r of results) {
         if (r.status === 'fulfilled') {
-          if (r.value.ok) sent++;
-          else if ((r.value as any).expired) expiredEndpoints.push(r.value.endpoint);
+          if (r.value.ok) {
+            sent++;
+            const lk = (r.value as any).logKey;
+            if (lk) {
+              const k = `${lk.user_id}:${lk.kind}:${lk.ref_key}:${lk.window_label}`;
+              if (!logInserts.has(k)) {
+                logInserts.set(k, lk);
+                if (lk.kind === 'match') matchSent++; else extrasSent++;
+              }
+            }
+          } else if ((r.value as any).expired) expiredEndpoints.push(r.value.endpoint);
         }
       }
+    }
+
+    // Persist log entries for dedupe on future runs
+    if (logInserts.size > 0) {
+      await supabase
+        .from('notification_log')
+        .upsert(Array.from(logInserts.values()), { onConflict: 'user_id,kind,ref_key,window_label', ignoreDuplicates: true });
     }
 
     // Clean up expired subscriptions
@@ -238,8 +278,17 @@ Deno.serve(async (req) => {
         .in('endpoint', expiredEndpoints);
     }
 
+    console.log('[send-push-reminders]', JSON.stringify({
+      matchCandidates, matchDeduped, matchSent,
+      extrasCandidates, extrasDeduped, extrasSent,
+      totalSent: sent, expired: expiredEndpoints.length,
+    }));
+
     return new Response(
-      JSON.stringify({ sent, expired: expiredEndpoints.length }),
+      JSON.stringify({
+        sent, expired: expiredEndpoints.length,
+        matchSent, extrasSent, matchDeduped, extrasDeduped,
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err) {
