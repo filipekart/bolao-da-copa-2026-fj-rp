@@ -1,62 +1,53 @@
-## Objetivo
-Trocar a numeração de posição do ranking (atualmente `idx + 1`) por "standard competition ranking" (1,1,1,4). Empate definido apenas por pontos + exact_hits. Ordenação visual intacta. Sem mexer em RPCs nem banco.
+# Ranking público com token
 
-## Implementação
+Criar uma rota pública `/r/:token` que mostra **posição, nome e pontos** de todos os usuários aprovados, sem login, com atualização em tempo real. O acesso é validado por um token na URL — fácil de revogar.
 
-### 1. Criar helper único
-Novo arquivo `src/lib/rankingPositions.ts`:
+## O que será feito
 
-```ts
-// Recebe lista JÁ ordenada e os campos que definem empate.
-// Retorna array paralelo de posições (1,1,1,4,...).
-export function computePositions<T>(
-  rows: T[],
-  tieKeys: (keyof T)[]
-): number[] {
-  const positions: number[] = [];
-  rows.forEach((row, idx) => {
-    if (idx === 0) {
-      positions.push(1);
-      return;
-    }
-    const prev = rows[idx - 1];
-    const tied = tieKeys.every(k => (row[k] ?? 0) === (prev[k] ?? 0));
-    positions.push(tied ? positions[idx - 1] : idx + 1);
-  });
-  return positions;
-}
-```
+### 1. Tabela `public_ranking_tokens` (migration)
+Guarda tokens válidos. Admin pode criar/revogar pelo painel (fora deste plano — por enquanto, criamos 1 token manualmente via SQL).
 
-### 2. `src/pages/RankingPage.tsx` — `RankingList`
-- Manter o `sorted` (ordem: `showField` DESC → `exact_hits` DESC → `display_name` ASC).
-- Calcular `positions = computePositions(sorted, [showField, 'exact_hits'])` — onde `showField` é `points_total`, `group_points` ou `round_points` conforme a aba.
-- Substituir o atual `idx + 1` (tanto no branch com busca quanto no sem) por `positions[idx]`.
-- O badge dourado/medalha continua reagindo ao número exibido (`position === 1/2/3`), então o estilo de empates segue natural (três "1" recebem badge gold).
+Colunas: `token` (text, PK), `label` (text), `is_active` (bool), `created_at`.
 
-### 3. `src/components/ranking/CustomRankingsTab.tsx` — `FilteredRankingList`
-- Manter o `.filter(...).sort(...)` atual (filtra antes de ordenar).
-- Calcular `positions = computePositions(filtered, ['points_total', 'exact_hits'])` SOBRE a lista já filtrada — posição é relativa ao grupo exibido.
-- Substituir `idx + 1` por `positions[idx]`.
+RLS: nenhum acesso direto do cliente. Apenas a edge function lê (via service_role).
 
-### 4. Campo de empate por aba
-| Aba | Campo de pontos (já é o `showField`) | tieKeys |
-|---|---|---|
-| Geral | `points_total` | `['points_total','exact_hits']` |
-| Grupos | `group_points` | `['group_points','exact_hits']` |
-| Rodadas 1/2/3 | `round_points` | `['round_points','exact_hits']` |
-| Mata-mata | `round_points` | `['round_points','exact_hits']` |
-| Custom | `points_total` | `['points_total','exact_hits']` |
+### 2. Edge function pública `public-ranking`
+- `verify_jwt = false` (config.toml).
+- Recebe `?token=xxx`.
+- Valida contra `public_ranking_tokens` (is_active = true). Inválido → 401.
+- Roda `get_general_ranking()`, filtra aprovados, ordena por `points_total DESC, exact_hits DESC, display_name ASC`, aplica a numeração 1,1,1,4 (`computePositions`).
+- Retorna JSON `[{ position, name, points }]`.
+- CORS aberto.
 
-Basta passar `[showField, 'exact_hits']` em `RankingList`.
+### 3. Página pública `/r/:token` (React)
+- Rota nova em `src/App.tsx`, **sem AppLayout** (sem header/menu), sem auth.
+- Componente `PublicRankingPage`:
+  - Pega `token` da URL.
+  - `useQuery` chamando a edge function a cada **30s** (refetchInterval) — simples e suficiente. Não usa Realtime do banco porque o ranking só muda quando admin reprocessa, não por mudanças individuais.
+  - Mostra tabela minimalista: 3 colunas (Posição, Nome, Pontos), mesmo visual dark/dourado do app.
+  - Token inválido → mensagem "Link expirado ou inválido".
+- SEO: `<title>` "Ranking — Bolão FJ | RP", `<meta name="robots" content="noindex">`.
 
-## Não será alterado
-- RPCs `get_general_ranking`, `get_round_ranking`, `get_group_ranking`.
-- Critérios de ordenação (alfabético continua só como desempate visual).
-- Estilo das medalhas (1º/2º/3º) — herda naturalmente do número calculado.
-- Nenhuma migration, nenhuma alteração em `leaderboard`.
+### 4. Criação do primeiro token
+Via SQL no migration: `INSERT INTO public_ranking_tokens (token, label) VALUES ('<token-aleatório-32-chars>', 'Link público inicial');`
 
-## Verificação (após implementar)
-- Caso 3 empatados no topo (mesmos pontos e exact_hits): exibe 1,1,1,4.
-- Caso empate no meio (ex.: posições 5,5,7): exibe 5,5,7 corretamente.
-- Dois usuários com mesmos pontos mas exact_hits diferentes: posições distintas (não empatam).
-- Custom ranking com 5 membros filtrados: numeração 1..N relativa ao grupo, não ao geral.
+Link final entregue: `https://bolao-da-copa-2026-fj-rp.lovable.app/r/<token>`
+
+## O que NÃO muda
+- Nenhuma RPC existente.
+- Nenhuma lógica de scoring, sort ou ranking interno.
+- Página `/ranking` autenticada continua igual.
+
+## Detalhes técnicos
+- A função `computePositions` (já existe em `src/lib/rankingPositions.ts`) é replicada inline na edge function (TS puro, 10 linhas).
+- Edge function usa `SUPABASE_SERVICE_ROLE_KEY` para validar token e chamar a RPC.
+- Polling de 30s = ~2880 req/dia por viewer aberto. Aceitável.
+
+## Verificação
+- Abrir `/r/<token>` em aba anônima → ranking carrega sem login.
+- Trocar token → "Link inválido".
+- Atualizar pontuação (admin scoring) → próximo refresh (≤30s) reflete na página.
+- Empates exibem 1,1,1,4 corretamente.
+
+## Pendência para você confirmar
+- OK com **polling de 30s** ou prefere Realtime de verdade (subscribe em `leaderboard`)? Polling é mais simples e barato; Realtime atualiza no instante mas adiciona conexão WS por viewer.
