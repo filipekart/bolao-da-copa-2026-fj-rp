@@ -43,27 +43,34 @@ Deno.serve(async (req) => {
       if (!isAdmin) return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const { match_id, title, body, url, include_user_ids = [] } = await req.json();
-    if (!match_id) return new Response(JSON.stringify({ error: 'match_id required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const { match_id, title, body, url, include_user_ids = [], only_user_ids } = await req.json();
 
-    const { data: match } = await admin.from('v_matches_with_teams').select('id, home_team_name, away_team_name, kickoff_at').eq('id', match_id).single();
-    if (!match) return new Response(JSON.stringify({ error: 'Match not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    let matchTitle = '';
+    let predicted = new Set<string>();
+    if (match_id) {
+      const { data: match } = await admin.from('v_matches_with_teams').select('id, home_team_name, away_team_name').eq('id', match_id).single();
+      if (!match) return new Response(JSON.stringify({ error: 'Match not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      matchTitle = `⚽ ${match.home_team_name} × ${match.away_team_name}`;
+      const { data: preds } = await admin.from('match_predictions').select('user_id').eq('match_id', match_id);
+      predicted = new Set((preds ?? []).map((p: any) => p.user_id));
+    } else if (!only_user_ids?.length) {
+      return new Response(JSON.stringify({ error: 'match_id or only_user_ids required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
-    const { data: preds } = await admin.from('match_predictions').select('user_id').eq('match_id', match_id);
-    const predicted = new Set((preds ?? []).map((p: any) => p.user_id));
     const force = new Set<string>(include_user_ids);
+    const onlyTo = only_user_ids ? new Set<string>(only_user_ids) : null;
 
     const { data: subs } = await admin.from('push_subscriptions').select('*');
-    const targets = (subs ?? []).filter((s: any) => force.has(s.user_id) || !predicted.has(s.user_id));
+    const targets = (subs ?? []).filter((s: any) => onlyTo ? onlyTo.has(s.user_id) : (force.has(s.user_id) || !predicted.has(s.user_id)));
 
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;
     const vapidPublicKey = 'BDxV6g8V9OvsPS2eGrz5U9LDXm9w3vkcgqsDMf_GxsXkRiinDopX0Nu7rcIvd3qTFkDhumAb5q5lzIs8JADavuU';
     webpush.setVapidDetails('mailto:admin@bolao-copa.app', vapidPublicKey, vapidPrivateKey);
 
     const payload = JSON.stringify({
-      title: title || `⚽ ${match.home_team_name} × ${match.away_team_name}`,
+      title: title || matchTitle || '⚽ Bolão Copa 2026',
       body: body || `Faça seu palpite antes do apito inicial!`,
-      tag: `manual-${match.id}`,
+      tag: `manual-${match_id ?? Date.now()}`,
       url: url || '/',
     });
 
