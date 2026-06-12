@@ -120,7 +120,9 @@
       "exact": "Exact score",
       "partial": "Partial hit",
       "miss": "Miss",
-      "clear": "Clear"
+      "clear": "Clear",
+      "stage": "Filter by stage",
+      "allStages": "All stages"
     },
     "rules": {
       "EXACT_SCORE": "🎯 Exact score! +25",
