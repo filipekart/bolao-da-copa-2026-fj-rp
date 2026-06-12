@@ -546,6 +546,33 @@ export type Database = {
           },
         ]
       }
+      notification_log: {
+        Row: {
+          id: string
+          kind: string
+          ref_key: string
+          sent_at: string
+          user_id: string
+          window_label: string
+        }
+        Insert: {
+          id?: string
+          kind: string
+          ref_key: string
+          sent_at?: string
+          user_id: string
+          window_label: string
+        }
+        Update: {
+          id?: string
+          kind?: string
+          ref_key?: string
+          sent_at?: string
+          user_id?: string
+          window_label?: string
+        }
+        Relationships: []
+      }
       players: {
         Row: {
           created_at: string
