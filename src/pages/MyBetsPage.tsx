@@ -21,8 +21,8 @@ const PARTIAL_RULES = new Set([
 const STORAGE_KEY = 'bets-active-tab';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-function formatCountdown(ms: number, t: (k: string, fb?: string) => string): string {
-  if (ms <= 0) return t('bets.now', 'agora');
+function formatCountdown(ms: number, nowLabel: string): string {
+  if (ms <= 0) return nowLabel;
   const totalMin = Math.floor(ms / 60000);
   const days = Math.floor(totalMin / (60 * 24));
   const hours = Math.floor((totalMin % (60 * 24)) / 60);
@@ -190,7 +190,7 @@ export default function MyBetsPage() {
                 )}
                 {showCountdown && (
                   <span className="text-primary font-semibold">
-                    {t('bets.in', 'em')} {formatCountdown(ko! - now, t)}
+                    {t('bets.in', 'em')} {formatCountdown(ko! - now, t('bets.now', 'agora'))}
                   </span>
                 )}
               </span>
