@@ -1,28 +1,47 @@
-## Diagnóstico
+## Objetivo
 
-- Hoje a planilha é gerada pela função `export-match-predictions` quando ela é chamada.
-- O texto do admin diz “geradas automaticamente no kickoff”, mas não há uma chamada automática garantida no app; por isso alguns jogos, como Coreia do Sul x República Tcheca, podem ficar sem registro em `match_export_log`.
-- O jogo Coreia do Sul x República Tcheca está cadastrado como jogo 2, mas ainda não tem planilha salva.
+Fechar as 2 sugestões pendentes da última rodada de melhorias no push de lembretes:
+- Logs de auditoria (quantos extras/matches enviados, para quem).
+- Dedupe via tabela `notification_log` para evitar reenvio se a função cron rodar duas vezes na mesma janela.
 
-## Plano
+## Mudanças
 
-1. **Criar geração automática no backend**
-   - Adicionar um agendamento/cron para chamar `export-match-predictions` periodicamente.
-   - A função já busca jogos cujo `kickoff_at <= agora` e ainda não têm planilha, então ela funciona bem para “recuperar atrasados” também.
+### 1. Nova tabela `notification_log` (migration)
 
-2. **Tornar a função mais robusta**
-   - Manter idempotência: se a planilha já existe, não duplica.
-   - Registrar falhas por jogo no retorno para facilitar diagnóstico.
-   - Garantir que jogos recém-iniciados e jogos esquecidos sejam processados na próxima execução.
+Schema mínimo para registrar cada push enviado e servir de chave de dedupe.
 
-3. **Adicionar botão de recuperação geral no Admin**
-   - Além do botão individual “Regenerar”, incluir uma ação tipo “Gerar pendentes”.
-   - Isso chama a função sem `match_id` e cria todas as planilhas faltantes de jogos já iniciados.
+```text
+notification_log
+├─ id          uuid pk default gen_random_uuid()
+├─ user_id     uuid not null references auth.users(id) on delete cascade
+├─ kind        text not null         -- 'match' | 'extras'
+├─ ref_key     text not null         -- match_id ou 'extras'
+├─ window_label text not null        -- '1 hora' | '10 minutos'
+├─ sent_at     timestamptz default now()
+└─ UNIQUE (user_id, kind, ref_key, window_label)
+```
 
-4. **Melhorar a mensagem da aba Planilhas**
-   - Explicar que as planilhas são geradas automaticamente e que o botão “Gerar pendentes” força uma varredura manual caso algo não apareça.
+- RLS ligada, nenhuma policy para `anon`/`authenticated` (uso interno do edge function via service_role).
+- GRANT ALL para `service_role`.
+
+### 2. Atualizar `supabase/functions/send-push-reminders/index.ts`
+
+- Antes de enfileirar cada push (match ou extras), consultar `notification_log` e pular usuários que já têm registro `(user_id, kind, ref_key, window_label)`.
+- Após cada envio bem-sucedido, inserir em `notification_log` (batch insert no fim, com `on conflict do nothing` para segurança).
+- Adicionar `console.log` no fim com: total candidatos, enviados de match, enviados de extras, expirados, deduplicados.
+
+### 3. Sem mudanças em UI ou outras funções
+
+Apenas o edge function `send-push-reminders` e a nova tabela. `send-match-push` (envio manual pelo admin) continua sem dedupe, por ser disparo intencional.
+
+## Detalhes técnicos
+
+- `window_label` usa as mesmas strings já existentes (`'1 hora'`, `'10 minutos'`) para casar com o `tag` do payload.
+- `ref_key` é `match.id` para lembrete de jogo e a constante `'extras'` para o lembrete de Campeão/Artilheiro/MVP (uma entrada por janela, independente de quais extras faltam).
+- Dedupe é por **usuário + janela**, não por subscription — evita reenviar quando o mesmo usuário tem múltiplos devices, mas continua mandando para todos os devices na primeira vez.
+- Insert em lote ao final, agrupando só os `(userId, kind, ref_key, window_label)` cujos pushes retornaram `ok: true`.
 
 ## Resultado esperado
 
-- A planilha do jogo Coreia do Sul x República Tcheca será criada automaticamente assim que o agendamento rodar, desde que o horário do jogo já tenha passado.
-- Se por algum motivo o agendamento falhar, o admin consegue corrigir clicando em “Gerar pendentes”, sem precisar regenerar jogo por jogo.
+- Cron pode rodar a cada minuto sem risco de spam: cada usuário recebe no máximo 1 push por janela.
+- Logs no painel mostram contagem clara por execução, facilitando diagnóstico futuro.
