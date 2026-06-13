@@ -7,7 +7,8 @@ import { useTeamNameByCode } from '@/hooks/useTranslatedTeamName';
 import { useTeams } from '@/hooks/useTeams';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const TOP_N = 10;
+const TOP_N_DEFAULT = 10;
+const TOP_N_PLAYERS = 20;
 const PIE_TOP = 5;
 const PIE_COLORS = ['#16a34a', '#eab308', '#0ea5e9', '#a855f7', '#ef4444', '#64748b'];
 
@@ -48,6 +49,7 @@ export default function ExtrasStatsPanel({ category }: Props) {
 
   const stats = data[category];
   const Icon = ICONS[category];
+  const topN = category === 'champion' ? TOP_N_DEFAULT : TOP_N_PLAYERS;
 
   const teamFifaById = new Map<string, string | null>();
   teams?.forEach((tm) => teamFifaById.set(tm.id, tm.fifa_code));
@@ -57,7 +59,7 @@ export default function ExtrasStatsPanel({ category }: Props) {
       ? translateTeam(opcaoNome ?? '', teamFifaById.get(opcaoId) ?? null)
       : (opcaoNome ?? '—');
 
-  const top = stats.options.slice(0, TOP_N);
+  const top = stats.options.slice(0, topN);
 
   // Pie: top 5 + "Outros" aggregated
   const pieTop = stats.options.slice(0, PIE_TOP);
@@ -144,7 +146,7 @@ export default function ExtrasStatsPanel({ category }: Props) {
           {/* Top 10 list */}
           <div>
             <h4 className="text-xs font-semibold text-muted-foreground mb-2">
-              {t('extras.stats.topList', { count: Math.min(TOP_N, stats.options.length) })}
+              {t('extras.stats.topList', { count: Math.min(topN, stats.options.length) })}
             </h4>
             <div className="space-y-2">
               {top.map((row, idx) => {
