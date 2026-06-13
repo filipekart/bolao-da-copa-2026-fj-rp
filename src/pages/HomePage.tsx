@@ -28,12 +28,14 @@ function MatchRow({
   onChange,
   locked,
   teamNames,
+  highlight,
 }: {
   match: MatchWithTeams;
   score: { home: number | null; away: number | null };
   onChange: (home: number | null, away: number | null) => void;
   locked: boolean;
   teamNames?: Map<string, string>;
+  highlight?: boolean;
 }) {
   const homeName = teamNames?.get(match.home_team_id) ?? match.home_team_name;
   const awayName = teamNames?.get(match.away_team_id) ?? match.away_team_name;
@@ -47,10 +49,10 @@ function MatchRow({
   const decAway = () => onChange(score.home, score.away === null ? 0 : Math.max(0, score.away - 1));
 
   return (
-    <div className="flex items-center gap-1 py-2">
+    <div className={`flex items-center gap-1 py-2 ${highlight ? 'bg-accent/5 -mx-3 px-3 rounded-md' : ''}`}>
       {/* Home team */}
       <div className="flex items-center gap-1 flex-1 min-w-0 justify-end">
-        <span className="text-xs text-foreground truncate text-right">{homeName}</span>
+        <span className={`text-xs text-foreground truncate text-right ${highlight ? 'font-semibold' : ''}`}>{homeName}</span>
         {match.home_team_flag_url && (
           <Flag src={match.home_team_flag_url} alt="" className="w-5 h-3.5 rounded-sm flex-shrink-0" />
         )}
@@ -99,7 +101,7 @@ function MatchRow({
         {match.away_team_flag_url && (
           <Flag src={match.away_team_flag_url} alt="" className="w-5 h-3.5 rounded-sm flex-shrink-0" />
         )}
-        <span className="text-xs text-foreground truncate">{awayName}</span>
+        <span className={`text-xs text-foreground truncate ${highlight ? 'font-semibold' : ''}`}>{awayName}</span>
       </div>
     </div>
   );
