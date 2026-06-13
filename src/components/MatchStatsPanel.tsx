@@ -51,6 +51,7 @@ export function MatchStatsPanel({ matchId, isFinished, homeTeamName, awayTeamNam
   const pointsRows = [
     { emoji: '🟢', pts: 25, count: stats.points_breakdown.p25, label: 'acertos' },
     { emoji: '🔵', pts: 18, count: stats.points_breakdown.p18, label: 'acertos' },
+    { emoji: '🟢', pts: 16, count: stats.points_breakdown.p16, label: 'acertos' },
     { emoji: '🔵', pts: 12, count: stats.points_breakdown.p12, label: 'acertos' },
     { emoji: '🟡', pts: 10, count: stats.points_breakdown.p10, label: 'acertos' },
     { emoji: '🔴', pts: 0, count: stats.points_breakdown.p0, label: 'erros' },

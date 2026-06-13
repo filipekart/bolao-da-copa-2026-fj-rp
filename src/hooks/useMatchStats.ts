@@ -6,7 +6,7 @@ export interface MatchStats {
   top_scores: { home: number; away: number; count: number }[];
   exact_hits: number;
   total_predictions: number;
-  points_breakdown: { p25: number; p18: number; p12: number; p10: number; p0: number };
+  points_breakdown: { p25: number; p18: number; p16: number; p12: number; p10: number; p0: number };
   total_points_awarded: number;
 }
 
@@ -55,12 +55,13 @@ export function useMatchStats(matchId: string, enabled: boolean) {
       const exact_hits = rows.filter((r) => r.rule_applied === "EXACT_SCORE").length;
 
       // points breakdown
-      const points_breakdown = { p25: 0, p18: 0, p12: 0, p10: 0, p0: 0 };
+      const points_breakdown = { p25: 0, p18: 0, p16: 0, p12: 0, p10: 0, p0: 0 };
       let total_points_awarded = 0;
       for (const r of rows) {
         total_points_awarded += r.points_awarded;
         if (r.points_awarded === 25) points_breakdown.p25++;
         else if (r.points_awarded === 18) points_breakdown.p18++;
+        else if (r.points_awarded === 16) points_breakdown.p16++;
         else if (r.points_awarded === 12) points_breakdown.p12++;
         else if (r.points_awarded === 10) points_breakdown.p10++;
         else if (r.points_awarded === 0 && r.rule_applied !== "PENDING") points_breakdown.p0++;
