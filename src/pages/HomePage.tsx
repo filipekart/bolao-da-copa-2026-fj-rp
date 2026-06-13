@@ -270,6 +270,8 @@ const GroupCard = React.forwardRef<HTMLDivElement, {
           {/* Match dates */}
           {matches.map((m, idx) => {
             const locked = new Date(m.kickoff_at) <= now;
+            const kickoff = new Date(m.kickoff_at).getTime();
+            const isNext24h = kickoff > now.getTime() && kickoff <= now.getTime() + 24 * 60 * 60 * 1000;
             return (
               <div key={m.id}>
                 {(idx === 0 || formatDate(matches[idx - 1].kickoff_at) !== formatDate(m.kickoff_at)) && (
@@ -284,6 +286,7 @@ const GroupCard = React.forwardRef<HTMLDivElement, {
                   onChange={(home, away) => onScoreChange(m.id, home, away)}
                   locked={locked}
                   teamNames={teamNames}
+                  highlight={isNext24h}
                 />
               </div>
             );
