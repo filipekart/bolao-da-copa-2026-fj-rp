@@ -164,6 +164,9 @@ export default function AuthPage() {
                     <Input
                       id="email"
                       type="email"
+                      name="email"
+                      autoComplete="email"
+                      inputMode="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder={t('auth.emailPlaceholder')}
@@ -226,6 +229,9 @@ export default function AuthPage() {
                     <Input
                       id="email"
                       type="email"
+                      name="email"
+                      autoComplete={isLogin ? 'username' : 'email'}
+                      inputMode="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder={t('auth.emailPlaceholder')}
@@ -242,6 +248,8 @@ export default function AuthPage() {
                     <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      autoComplete={isLogin ? 'current-password' : 'new-password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
