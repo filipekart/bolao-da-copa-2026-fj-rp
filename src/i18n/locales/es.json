@@ -312,6 +312,8 @@
     "pending": "Pendientes",
     "approved": "Aprobados",
     "noUsers": "Ningún usuario registrado.",
+    "searchApproved": "Buscar aprobados...",
+    "noResults": "Sin resultados.",
     "matchResults": "Resultados de Partidos",
     "knockoutNote": "Para eliminatorias, ingresa el marcador del tiempo reglamentario + prórroga (sin penales).",
     "saveFinished": "Guardar (Finalizado)",

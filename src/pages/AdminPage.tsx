@@ -84,12 +84,17 @@ function UserApprovalSection() {
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [approvedSearch, setApprovedSearch] = useState('');
   const { t } = useTranslation();
 
   if (isLoading) return <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />;
 
   const pending = users?.filter(u => !u.approved) ?? [];
   const approved = (users?.filter(u => u.approved) ?? []).sort((a, b) => a.display_name.localeCompare(b.display_name));
+  const normalizedSearch = approvedSearch.trim().toLowerCase();
+  const filteredApproved = normalizedSearch
+    ? approved.filter(u => u.display_name.toLowerCase().includes(normalizedSearch))
+    : approved;
 
   return (
     <div className="space-y-4">
@@ -164,7 +169,19 @@ function UserApprovalSection() {
       {approved.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">{t('admin.approved')} ({approved.length})</p>
-          {approved.map(u => (
+          <div className="relative">
+            <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+            <Input
+              value={approvedSearch}
+              onChange={e => setApprovedSearch(e.target.value)}
+              placeholder={t('admin.searchApproved')}
+              className="pl-9 h-9 bg-secondary border-border"
+            />
+          </div>
+          {filteredApproved.length === 0 && (
+            <p className="text-xs text-muted-foreground text-center py-2">{t('admin.noResults')}</p>
+          )}
+          {filteredApproved.map(u => (
             <div key={u.id} className="glass rounded-xl p-3 flex items-center justify-between">
               <div className="flex-1 min-w-0">
                 <InlineNameEditor

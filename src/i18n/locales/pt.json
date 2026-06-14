@@ -316,6 +316,8 @@
     "pending": "Pendentes",
     "approved": "Aprovados",
     "noUsers": "Nenhum usuário cadastrado.",
+    "searchApproved": "Buscar aprovados...",
+    "noResults": "Nenhum resultado.",
     "matchResults": "Resultados dos Jogos",
     "knockoutNote": "Para mata-mata, insira o placar do tempo regulamentar + prorrogação (sem pênaltis).",
     "saveFinished": "Salvar (Finalizado)",
