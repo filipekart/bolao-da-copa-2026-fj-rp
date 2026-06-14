@@ -312,6 +312,8 @@
     "pending": "Pending",
     "approved": "Approved",
     "noUsers": "No registered users.",
+    "searchApproved": "Search approved...",
+    "noResults": "No results.",
     "matchResults": "Match Results",
     "knockoutNote": "For knockout, enter the score after regular time + extra time (no penalties).",
     "saveFinished": "Save (Finished)",

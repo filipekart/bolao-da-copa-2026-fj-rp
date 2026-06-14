@@ -312,6 +312,8 @@
     "pending": "En attente",
     "approved": "Approuvé",
     "noUsers": "Aucun utilisateur enregistré.",
+    "searchApproved": "Rechercher approuvés...",
+    "noResults": "Aucun résultat.",
     "matchResults": "Résultats des matchs",
     "knockoutNote": "Pour les éliminatoires, entrez le score après le temps réglementaire + prolongations (pas de tirs au but).",
     "saveFinished": "Enregistrer (Terminé)",
