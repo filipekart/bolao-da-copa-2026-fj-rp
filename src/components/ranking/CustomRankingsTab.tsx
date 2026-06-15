@@ -36,26 +36,23 @@ function FilteredRankingList({ ranking, memberIds, userId, t, extrasRevealed }: 
         const isMe = entry.user_id === userId;
         const position = positions[idx];
         return (
-          <div key={entry.user_id} className={`glass rounded-xl p-3 flex items-center gap-3 ${isMe ? 'ring-1 ring-primary' : ''}`}>
-            <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-display font-bold text-xs ${
+          <div key={entry.user_id} className={`glass rounded-xl p-3 flex items-center gap-2 ${isMe ? 'ring-1 ring-primary' : ''}`}>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-sm shrink-0 ${
               position === 1 ? 'gradient-gold text-accent-foreground' :
               position === 2 ? 'bg-muted text-foreground' :
               position === 3 ? 'bg-secondary text-accent' :
               'bg-secondary text-muted-foreground'
             }`}>{position}</div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                {entry.display_name}
-                {isMe && <span className="text-primary ml-1">{t('ranking.you')}</span>}
-              </p>
-              <div className="flex gap-3 text-xs text-muted-foreground mt-0.5 flex-wrap">
-                <span>{t('ranking.exact')}: {entry.exact_hits ?? 0}</span>
-                {(extrasRevealed || isMe) && entry.champion_flag_url && (
-                  <span className="flex items-center gap-1">🏆 <Flag src={entry.champion_flag_url} alt="" className="w-4 h-3 rounded-sm" /></span>
-                )}
-              </div>
-            </div>
-            <span className="text-lg font-display font-bold text-gradient-gold">{entry.points_total ?? 0}</span>
+            <p className="flex-1 min-w-0 text-sm font-medium text-foreground truncate">
+              {entry.display_name}
+              {isMe && <span className="text-primary ml-1">{t('ranking.you')}</span>}
+            </p>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground whitespace-nowrap shrink-0">
+              PE: {entry.exact_hits ?? 0}
+            </span>
+            <span className="text-lg font-display font-bold text-gradient-gold shrink-0 min-w-[2ch] text-right">
+              {entry.points_total ?? 0}
+            </span>
           </div>
         );
       })}
