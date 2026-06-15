@@ -220,9 +220,9 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
           <div
             key={entry.user_id}
             ref={isMe ? myRef : undefined}
-            className={`glass rounded-xl p-4 flex items-center gap-3 transition-all ${isMe ? 'ring-1 ring-primary' : ''}`}
+            className={`glass rounded-xl p-3 flex items-center gap-2 transition-all ${isMe ? 'ring-1 ring-primary' : ''}`}
           >
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-sm ${
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-sm shrink-0 ${
               position === 1 ? 'gradient-gold text-accent-foreground' :
               position === 2 ? 'bg-muted text-foreground' :
               position === 3 ? 'bg-secondary text-accent' :
@@ -230,35 +230,14 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
             }`}>
               {position}
             </div>
-
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                {entry.display_name}
-                {isMe && <span className="text-primary ml-1">{t('ranking.you')}</span>}
-              </p>
-              <div className="flex gap-3 text-xs text-muted-foreground mt-0.5 items-center flex-wrap">
-                <span>{t('ranking.exact')}: {entry.exact_hits ?? 0}</span>
-                {(extrasRevealed || isMe) && entry.champion_flag_url && (
-                  <span className="flex items-center gap-1" title={`${t('extras.champion')}: ${entry.champion_team_name}`}>
-                    🏆 <Flag src={entry.champion_flag_url} alt="entry.champion_team_name ?? ''" className="w-4 h-3 rounded-sm" />
-                  </span>
-                )}
-                {(extrasRevealed || isMe) && entry.top_scorer_name && (
-                  <span className="flex items-center gap-1" title={`${t('extras.topScorer')}: ${entry.top_scorer_name}`}>
-                    ⚽ {entry.top_scorer_flag_url && <Flag src={entry.top_scorer_flag_url} alt="" className="w-4 h-3 rounded-sm" />}
-                    <span className="whitespace-nowrap">{entry.top_scorer_name}</span>
-                  </span>
-                )}
-                {(extrasRevealed || isMe) && entry.mvp_name && (
-                  <span className="flex items-center gap-1" title={`${t('extras.mvp')}: ${entry.mvp_name}`}>
-                    ⭐ {entry.mvp_flag_url && <Flag src={entry.mvp_flag_url} alt="" className="w-4 h-3 rounded-sm" />}
-                    <span className="whitespace-nowrap">{entry.mvp_name}</span>
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <span className="text-lg font-display font-bold text-gradient-gold">
+            <p className="flex-1 min-w-0 text-sm font-medium text-foreground truncate">
+              {entry.display_name}
+              {isMe && <span className="text-primary ml-1">{t('ranking.you')}</span>}
+            </p>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground whitespace-nowrap shrink-0">
+              PE: {entry.exact_hits ?? 0}
+            </span>
+            <span className="text-lg font-display font-bold text-gradient-gold shrink-0 min-w-[2ch] text-right">
               {points}
             </span>
           </div>
