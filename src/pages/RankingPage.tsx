@@ -331,7 +331,7 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
         <TabsContent value="geral" className="mt-4">
-          <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} extrasRevealed={extrasRevealed} />
+          <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} extrasRevealed={extrasRevealed} collapsible />
         </TabsContent>
         <TabsContent value="grupos" className="mt-4">
           {groupLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
