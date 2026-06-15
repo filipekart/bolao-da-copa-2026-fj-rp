@@ -89,10 +89,13 @@
     "finished": "FINALIZADO",
     "stages": {
       "GROUP_STAGE": "Fase de Grupos",
-      "ROUND_OF_32": "Ronda de 32",
-      "ROUND_OF_16": "Octavos de Final",
-      "QUARTER_FINAL": "Cuartos de Final",
-      "SEMI_FINAL": "Semifinal",
+      "ROUND_1": "Jornada 1",
+      "ROUND_2": "Jornada 2",
+      "ROUND_3": "Jornada 3",
+      "ROUND_OF_32": "Fase de 32",
+      "ROUND_OF_16": "Octavos",
+      "QUARTER_FINAL": "Cuartos",
+      "SEMI_FINAL": "Semis",
       "FINAL": "Final"
     }
   },

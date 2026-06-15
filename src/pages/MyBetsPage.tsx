@@ -3,6 +3,7 @@ import { useMyPredictions } from '@/hooks/usePredictions';
 import { Loader2, History, Clock, MapPin, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
+import { formatStageLabel } from '@/lib/stageLabel';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTranslation } from 'react-i18next';
@@ -183,7 +184,7 @@ export default function MyBetsPage() {
           <>
             <div className="flex items-center justify-between text-[10px] text-muted-foreground">
               <span className="flex items-center gap-2">
-                {t(`match.stages.${match.stage}`, match.stage?.replace(/_/g, ' '))}
+                {formatStageLabel(t, match.stage, (match as any).match_number)}
                 {opts.live && (
                   <span className="inline-flex items-center gap-1 text-destructive font-semibold">
                     <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
@@ -268,7 +269,7 @@ export default function MyBetsPage() {
       const stage = p.match?.stage ?? 'OTHER';
       const groupName = stage === 'GROUP_STAGE'
         ? `${t('bets.group')} ${(p.match as any)?.group_name ?? '—'}`
-        : t(`match.stages.${stage}`, stage.replace(/_/g, ' '));
+        : formatStageLabel(t, stage, (p.match as any)?.match_number);
       if (!groups.has(groupName)) groups.set(groupName, []);
       groups.get(groupName)!.push(p);
     }

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useMatches } from '@/hooks/useMatches';
 import { useTeams } from '@/hooks/useTeams';
+import { formatStageLabel } from '@/lib/stageLabel';
 import {
   usePendingUsers,
   useApproveUser,
@@ -311,7 +312,7 @@ function MatchResultSection() {
                   {m.match_number ? `#${m.match_number} · ` : ''}
                   {m.match_number === 103
                     ? 'Disputa do 3º lugar'
-                    : t(`match.stages.${m.stage}`, m.stage.replace(/_/g, ' '))}
+                    : formatStageLabel(t, m.stage, m.match_number)}
                 </span>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
                   m.status === 'FINISHED' ? 'bg-primary/20 text-primary' :
