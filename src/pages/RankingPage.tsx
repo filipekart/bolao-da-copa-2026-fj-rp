@@ -12,6 +12,7 @@ import CustomRankingsTab from '@/components/ranking/CustomRankingsTab';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { computePositions } from '@/lib/rankingPositions';
 import { useUserExactHits } from '@/hooks/useUserExactHits';
+import { formatStageLabel } from '@/lib/stageLabel';
 
 import { Flag } from '@/components/Flag';
 function useExtrasRevealed() {
@@ -47,7 +48,7 @@ function ExactHitsPanel({ targetUserId, t }: { targetUserId: string; t: any }) {
       {data.map((hit) => (
         <li key={hit.match_id} className="flex items-center gap-2 text-xs">
           <span className="text-[10px] text-muted-foreground w-20 shrink-0 truncate">
-            {t(`matches.stages.${hit.stage}`, { defaultValue: hit.stage })}
+            {formatStageLabel(t, hit.stage, hit.match_number)}
           </span>
           <div className="flex items-center gap-1.5 flex-1 min-w-0">
             {hit.home_flag_url && <Flag src={hit.home_flag_url} alt="" className="w-4 h-3 rounded-sm shrink-0" />}
