@@ -3,6 +3,7 @@ import { type MatchWithTeams } from '@/hooks/useMatches';
 import { Clock, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
+import { formatStageLabel } from '@/lib/stageLabel';
 
 import { Flag } from '@/components/Flag';
 function getLocale(lang: string) {
@@ -33,7 +34,7 @@ export function MatchCard({ match }: { match: MatchWithTeams }) {
     >
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs text-muted-foreground font-medium">
-          {t(`match.stages.${match.stage}`, match.stage)}
+          {formatStageLabel(t, match.stage, match.match_number)}
         </span>
         {isLive && (
           <span className="text-xs font-semibold text-destructive flex items-center gap-1">
