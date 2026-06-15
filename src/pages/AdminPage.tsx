@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useMatches } from '@/hooks/useMatches';
 import { useTeams } from '@/hooks/useTeams';
+import { formatStageLabel } from '@/lib/stageLabel';
 import {
   usePendingUsers,
   useApproveUser,
