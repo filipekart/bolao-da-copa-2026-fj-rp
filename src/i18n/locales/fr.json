@@ -218,7 +218,10 @@
     "confirmDeleteTitle": "Supprimer le classement ?",
     "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer ce classement ? Cette action est irréversible.",
     "cancel": "Annuler",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "exactHitsList": "Scores exacts",
+    "noExactHits": "Aucun score exact pour l'instant",
+    "loadingHits": "Chargement..."
   },
   "profile": {
     "title": "Profil",

@@ -218,7 +218,10 @@
     "confirmDeleteTitle": "¿Eliminar ranking?",
     "confirmDeleteMessage": "¿Estás seguro de que deseas eliminar este ranking? Esta acción no se puede deshacer.",
     "cancel": "Cancelar",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "exactHitsList": "Marcadores exactos",
+    "noExactHits": "Aún no hay marcadores exactos",
+    "loadingHits": "Cargando..."
   },
   "profile": {
     "title": "Perfil",

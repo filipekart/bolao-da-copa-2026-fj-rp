@@ -5,12 +5,13 @@ import { useRoundRanking } from '@/hooks/useRoundRanking';
 import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Trophy, Medal, Search, X, MapPin } from 'lucide-react';
+import { Loader2, Trophy, Medal, Search, X, MapPin, ChevronDown } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
 import CustomRankingsTab from '@/components/ranking/CustomRankingsTab';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { computePositions } from '@/lib/rankingPositions';
+import { useUserExactHits } from '@/hooks/useUserExactHits';
 
 import { Flag } from '@/components/Flag';
 function useExtrasRevealed() {
@@ -29,8 +30,43 @@ function useExtrasRevealed() {
   });
 }
 
-const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points' | 'round_points'; t: any; extrasRevealed: boolean }>(({ ranking, userId, showField, t, extrasRevealed }, ref) => {
+function ExactHitsPanel({ targetUserId, t }: { targetUserId: string; t: any }) {
+  const { data, isLoading } = useUserExactHits(targetUserId, true);
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+        <Loader2 className="w-3 h-3 animate-spin" /> {t('ranking.loadingHits')}
+      </div>
+    );
+  }
+  if (!data || data.length === 0) {
+    return <p className="text-xs text-muted-foreground py-2">{t('ranking.noExactHits')}</p>;
+  }
+  return (
+    <ul className="space-y-1.5">
+      {data.map((hit) => (
+        <li key={hit.match_id} className="flex items-center gap-2 text-xs">
+          <span className="text-[10px] text-muted-foreground w-20 shrink-0 truncate">
+            {t(`matches.stages.${hit.stage}`, { defaultValue: hit.stage })}
+          </span>
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            {hit.home_flag_url && <Flag src={hit.home_flag_url} alt="" className="w-4 h-3 rounded-sm shrink-0" />}
+            <span className="truncate">{hit.home_team_name}</span>
+            <span className="font-display font-bold text-accent whitespace-nowrap">
+              {hit.official_home_score} x {hit.official_away_score}
+            </span>
+            <span className="truncate">{hit.away_team_name}</span>
+            {hit.away_flag_url && <Flag src={hit.away_flag_url} alt="" className="w-4 h-3 rounded-sm shrink-0" />}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points' | 'round_points'; t: any; extrasRevealed: boolean; collapsible?: boolean }>(({ ranking, userId, showField, t, extrasRevealed, collapsible = false }, ref) => {
   const [search, setSearch] = useState('');
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
   const myRef = useRef<HTMLDivElement>(null);
 
   const sorted = useMemo(
@@ -106,6 +142,79 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
       {visible.map(({ entry, position }) => {
         const isMe = entry.user_id === userId;
         const points = entry[showField] ?? 0;
+        const isExpanded = collapsible && expandedUserId === entry.user_id;
+        const showChampionFlag = (extrasRevealed || isMe) && entry.champion_flag_url;
+
+        if (collapsible) {
+          return (
+            <div
+              key={entry.user_id}
+              ref={isMe ? myRef : undefined}
+              className={`glass rounded-xl transition-all ${isMe ? 'ring-1 ring-primary' : ''}`}
+            >
+              <button
+                type="button"
+                onClick={() => setExpandedUserId(isExpanded ? null : entry.user_id)}
+                aria-expanded={isExpanded}
+                className="w-full p-3 flex items-center gap-2 text-left"
+              >
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-sm shrink-0 ${
+                  position === 1 ? 'gradient-gold text-accent-foreground' :
+                  position === 2 ? 'bg-muted text-foreground' :
+                  position === 3 ? 'bg-secondary text-accent' :
+                  'bg-secondary text-muted-foreground'
+                }`}>
+                  {position}
+                </div>
+                <p className="flex-1 min-w-0 text-sm font-medium text-foreground truncate">
+                  {entry.display_name}
+                  {isMe && <span className="text-primary ml-1">{t('ranking.you')}</span>}
+                </p>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground whitespace-nowrap shrink-0">
+                  PE: {entry.exact_hits ?? 0}
+                </span>
+                {showChampionFlag && (
+                  <span className="flex items-center gap-0.5 shrink-0" title={`${t('extras.champion')}: ${entry.champion_team_name ?? ''}`}>
+                    🏆<Flag src={entry.champion_flag_url} alt="" className="w-4 h-3 rounded-sm" />
+                  </span>
+                )}
+                <span className="text-lg font-display font-bold text-gradient-gold shrink-0 min-w-[2ch] text-right">
+                  {points}
+                </span>
+                <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+              </button>
+              {isExpanded && (
+                <div className="px-3 pb-3 pt-1 border-t border-border/50 space-y-2 animate-fade-in">
+                  {(extrasRevealed || isMe) && (entry.top_scorer_name || entry.mvp_name) && (
+                    <div className="flex flex-col gap-1 pt-2 text-xs">
+                      {entry.top_scorer_name && (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-muted-foreground">⚽ {t('extras.topScorer')}:</span>
+                          {entry.top_scorer_flag_url && <Flag src={entry.top_scorer_flag_url} alt="" className="w-4 h-3 rounded-sm" />}
+                          <span className="text-foreground">{entry.top_scorer_name}</span>
+                        </div>
+                      )}
+                      {entry.mvp_name && (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-muted-foreground">⭐ {t('extras.mvp')}:</span>
+                          {entry.mvp_flag_url && <Flag src={entry.mvp_flag_url} alt="" className="w-4 h-3 rounded-sm" />}
+                          <span className="text-foreground">{entry.mvp_name}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className="pt-2">
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5">
+                      {t('ranking.exactHitsList')}
+                    </p>
+                    <ExactHitsPanel targetUserId={entry.user_id} t={t} />
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        }
+
         return (
           <div
             key={entry.user_id}
@@ -222,7 +331,7 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
         <TabsContent value="geral" className="mt-4">
-          <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} extrasRevealed={extrasRevealed} />
+          <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} extrasRevealed={extrasRevealed} collapsible />
         </TabsContent>
         <TabsContent value="grupos" className="mt-4">
           {groupLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :

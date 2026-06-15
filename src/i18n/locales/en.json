@@ -218,7 +218,10 @@
     "confirmDeleteTitle": "Delete ranking?",
     "confirmDeleteMessage": "Are you sure you want to delete this ranking? This action cannot be undone.",
     "cancel": "Cancel",
-    "delete": "Delete"
+    "delete": "Delete",
+    "exactHitsList": "Exact scores",
+    "noExactHits": "No exact scores yet",
+    "loadingHits": "Loading..."
   },
   "profile": {
     "title": "Profile",
