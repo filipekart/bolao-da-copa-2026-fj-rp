@@ -144,7 +144,7 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
         const isMe = entry.user_id === userId;
         const points = entry[showField] ?? 0;
         const isExpanded = collapsible && expandedUserId === entry.user_id;
-        const showChampionFlag = (extrasRevealed || isMe) && entry.champion_flag_url;
+        const showChampion = (extrasRevealed || isMe) && entry.champion_flag_url;
 
         if (collapsible) {
           return (
@@ -174,11 +174,6 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground whitespace-nowrap shrink-0">
                   PE: {entry.exact_hits ?? 0}
                 </span>
-                {showChampionFlag && (
-                  <span className="flex items-center gap-0.5 shrink-0" title={`${t('extras.champion')}: ${entry.champion_team_name ?? ''}`}>
-                    🏆<Flag src={entry.champion_flag_url} alt="" className="w-4 h-3 rounded-sm" />
-                  </span>
-                )}
                 <span className="text-lg font-display font-bold text-gradient-gold shrink-0 min-w-[2ch] text-right">
                   {points}
                 </span>
@@ -186,8 +181,15 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
               </button>
               {isExpanded && (
                 <div className="px-3 pb-3 pt-1 border-t border-border/50 space-y-2 animate-fade-in">
-                  {(extrasRevealed || isMe) && (entry.top_scorer_name || entry.mvp_name) && (
+                  {(extrasRevealed || isMe) && (showChampion || entry.top_scorer_name || entry.mvp_name) && (
                     <div className="flex flex-col gap-1 pt-2 text-xs">
+                      {showChampion && (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-muted-foreground">🏆 {t('extras.champion')}:</span>
+                          <Flag src={entry.champion_flag_url} alt="" className="w-4 h-3 rounded-sm" />
+                          <span className="text-foreground">{entry.champion_team_name}</span>
+                        </div>
+                      )}
                       {entry.top_scorer_name && (
                         <div className="flex items-center gap-1.5">
                           <span className="text-muted-foreground">⚽ {t('extras.topScorer')}:</span>
