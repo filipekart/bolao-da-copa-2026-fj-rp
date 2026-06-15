@@ -3,6 +3,7 @@ import { useMyPredictions } from '@/hooks/usePredictions';
 import { Loader2, History, Clock, MapPin, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
+import { formatStageLabel } from '@/lib/stageLabel';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTranslation } from 'react-i18next';
