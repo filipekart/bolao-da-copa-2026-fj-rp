@@ -1,53 +1,76 @@
-# Ranking público com token
+## Escopo
 
-Criar uma rota pública `/r/:token` que mostra **posição, nome e pontos** de todos os usuários aprovados, sem login, com atualização em tempo real. O acesso é validado por um token na URL — fácil de revogar.
+Aplicar **apenas na aba "Ranking Geral"** (tab `geral`). As demais abas (Grupos, Rodadas, Mata-mata, Personalizados) continuam como estão. Comportamento atual de busca e "Encontre-me" preservado.
 
-## O que será feito
+## UX
 
-### 1. Tabela `public_ranking_tokens` (migration)
-Guarda tokens válidos. Admin pode criar/revogar pelo painel (fora deste plano — por enquanto, criamos 1 token manualmente via SQL).
+**Linha compacta (clicável):**
 
-Colunas: `token` (text, PK), `label` (text), `is_active` (bool), `created_at`.
+```
+[pos] [nome truncado]            [PE: X] [🏆 bandeira] [pontos]
+```
 
-RLS: nenhum acesso direto do cliente. Apenas a edge function lê (via service_role).
+- `PE: X` vira um badge compacto (ao invés do texto solto atual).
+- Bandeira do campeão aparece apenas se `extrasRevealed || isMe`.
+- Artilheiro/MVP saem da linha compacta — vão para o dropdown.
+- Indicador visual: chevron que rotaciona ao expandir.
 
-### 2. Edge function pública `public-ranking`
-- `verify_jwt = false` (config.toml).
-- Recebe `?token=xxx`.
-- Valida contra `public_ranking_tokens` (is_active = true). Inválido → 401.
-- Roda `get_general_ranking()`, filtra aprovados, ordena por `points_total DESC, exact_hits DESC, display_name ASC`, aplica a numeração 1,1,1,4 (`computePositions`).
-- Retorna JSON `[{ position, name, points }]`.
-- CORS aberto.
+**Dropdown expandido (lazy):**
 
-### 3. Página pública `/r/:token` (React)
-- Rota nova em `src/App.tsx`, **sem AppLayout** (sem header/menu), sem auth.
-- Componente `PublicRankingPage`:
-  - Pega `token` da URL.
-  - `useQuery` chamando a edge function a cada **30s** (refetchInterval) — simples e suficiente. Não usa Realtime do banco porque o ranking só muda quando admin reprocessa, não por mudanças individuais.
-  - Mostra tabela minimalista: 3 colunas (Posição, Nome, Pontos), mesmo visual dark/dourado do app.
-  - Token inválido → mensagem "Link expirado ou inválido".
-- SEO: `<title>` "Ranking — Bolão FJ | RP", `<meta name="robots" content="noindex">`.
+- Artilheiro: nome + bandeira do time (se `extrasRevealed || isMe`, senão "—" ou oculto).
+- MVP: idem.
+- Lista de placares exatos: cada item mostra `Time A [bandeira] X x Y [bandeira] Time B` + label da rodada/fase (ex.: "Rodada 1", "Oitavas"). Loading spinner enquanto carrega.
+- Estado vazio: "Nenhum placar exato ainda".
 
-### 4. Criação do primeiro token
-Via SQL no migration: `INSERT INTO public_ranking_tokens (token, label) VALUES ('<token-aleatório-32-chars>', 'Link público inicial');`
+**Comportamento:**
 
-Link final entregue: `https://bolao-da-copa-2026-fj-rp.lovable.app/r/<token>`
+- Estado local `expandedUserId: string | null` no `RankingList`. Só um aberto por vez (abrir outro fecha o anterior).
+- Dados dos acertos buscados via `useQuery` por user_id, ativado apenas quando expandido (`enabled: expandedUserId === entry.user_id`), com cache.
 
-## O que NÃO muda
-- Nenhuma RPC existente.
-- Nenhuma lógica de scoring, sort ou ranking interno.
-- Página `/ranking` autenticada continua igual.
+## Backend
 
-## Detalhes técnicos
-- A função `computePositions` (já existe em `src/lib/rankingPositions.ts`) é replicada inline na edge function (TS puro, 10 linhas).
-- Edge function usa `SUPABASE_SERVICE_ROLE_KEY` para validar token e chamar a RPC.
-- Polling de 30s = ~2880 req/dia por viewer aberto. Aceitável.
+**Nova RPC `get_user_exact_hits(p_user_id uuid)`** — `SECURITY DEFINER`, `STABLE`, `search_path = public`:
 
-## Verificação
-- Abrir `/r/<token>` em aba anônima → ranking carrega sem login.
-- Trocar token → "Link inválido".
-- Atualizar pontuação (admin scoring) → próximo refresh (≤30s) reflete na página.
-- Empates exibem 1,1,1,4 corretamente.
+Retorna:
+- `match_id uuid`
+- `match_number int`
+- `stage match_stage`
+- `kickoff_at timestamptz`
+- `home_team_name text`, `home_flag_url text`
+- `away_team_name text`, `away_flag_url text`
+- `official_home_score int`, `official_away_score int`
 
-## Pendência para você confirmar
-- OK com **polling de 30s** ou prefere Realtime de verdade (subscribe em `leaderboard`)? Polling é mais simples e barato; Realtime atualiza no instante mas adiciona conexão WS por viewer.
+Filtros: somente `match_predictions` onde `rule_applied = 'EXACT_SCORE'` E partida `FINISHED` E `user_id = p_user_id`. Ordenado por `match_number`.
+
+A RPC em si **não precisa checar `extrasRevealed`** (placares exatos são públicos por natureza). A trava de extras (artilheiro/MVP/campeão) acontece na RPC de ranking que já existe — mas o requisito do usuário pede revelação respeitada no backend. Para cumprir:
+
+**Atualizar `get_general_ranking`** para zerar `top_scorer_name/flag`, `mvp_name/flag` e `champion_team_name/flag` para usuários ≠ `auth.uid()` quando `is_tournament_open() = true`. Hoje isso é feito só no front — passa a ser feito no servidor também (defense-in-depth). O check `extrasRevealed` no front continua para o caso de cache.
+
+**Índice de performance:**
+
+`match_predictions(user_id, match_id)` — verificar se já existe (geralmente há uma UNIQUE `(user_id, match_id)`); se sim, dispensa novo índice. Caso contrário, criar.
+
+## Frontend
+
+**`src/hooks/useUserExactHits.ts`** (novo): hook que recebe `userId` e `enabled`, chama a RPC, cache 5min.
+
+**`src/pages/RankingPage.tsx`**:
+- Adicionar prop/state `expandedUserId` + `setExpandedUserId` no `RankingList`.
+- Converter linha em `<button>` com `aria-expanded`.
+- Mover Artilheiro/MVP para bloco expandido.
+- Renderizar `PE: X` como badge compacto.
+- Renderizar lista de acertos via subcomponente `UserExactHitsList` que dispara `useUserExactHits` apenas quando montado.
+
+**i18n** (pt/en/es/fr): chaves novas
+- `ranking.exactHitsList` ("Placares exatos")
+- `ranking.noExactHits` ("Nenhum placar exato")
+- `ranking.loadingHits` ("Carregando...")
+- Labels de stage já existem em `tournament.stage.*`.
+
+## Pontos a confirmar
+
+1. **Linha compacta — bandeira do campeão**: deve aparecer no compacto para todos quando `extrasRevealed`, ou sempre só para `isMe` antes da Copa começar?  → Plano atual: respeita `extrasRevealed || isMe`.
+2. **Mostrar data/rodada no item de acerto exato**: sim, label curto tipo "R1", "Oitavas". OK?
+3. **Sem `extrasRevealed`**: no dropdown, ocultar totalmente as linhas de Artilheiro/MVP de terceiros, ou mostrar com "—"?  → Plano: ocultar totalmente.
+
+Aguardando seu OK.
