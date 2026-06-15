@@ -5,12 +5,13 @@ import { useRoundRanking } from '@/hooks/useRoundRanking';
 import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Trophy, Medal, Search, X, MapPin } from 'lucide-react';
+import { Loader2, Trophy, Medal, Search, X, MapPin, ChevronDown } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
 import CustomRankingsTab from '@/components/ranking/CustomRankingsTab';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { computePositions } from '@/lib/rankingPositions';
+import { useUserExactHits } from '@/hooks/useUserExactHits';
 
 import { Flag } from '@/components/Flag';
 function useExtrasRevealed() {
