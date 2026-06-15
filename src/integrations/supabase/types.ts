@@ -925,6 +925,23 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_user_exact_hits: {
+        Args: { p_user_id: string }
+        Returns: {
+          away_flag_url: string
+          away_team_name: string
+          home_flag_url: string
+          home_team_name: string
+          kickoff_at: string
+          match_id: string
+          match_number: number
+          official_away_score: number
+          official_home_score: number
+          predicted_away_score: number
+          predicted_home_score: number
+          stage: Database["public"]["Enums"]["match_stage"]
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
