@@ -89,10 +89,13 @@
     "finished": "FINISHED",
     "stages": {
       "GROUP_STAGE": "Group Stage",
+      "ROUND_1": "Round 1",
+      "ROUND_2": "Round 2",
+      "ROUND_3": "Round 3",
       "ROUND_OF_32": "Round of 32",
       "ROUND_OF_16": "Round of 16",
       "QUARTER_FINAL": "Quarter-finals",
-      "SEMI_FINAL": "Semi-finals",
+      "SEMI_FINAL": "Semis",
       "FINAL": "Final"
     }
   },
