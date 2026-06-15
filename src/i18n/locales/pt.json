@@ -147,9 +147,9 @@
     "game": "Jogo",
     "stages": {
       "ROUND_OF_32": "Fase de 32",
-      "ROUND_OF_16": "Oitavas de Final",
-      "QUARTER_FINAL": "Quartas de Final",
-      "SEMI_FINAL": "Semifinal",
+      "ROUND_OF_16": "Oitavas",
+      "QUARTER_FINAL": "Quartas",
+      "SEMI_FINAL": "Semi",
       "FINAL": "Final"
     }
   },
