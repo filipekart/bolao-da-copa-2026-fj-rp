@@ -12,6 +12,7 @@ import { MatchPredictionsList } from '@/components/MatchPredictionsList';
 import { MatchStatsPanel } from '@/components/MatchStatsPanel';
 
 import { Flag } from '@/components/Flag';
+import { formatStageLabel } from '@/lib/stageLabel';
 function formatDateTime(iso: string, lang: string) {
   const locale = lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : 'en-US';
   return new Date(iso).toLocaleDateString(locale, {
@@ -162,7 +163,7 @@ export default function MatchDetailPage() {
 
       <div className="glass rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{t(`match.stages.${match.stage}`, match.stage.replace(/_/g, ' '))}</span>
+          <span>{formatStageLabel(t, match.stage, (match as any).match_number)}</span>
           <div className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
             {formatDateTime(match.kickoff_at, lang)}
