@@ -218,7 +218,10 @@
     "confirmDeleteTitle": "Excluir ranking?",
     "confirmDeleteMessage": "Tem certeza que deseja excluir este ranking? Esta ação não pode ser desfeita.",
     "cancel": "Cancelar",
-    "delete": "Excluir"
+    "delete": "Excluir",
+    "exactHitsList": "Placares exatos",
+    "noExactHits": "Nenhum placar exato ainda",
+    "loadingHits": "Carregando..."
   },
   "profile": {
     "title": "Perfil",
