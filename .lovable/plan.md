@@ -3,9 +3,14 @@
 Em todas as abas de Ranking exceto "Geral", cada usuário aparece em uma única linha enxuta: posição, nome (truncate), badge PE, pontos. Sem dropdown, sem bandeiras de campeão/artilheiro/MVP, sem linha secundária.
 
 Abas afetadas: Fase de Grupos, Rodada 1, Rodada 2, Rodada 3, 2ª Fase (knockout), Meus Rankings.
-Aba "Geral" permanece como está (colapsável com extras + placares exatos).
+Aba "Geral" permanece colapsável. A linha compacta NÃO mostra mais a bandeira do campeão — ela aparece apenas dentro do dropdown junto com artilheiro, MVP e lista de placares exatos. Isso mantém a linha principal limpa (posição, nome, PE, pontos, chevron).
 
 ## Mudanças
+
+### `src/pages/RankingPage.tsx` — `RankingList` (branch colapsável, aba Geral)
+- Remover a renderização da `<Flag>` do campeão da linha compacta.
+- Dentro do dropdown, adicionar bloco do campeão (🏆 + bandeira + nome do time) condicionado a `extrasRevealed || isMe`, ao lado de artilheiro e MVP existentes.
+- Manter `ChevronDown` com rotação no estado expandido.
 
 ### `src/pages/RankingPage.tsx` — `RankingList` (branch não-colapsável)
 Substituir o card de duas linhas pela mesma estrutura visual da linha compacta usada na aba Geral, mas sem o `ChevronDown` e sem `onClick` de expandir:
@@ -29,4 +34,5 @@ Aplicar o mesmo layout compacto na lista de membros de cada ranking personalizad
 - Reutilizar exatamente as classes da linha compacta atual (bloco `if (collapsible)` em `RankingList`) para garantir consistência visual entre Geral e as demais abas.
 - Badge PE: `text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground`.
 - Pontos: `text-lg font-display font-bold text-gradient-gold`.
+- Reuso do label `extras.champion` já existente em pt/en/es/fr.
 - Nada de mudanças em hooks, RPCs ou i18n.
