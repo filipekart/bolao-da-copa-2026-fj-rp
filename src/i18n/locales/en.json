@@ -111,7 +111,7 @@
     "live": "LIVE",
     "tabs": {
       "upcoming": "Upcoming",
-      "today": "Today",
+      "today": "Next 24h",
       "finished": "Finished"
     },
     "empty": {
