@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useCustomRankings, CustomRanking } from '@/hooks/useCustomRankings';
 import { useRanking } from '@/hooks/useRanking';
+import { useGroupRanking } from '@/hooks/useGroupRanking';
+import { useRoundRanking } from '@/hooks/useRoundRanking';
 import { useAuth } from '@/lib/auth';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,11 +17,14 @@ import { toast } from 'sonner';
 
 import { Flag } from '@/components/Flag';
 import { computePositions } from '@/lib/rankingPositions';
+
+type Phase = 'geral' | 'grupos' | 'round1' | 'round2' | 'round3' | 'knockout';
+
 // Inline filtered ranking list (simplified)
-function FilteredRankingList({ ranking, memberIds, userId, t, extrasRevealed }: any) {
+function FilteredRankingList({ ranking, memberIds, userId, t, pointsField }: any) {
   const filtered = ranking?.filter((r: any) => memberIds.includes(r.user_id))
     .sort((a: any, b: any) => {
-      const pointsDiff = (b.points_total ?? 0) - (a.points_total ?? 0);
+      const pointsDiff = (b[pointsField] ?? 0) - (a[pointsField] ?? 0);
       if (pointsDiff !== 0) return pointsDiff;
       const exactDiff = (b.exact_hits ?? 0) - (a.exact_hits ?? 0);
       if (exactDiff !== 0) return exactDiff;
@@ -28,7 +33,7 @@ function FilteredRankingList({ ranking, memberIds, userId, t, extrasRevealed }: 
 
   if (!filtered.length) return <p className="text-sm text-muted-foreground py-4 text-center">{t('ranking.noParticipants')}</p>;
 
-  const positions = computePositions(filtered, ['points_total', 'exact_hits']);
+  const positions = computePositions(filtered, [pointsField, 'exact_hits']);
 
   return (
     <div className="space-y-2 mt-2">
@@ -51,7 +56,7 @@ function FilteredRankingList({ ranking, memberIds, userId, t, extrasRevealed }: 
               PE: {entry.exact_hits ?? 0}
             </span>
             <span className="text-lg font-display font-bold text-gradient-gold shrink-0 min-w-[2ch] text-right">
-              {entry.points_total ?? 0}
+              {entry[pointsField] ?? 0}
             </span>
           </div>
         );
@@ -66,6 +71,35 @@ export default function CustomRankingsTab({ extrasRevealed }: { extrasRevealed: 
   const { data: rankings, isLoading, createRanking, updateRanking, deleteRanking } = useCustomRankings();
   const { data: ranking } = useRanking();
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [phaseByRanking, setPhaseByRanking] = useState<Record<string, Phase>>({});
+
+  // Enable phase fetches only when at least one card uses them
+  const activePhases = new Set(Object.values(phaseByRanking));
+  const { data: groupRanking } = useGroupRanking(activePhases.has('grupos'));
+  const { data: round1 } = useRoundRanking('round1', activePhases.has('round1'));
+  const { data: round2 } = useRoundRanking('round2', activePhases.has('round2'));
+  const { data: round3 } = useRoundRanking('round3', activePhases.has('round3'));
+  const { data: knockout } = useRoundRanking('knockout', activePhases.has('knockout'));
+
+  const getSource = (phase: Phase) => {
+    switch (phase) {
+      case 'grupos': return { source: groupRanking, field: 'group_points' as const };
+      case 'round1': return { source: round1, field: 'round_points' as const };
+      case 'round2': return { source: round2, field: 'round_points' as const };
+      case 'round3': return { source: round3, field: 'round_points' as const };
+      case 'knockout': return { source: knockout, field: 'round_points' as const };
+      default: return { source: ranking, field: 'points_total' as const };
+    }
+  };
+
+  const phaseOptions: { value: Phase; label: string }[] = [
+    { value: 'geral', label: t('ranking.general') },
+    { value: 'grupos', label: t('ranking.groupStage') },
+    { value: 'round1', label: t('ranking.round1') },
+    { value: 'round2', label: t('ranking.round2') },
+    { value: 'round3', label: t('ranking.round3') },
+    { value: 'knockout', label: t('ranking.knockout') },
+  ];
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRanking, setEditingRanking] = useState<CustomRanking | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -176,12 +210,31 @@ export default function CustomRankingsTab({ extrasRevealed }: { extrasRevealed: 
           </button>
           {expanded === r.id && (
             <div className="px-4 pb-4">
+              <div className="flex flex-wrap gap-1 mb-2">
+                {phaseOptions.map(opt => {
+                  const current = phaseByRanking[r.id] ?? 'geral';
+                  const isActive = current === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => setPhaseByRanking(prev => ({ ...prev, [r.id]: opt.value }))}
+                      className={`text-[11px] px-2 py-1 rounded-md transition-colors ${
+                        isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-secondary text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
               <FilteredRankingList
-                ranking={ranking}
+                ranking={getSource(phaseByRanking[r.id] ?? 'geral').source}
+                pointsField={getSource(phaseByRanking[r.id] ?? 'geral').field}
                 memberIds={r.members.map(m => m.user_id)}
                 userId={user?.id}
                 t={t}
-                extrasRevealed={extrasRevealed}
               />
             </div>
           )}
