@@ -1,38 +1,34 @@
 ## Objetivo
+Na aba "Meus Rankings", permitir filtrar a pontuação dos membros por fase: Geral, Fase de Grupos, Rodada 1, Rodada 2, Rodada 3 e Mata-mata.
 
-Em todas as abas de Ranking exceto "Geral", cada usuário aparece em uma única linha enxuta: posição, nome (truncate), badge PE, pontos. Sem dropdown, sem bandeiras de campeão/artilheiro/MVP, sem linha secundária.
+## Como funciona hoje
+Cada ranking customizado, ao expandir, mostra apenas a pontuação **Geral** (`points_total`) dos membros, filtrando a lista global do hook `useRanking()`.
 
-Abas afetadas: Fase de Grupos, Rodada 1, Rodada 2, Rodada 3, 2ª Fase (knockout), Meus Rankings.
-Aba "Geral" permanece colapsável. A linha compacta NÃO mostra mais a bandeira do campeão — ela aparece apenas dentro do dropdown junto com artilheiro, MVP e lista de placares exatos. Isso mantém a linha principal limpa (posição, nome, PE, pontos, chevron).
+## Mudanças propostas
 
-## Mudanças
+### 1. `CustomRankingsTab.tsx`
+- Ao expandir um ranking, mostrar uma barra de chips/abas pequenas com as opções:
+  - Geral (default)
+  - Grupos
+  - Rodada 1
+  - Rodada 2
+  - Rodada 3
+  - Mata-mata
+- Estado local `filterByRanking: Record<string, Phase>` para lembrar a escolha por card (independente entre rankings expandidos).
+- Conforme a opção escolhida, buscar a fonte de pontuação correta:
+  - Geral → `useRanking()` (já em uso), campo `points_total`
+  - Grupos → `useGroupRanking()`, campo `group_points`
+  - Rodada 1/2/3 e Mata-mata → `useRoundRanking('round1'|...|'knockout')`, campo `round_points`
+- Hooks são chamados no nível do `CustomRankingsTab` (não dentro do map), todos sempre habilitados (cache de 5 min já existe). Alternativa: habilitar sob demanda via um set de fases ativas — fica como detalhe de implementação para evitar fetch desnecessário no carregamento inicial.
 
-### `src/pages/RankingPage.tsx` — `RankingList` (branch colapsável, aba Geral)
-- Remover a renderização da `<Flag>` do campeão da linha compacta.
-- Dentro do dropdown, adicionar bloco do campeão (🏆 + bandeira + nome do time) condicionado a `extrasRevealed || isMe`, ao lado de artilheiro e MVP existentes.
-- Manter `ChevronDown` com rotação no estado expandido.
+### 2. `FilteredRankingList`
+- Aceitar props extras: `source` (array de pontuação da fase escolhida), `pointsField` (`points_total` | `group_points` | `round_points`).
+- Usar `pointsField` na ordenação, no `computePositions` e na coluna de pontos exibida.
+- Manter "PE" (acertos exatos) como hoje — cada hook já retorna `exact_hits` da fase correspondente.
 
-### `src/pages/RankingPage.tsx` — `RankingList` (branch não-colapsável)
-Substituir o card de duas linhas pela mesma estrutura visual da linha compacta usada na aba Geral, mas sem o `ChevronDown` e sem `onClick` de expandir:
+### 3. i18n
+- Reaproveitar chaves existentes em `ranking.*` (`general`, `groupStage`, `round1`, `round2`, `round3`, `knockout`) — nenhuma string nova necessária.
 
-```text
-[pos]  [nome ...you]                 [PE: N]   [pontos]
-```
-
-- Remover do branch não-colapsável: bandeira do campeão, artilheiro, MVP, segunda linha de stats.
-- Manter: ref `isMe`, ring do "eu", busca, botão "Encontre-me", ordenação e posições atuais.
-- Como nenhuma aba não-colapsável precisa mais de extras, podemos parar de chamar `mergeExtras(...)` nessas abas (passar `groupRanking`, `round1`, etc. direto). Mantém `extrasRevealed` no props apenas para compatibilidade, mas não é mais usado dentro do branch não-colapsável.
-
-### `src/components/ranking/CustomRankingsTab.tsx`
-Aplicar o mesmo layout compacto na lista de membros de cada ranking personalizado:
-- Remover bandeira de campeão, artilheiro, MVP e linha secundária `ranking.exact: N`.
-- Renderizar uma linha única: posição, nome (truncate, `(você)` quando `isMe`), badge `PE: N`, pontos em destaque (gradient gold).
-- Manter ordenação, posições com tiebreaker, busca e demais controles existentes.
-
-## Detalhes técnicos
-
-- Reutilizar exatamente as classes da linha compacta atual (bloco `if (collapsible)` em `RankingList`) para garantir consistência visual entre Geral e as demais abas.
-- Badge PE: `text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground`.
-- Pontos: `text-lg font-display font-bold text-gradient-gold`.
-- Reuso do label `extras.champion` já existente em pt/en/es/fr.
-- Nada de mudanças em hooks, RPCs ou i18n.
+## Notas
+- Mudança puramente de UI/apresentação: nenhuma alteração de schema, RPC ou RLS.
+- O filtro só aparece dentro do card expandido, mantendo a listagem de rankings limpa.
