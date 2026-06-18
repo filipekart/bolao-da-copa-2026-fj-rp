@@ -33,7 +33,7 @@ function FilteredRankingList({ ranking, memberIds, userId, t, pointsField }: any
 
   if (!filtered.length) return <p className="text-sm text-muted-foreground py-4 text-center">{t('ranking.noParticipants')}</p>;
 
-  const positions = computePositions(filtered, [pointsField, 'exact_hits']);
+  const positions = computePositions<any>(filtered, [pointsField, 'exact_hits']);
 
   return (
     <div className="space-y-2 mt-2">
