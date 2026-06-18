@@ -461,17 +461,17 @@ export default function MyBetsPage() {
       ) : (
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="upcoming" className="text-xs sm:text-sm">
-              {t('bets.tabs.upcoming', 'Próximos')}
-              <span className="ml-1.5 text-[10px] opacity-70">{buckets.upcoming.length}</span>
-            </TabsTrigger>
-            <TabsTrigger value="today" className="text-xs sm:text-sm">
-              {t('bets.tabs.today', 'Hoje')}
-              <span className="ml-1.5 text-[10px] opacity-70">{buckets.today.length}</span>
-            </TabsTrigger>
             <TabsTrigger value="finished" className="text-xs sm:text-sm">
               {t('bets.tabs.finished', 'Finalizados')}
               <span className="ml-1.5 text-[10px] opacity-70">{buckets.finished.length}</span>
+            </TabsTrigger>
+            <TabsTrigger value="today" className="text-xs sm:text-sm">
+              {t('bets.tabs.today', 'Próx. 24hrs')}
+              <span className="ml-1.5 text-[10px] opacity-70">{buckets.today.length}</span>
+            </TabsTrigger>
+            <TabsTrigger value="upcoming" className="text-xs sm:text-sm">
+              {t('bets.tabs.upcoming', 'Próximos')}
+              <span className="ml-1.5 text-[10px] opacity-70">{buckets.upcoming.length}</span>
             </TabsTrigger>
           </TabsList>
 
