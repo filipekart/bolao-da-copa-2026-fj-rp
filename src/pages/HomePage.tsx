@@ -69,28 +69,20 @@ function MatchRow({
         {locked ? (
           <div className="flex items-center gap-1">
             {isFinished && hasPrediction && (
-              <span className="text-xs text-muted-foreground">
-                ({displayHome}×{displayAway})
+              <span className="text-xs text-primary font-semibold">
+                ({match.official_home_score}×{match.official_away_score})
               </span>
             )}
             <span
-              className={`w-7 text-center text-sm font-bold rounded px-1 py-0.5 ${
-                isFinished
-                  ? 'text-primary bg-primary/10'
-                  : 'text-foreground bg-secondary'
-              }`}
+              className="w-7 text-center text-sm font-bold rounded px-1 py-0.5 text-foreground bg-secondary"
             >
-              {isFinished ? match.official_home_score : displayHome}
+              {displayHome}
             </span>
             <span className="text-muted-foreground text-xs">×</span>
             <span
-              className={`w-7 text-center text-sm font-bold rounded px-1 py-0.5 ${
-                isFinished
-                  ? 'text-primary bg-primary/10'
-                  : 'text-foreground bg-secondary'
-              }`}
+              className="w-7 text-center text-sm font-bold rounded px-1 py-0.5 text-foreground bg-secondary"
             >
-              {isFinished ? match.official_away_score : displayAway}
+              {displayAway}
             </span>
             <Lock className="w-3 h-3 text-muted-foreground ml-0.5" />
           </div>
