@@ -74,20 +74,20 @@ function MatchRow({
               </span>
             )}
             <span
-              className={`w-7 text-center text-sm font-bold rounded px-1 py-0.5 ${
+              className={`w-7 text-center font-bold rounded px-1 py-0.5 ${
                 isFinished
-                  ? 'text-primary bg-primary/10'
-                  : 'text-foreground bg-secondary'
+                  ? 'text-base text-primary bg-primary/10'
+                  : 'text-sm text-foreground bg-secondary'
               }`}
             >
               {isFinished ? match.official_home_score : displayHome}
             </span>
             <span className="text-muted-foreground text-xs">×</span>
             <span
-              className={`w-7 text-center text-sm font-bold rounded px-1 py-0.5 ${
+              className={`w-7 text-center font-bold rounded px-1 py-0.5 ${
                 isFinished
-                  ? 'text-primary bg-primary/10'
-                  : 'text-foreground bg-secondary'
+                  ? 'text-base text-primary bg-primary/10'
+                  : 'text-sm text-foreground bg-secondary'
               }`}
             >
               {isFinished ? match.official_away_score : displayAway}
