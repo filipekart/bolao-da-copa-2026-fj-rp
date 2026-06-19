@@ -584,10 +584,15 @@ export default function HomePage() {
       </div>
 
       {totalGroupMatches > 0 && (
-        <div className={`glass rounded-xl px-3 py-2 flex items-center justify-center gap-2 ${allFilled ? 'ring-1 ring-primary/50' : 'ring-1 ring-accent/40'}`}>
-          <span className="text-sm">{allFilled ? '✅' : '⚠️'}</span>
-          <span className={`text-sm font-semibold ${allFilled ? 'text-primary' : 'text-accent'}`}>
-            {t('home.predictionsProgress', { done: filledTotal, total: totalGroupMatches })}
+        <div className={`glass rounded-xl px-3 py-2 flex flex-col items-center justify-center gap-1 ${allFilled ? 'ring-1 ring-primary/50' : 'ring-1 ring-accent/40'}`}>
+          <div className="flex items-center gap-2">
+            <span className="text-sm">{allFilled ? '✅' : '⚠️'}</span>
+            <span className={`text-sm font-semibold ${allFilled ? 'text-primary' : 'text-accent'}`}>
+              {t('home.predictionsProgress', { done: filledTotal, total: totalGroupMatches })}
+            </span>
+          </div>
+          <span className="text-[10px] text-primary">
+            (Resultado em verde ( ) = Resultado Real)
           </span>
         </div>
       )}
