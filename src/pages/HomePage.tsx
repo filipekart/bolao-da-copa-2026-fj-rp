@@ -43,6 +43,12 @@ function MatchRow({
   const displayHome = score.home === null ? '–' : score.home;
   const displayAway = score.away === null ? '–' : score.away;
 
+  const isFinished =
+    match.status === 'FINISHED' &&
+    match.official_home_score !== null &&
+    match.official_away_score !== null;
+  const hasPrediction = score.home !== null && score.away !== null;
+
   const incHome = () => onChange((score.home ?? 0) + 1, score.away);
   const decHome = () => onChange(score.home === null ? 0 : Math.max(0, score.home - 1), score.away);
   const incAway = () => onChange(score.home, (score.away ?? 0) + 1);
@@ -62,12 +68,29 @@ function MatchRow({
       <div className="flex items-center gap-1 px-1 flex-shrink-0">
         {locked ? (
           <div className="flex items-center gap-1">
-            <span className="w-7 text-center text-sm font-bold text-foreground bg-secondary rounded px-1 py-0.5">
-              {displayHome}
+            {isFinished && hasPrediction && (
+              <span className="text-[10px] text-muted-foreground">
+                ({displayHome}×{displayAway})
+              </span>
+            )}
+            <span
+              className={`w-7 text-center text-sm font-bold rounded px-1 py-0.5 ${
+                isFinished
+                  ? 'text-primary bg-primary/10'
+                  : 'text-foreground bg-secondary'
+              }`}
+            >
+              {isFinished ? match.official_home_score : displayHome}
             </span>
             <span className="text-muted-foreground text-xs">×</span>
-            <span className="w-7 text-center text-sm font-bold text-foreground bg-secondary rounded px-1 py-0.5">
-              {displayAway}
+            <span
+              className={`w-7 text-center text-sm font-bold rounded px-1 py-0.5 ${
+                isFinished
+                  ? 'text-primary bg-primary/10'
+                  : 'text-foreground bg-secondary'
+              }`}
+            >
+              {isFinished ? match.official_away_score : displayAway}
             </span>
             <Lock className="w-3 h-3 text-muted-foreground ml-0.5" />
           </div>
