@@ -1,34 +1,40 @@
 ## Objetivo
-Na aba "Meus Rankings", permitir filtrar a pontuação dos membros por fase: Geral, Fase de Grupos, Rodada 1, Rodada 2, Rodada 3 e Mata-mata.
 
-## Como funciona hoje
-Cada ranking customizado, ao expandir, mostra apenas a pontuação **Geral** (`points_total`) dos membros, filtrando a lista global do hook `useRanking()`.
+Na aba **Jogos** (HomePage), dentro de cada grupo expandido, os jogos já encerrados aparecem hoje apenas com o **palpite** do usuário e um cadeado. O placar real não é mostrado, o que dificulta lembrar resultados ao palpitar nas rodadas seguintes do mesmo grupo.
 
-## Mudanças propostas
+## Sugestão (sem adicionar linha)
 
-### 1. `CustomRankingsTab.tsx`
-- Ao expandir um ranking, mostrar uma barra de chips/abas pequenas com as opções:
-  - Geral (default)
-  - Grupos
-  - Rodada 1
-  - Rodada 2
-  - Rodada 3
-  - Mata-mata
-- Estado local `filterByRanking: Record<string, Phase>` para lembrar a escolha por card (independente entre rankings expandidos).
-- Conforme a opção escolhida, buscar a fonte de pontuação correta:
-  - Geral → `useRanking()` (já em uso), campo `points_total`
-  - Grupos → `useGroupRanking()`, campo `group_points`
-  - Rodada 1/2/3 e Mata-mata → `useRoundRanking('round1'|...|'knockout')`, campo `round_points`
-- Hooks são chamados no nível do `CustomRankingsTab` (não dentro do map), todos sempre habilitados (cache de 5 min já existe). Alternativa: habilitar sob demanda via um set de fases ativas — fica como detalhe de implementação para evitar fetch desnecessário no carregamento inicial.
+Reaproveitar a mesma linha do `MatchRow` no estado `locked`. Quando o jogo estiver `FINISHED` (com `official_home_score`/`official_away_score`), exibir o **placar oficial em destaque** e o **palpite do usuário menor entre parênteses**, tudo na mesma linha:
 
-### 2. `FilteredRankingList`
-- Aceitar props extras: `source` (array de pontuação da fase escolhida), `pointsField` (`points_total` | `group_points` | `round_points`).
-- Usar `pointsField` na ordenação, no `computePositions` e na coluna de pontos exibida.
-- Manter "PE" (acertos exatos) como hoje — cada hook já retorna `exact_hits` da fase correspondente.
+```text
+Brasil  (2×1) 3 × 0 🔒  Sérvia
+```
 
-### 3. i18n
-- Reaproveitar chaves existentes em `ranking.*` (`general`, `groupStage`, `round1`, `round2`, `round3`, `knockout`) — nenhuma string nova necessária.
+- `3 × 0` → placar oficial, fonte bold, cor `text-primary` (dourado), nos mesmos boxes onde hoje aparece o palpite.
+- `(2×1)` → palpite do usuário, fonte menor (`text-[10px] text-muted-foreground`), à esquerda dos boxes.
+- Cadeado permanece à direita, como hoje.
+- Se o usuário não palpitou, mostra só o placar oficial (sem parênteses).
+- Para jogos só travados (kickoff passou) mas ainda não finalizados, comportamento atual continua igual (mostra só o palpite + cadeado).
 
-## Notas
-- Mudança puramente de UI/apresentação: nenhuma alteração de schema, RPC ou RLS.
-- O filtro só aparece dentro do card expandido, mantendo a listagem de rankings limpa.
+Vantagens:
+- Zero linha nova; mesma altura visual da linha.
+- O placar real fica em destaque (dourado), batendo com o padrão da `MatchCard` da aba Jogos.
+- O palpite continua visível para conferência rápida.
+
+## Onde mexer
+
+Apenas `src/components/MatchCard.tsx`? Não — é `src/pages/HomePage.tsx`, componente `MatchRow`, ramo `locked` (linhas ~63-73). Adicionar:
+
+1. Detectar `isFinished = match.status === 'FINISHED' && official_home_score != null && official_away_score != null`.
+2. Se `isFinished`:
+   - Renderizar pequeno texto `(palpiteHome×palpiteAway)` à esquerda dos boxes (apenas se houver palpite).
+   - Trocar o conteúdo dos boxes para `official_home_score` e `official_away_score`, com classe `text-primary`.
+3. Caso contrário, manter exatamente o layout atual.
+
+Nenhuma alteração em hooks, RPC, RLS, i18n ou outras telas.
+
+## Alternativas consideradas (descartadas)
+
+- **Tooltip no cadeado** com o placar oficial → exige toque/hover, não ajuda em mobile.
+- **Substituir palpite pelo placar oficial sem mostrar palpite** → perde a referência do que o usuário apostou.
+- **Badge "+25" ao lado** → já existe na aba Palpites; aqui o foco é o placar real para apoiar próximos palpites.
