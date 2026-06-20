@@ -71,7 +71,7 @@ function ExactHitsPanel({ targetUserId, t, filter }: { targetUserId: string; t: 
   );
 }
 
-const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points' | 'round_points'; t: any; extrasRevealed: boolean; collapsible?: boolean }>(({ ranking, userId, showField, t, extrasRevealed, collapsible = false }, ref) => {
+const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points' | 'round_points'; t: any; extrasRevealed: boolean; collapsible?: boolean; hitsFilter?: HitFilter; showExtras?: boolean }>(({ ranking, userId, showField, t, extrasRevealed, collapsible = false, hitsFilter, showExtras = true }, ref) => {
   const [search, setSearch] = useState('');
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
   const myRef = useRef<HTMLDivElement>(null);
@@ -187,7 +187,7 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
               </button>
               {isExpanded && (
                 <div className="px-3 pb-3 pt-1 border-t border-border/50 space-y-2 animate-fade-in">
-                  {(extrasRevealed || isMe) && (showChampion || entry.top_scorer_name || entry.mvp_name) && (
+                  {showExtras && (extrasRevealed || isMe) && (showChampion || entry.top_scorer_name || entry.mvp_name) && (
                     <div className="flex flex-col gap-1 pt-2 text-xs">
                       {showChampion && (
                         <div className="flex items-center gap-1.5">
@@ -216,7 +216,7 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5">
                       {t('ranking.exactHitsList')}
                     </p>
-                    <ExactHitsPanel targetUserId={entry.user_id} t={t} />
+                    <ExactHitsPanel targetUserId={entry.user_id} t={t} filter={hitsFilter} />
                   </div>
                 </div>
               )}
