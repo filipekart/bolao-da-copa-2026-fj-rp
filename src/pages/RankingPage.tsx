@@ -323,19 +323,19 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
         </TabsContent>
         <TabsContent value="grupos" className="mt-4">
           {groupLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(groupRanking)} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} collapsible />}
+            <RankingList ranking={mergeExtras(groupRanking)} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} collapsible showExtras={false} hitsFilter={(h) => h.stage === 'GROUP_STAGE'} />}
         </TabsContent>
         <TabsContent value="round1" className="mt-4">
           {r1Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(round1)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible />}
+            <RankingList ranking={mergeExtras(round1)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible showExtras={false} hitsFilter={(h) => h.stage === 'GROUP_STAGE' && h.match_number <= 24} />}
         </TabsContent>
         <TabsContent value="round2" className="mt-4">
           {r2Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(round2)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible />}
+            <RankingList ranking={mergeExtras(round2)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible showExtras={false} hitsFilter={(h) => h.stage === 'GROUP_STAGE' && h.match_number > 24 && h.match_number <= 48} />}
         </TabsContent>
         <TabsContent value="round3" className="mt-4">
           {r3Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(round3)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible />}
+            <RankingList ranking={mergeExtras(round3)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible showExtras={false} hitsFilter={(h) => h.stage === 'GROUP_STAGE' && h.match_number > 48 && h.match_number <= 72} />}
         </TabsContent>
         <TabsContent value="knockout" className="mt-4">
           {koLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
