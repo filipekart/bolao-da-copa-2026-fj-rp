@@ -31,7 +31,9 @@ function useExtrasRevealed() {
   });
 }
 
-function ExactHitsPanel({ targetUserId, t }: { targetUserId: string; t: any }) {
+type HitFilter = (hit: any) => boolean;
+
+function ExactHitsPanel({ targetUserId, t, filter }: { targetUserId: string; t: any; filter?: HitFilter }) {
   const { data, isLoading } = useUserExactHits(targetUserId, true);
   if (isLoading) {
     return (
@@ -40,10 +42,11 @@ function ExactHitsPanel({ targetUserId, t }: { targetUserId: string; t: any }) {
       </div>
     );
   }
-  if (!data || data.length === 0) {
+  const filtered = (data ?? []).filter(h => (filter ? filter(h) : true));
+  if (!filtered.length) {
     return <p className="text-xs text-muted-foreground py-2">{t('ranking.noExactHits')}</p>;
   }
-  const sorted = [...data].sort(
+  const sorted = [...filtered].sort(
     (a, b) => new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime()
   );
   return (
