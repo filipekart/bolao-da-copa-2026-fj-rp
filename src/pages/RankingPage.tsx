@@ -31,7 +31,9 @@ function useExtrasRevealed() {
   });
 }
 
-function ExactHitsPanel({ targetUserId, t }: { targetUserId: string; t: any }) {
+type HitFilter = (hit: any) => boolean;
+
+function ExactHitsPanel({ targetUserId, t, filter }: { targetUserId: string; t: any; filter?: HitFilter }) {
   const { data, isLoading } = useUserExactHits(targetUserId, true);
   if (isLoading) {
     return (
@@ -40,10 +42,11 @@ function ExactHitsPanel({ targetUserId, t }: { targetUserId: string; t: any }) {
       </div>
     );
   }
-  if (!data || data.length === 0) {
+  const filtered = (data ?? []).filter(h => (filter ? filter(h) : true));
+  if (!filtered.length) {
     return <p className="text-xs text-muted-foreground py-2">{t('ranking.noExactHits')}</p>;
   }
-  const sorted = [...data].sort(
+  const sorted = [...filtered].sort(
     (a, b) => new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime()
   );
   return (
@@ -68,7 +71,7 @@ function ExactHitsPanel({ targetUserId, t }: { targetUserId: string; t: any }) {
   );
 }
 
-const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points' | 'round_points'; t: any; extrasRevealed: boolean; collapsible?: boolean }>(({ ranking, userId, showField, t, extrasRevealed, collapsible = false }, ref) => {
+const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; userId: string | undefined; showField: 'points_total' | 'group_points' | 'round_points'; t: any; extrasRevealed: boolean; collapsible?: boolean; hitsFilter?: HitFilter; showExtras?: boolean }>(({ ranking, userId, showField, t, extrasRevealed, collapsible = false, hitsFilter, showExtras = true }, ref) => {
   const [search, setSearch] = useState('');
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
   const myRef = useRef<HTMLDivElement>(null);
@@ -184,7 +187,7 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
               </button>
               {isExpanded && (
                 <div className="px-3 pb-3 pt-1 border-t border-border/50 space-y-2 animate-fade-in">
-                  {(extrasRevealed || isMe) && (showChampion || entry.top_scorer_name || entry.mvp_name) && (
+                  {showExtras && (extrasRevealed || isMe) && (showChampion || entry.top_scorer_name || entry.mvp_name) && (
                     <div className="flex flex-col gap-1 pt-2 text-xs">
                       {showChampion && (
                         <div className="flex items-center gap-1.5">
@@ -213,7 +216,7 @@ const RankingList = forwardRef<HTMLDivElement, { ranking: any[] | undefined; use
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5">
                       {t('ranking.exactHitsList')}
                     </p>
-                    <ExactHitsPanel targetUserId={entry.user_id} t={t} />
+                    <ExactHitsPanel targetUserId={entry.user_id} t={t} filter={hitsFilter} />
                   </div>
                 </div>
               )}
@@ -320,19 +323,19 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
         </TabsContent>
         <TabsContent value="grupos" className="mt-4">
           {groupLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(groupRanking)} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} collapsible />}
+            <RankingList ranking={mergeExtras(groupRanking)} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} collapsible showExtras={false} hitsFilter={(h) => h.stage === 'GROUP_STAGE'} />}
         </TabsContent>
         <TabsContent value="round1" className="mt-4">
           {r1Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(round1)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible />}
+            <RankingList ranking={mergeExtras(round1)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible showExtras={false} hitsFilter={(h) => h.stage === 'GROUP_STAGE' && h.match_number <= 24} />}
         </TabsContent>
         <TabsContent value="round2" className="mt-4">
           {r2Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(round2)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible />}
+            <RankingList ranking={mergeExtras(round2)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible showExtras={false} hitsFilter={(h) => h.stage === 'GROUP_STAGE' && h.match_number > 24 && h.match_number <= 48} />}
         </TabsContent>
         <TabsContent value="round3" className="mt-4">
           {r3Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(round3)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible />}
+            <RankingList ranking={mergeExtras(round3)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible showExtras={false} hitsFilter={(h) => h.stage === 'GROUP_STAGE' && h.match_number > 48 && h.match_number <= 72} />}
         </TabsContent>
         <TabsContent value="knockout" className="mt-4">
           {koLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
