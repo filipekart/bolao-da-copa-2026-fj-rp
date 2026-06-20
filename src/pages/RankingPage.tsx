@@ -43,9 +43,12 @@ function ExactHitsPanel({ targetUserId, t }: { targetUserId: string; t: any }) {
   if (!data || data.length === 0) {
     return <p className="text-xs text-muted-foreground py-2">{t('ranking.noExactHits')}</p>;
   }
+  const sorted = [...data].sort(
+    (a, b) => new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime()
+  );
   return (
     <ul className="space-y-1.5">
-      {data.map((hit) => (
+      {sorted.map((hit) => (
         <li key={hit.match_id} className="flex items-center gap-2 text-xs">
           <span className="text-[10px] text-muted-foreground w-20 shrink-0 truncate">
             {formatStageLabel(t, hit.stage, hit.match_number)}
@@ -317,19 +320,19 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
         </TabsContent>
         <TabsContent value="grupos" className="mt-4">
           {groupLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(groupRanking)} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} />}
+            <RankingList ranking={mergeExtras(groupRanking)} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} collapsible />}
         </TabsContent>
         <TabsContent value="round1" className="mt-4">
           {r1Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(round1)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} />}
+            <RankingList ranking={mergeExtras(round1)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible />}
         </TabsContent>
         <TabsContent value="round2" className="mt-4">
           {r2Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(round2)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} />}
+            <RankingList ranking={mergeExtras(round2)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible />}
         </TabsContent>
         <TabsContent value="round3" className="mt-4">
           {r3Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(round3)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} />}
+            <RankingList ranking={mergeExtras(round3)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible />}
         </TabsContent>
         <TabsContent value="knockout" className="mt-4">
           {koLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
