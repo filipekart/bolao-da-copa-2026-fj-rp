@@ -1,40 +1,62 @@
 ## Objetivo
 
-Na aba **Jogos** (HomePage), dentro de cada grupo expandido, os jogos já encerrados aparecem hoje apenas com o **palpite** do usuário e um cadeado. O placar real não é mostrado, o que dificulta lembrar resultados ao palpitar nas rodadas seguintes do mesmo grupo.
+Na aba **Jogos → Classificação prevista** (HomePage, dentro do `GroupCard`), trocar a fonte dos placares usados para montar a tabela do grupo:
 
-## Sugestão (sem adicionar linha)
+- Se a partida está finalizada (`status === 'FINISHED'` e tem `official_home_score` / `official_away_score`): usar o **placar oficial**.
+- Caso contrário (jogo futuro/ao vivo/sem placar oficial): usar o **palpite atual do usuário**, exatamente como hoje.
+- Se não houver nem placar oficial nem palpite preenchido: a partida é ignorada na conta (comportamento atual).
 
-Reaproveitar a mesma linha do `MatchRow` no estado `locked`. Quando o jogo estiver `FINISHED` (com `official_home_score`/`official_away_score`), exibir o **placar oficial em destaque** e o **palpite do usuário menor entre parênteses**, tudo na mesma linha:
+Sem indicador visual — a tabela simplesmente reflete a realidade conforme os jogos vão acontecendo.
 
-```text
-Brasil  (2×1) 3 × 0 🔒  Sérvia
+## Alteração
+
+Arquivo único: `src/pages/HomePage.tsx`, função `GroupCard` (linhas ~217–229).
+
+Substituir o bloco que monta `predictedMatches` por uma versão que prioriza o placar oficial:
+
+```ts
+const predictedMatches: PredictedMatch[] = matches
+  .map(m => {
+    const isFinished =
+      m.status === 'FINISHED' &&
+      m.official_home_score !== null &&
+      m.official_away_score !== null;
+
+    if (isFinished) {
+      return {
+        homeTeamId: m.home_team_id,
+        awayTeamId: m.away_team_id,
+        homeScore: m.official_home_score as number,
+        awayScore: m.official_away_score as number,
+      };
+    }
+
+    const s = scores[m.id];
+    if (s && s.home !== null && s.away !== null) {
+      return {
+        homeTeamId: m.home_team_id,
+        awayTeamId: m.away_team_id,
+        homeScore: s.home as number,
+        awayScore: s.away as number,
+      };
+    }
+
+    return null;
+  })
+  .filter((x): x is PredictedMatch => x !== null);
+
+const standings = calculatePredictedStandings(predictedMatches);
 ```
 
-- `3 × 0` → placar oficial, fonte bold, cor `text-primary` (dourado), nos mesmos boxes onde hoje aparece o palpite.
-- `(2×1)` → palpite do usuário, fonte menor (`text-[10px] text-muted-foreground`), à esquerda dos boxes.
-- Cadeado permanece à direita, como hoje.
-- Se o usuário não palpitou, mostra só o placar oficial (sem parênteses).
-- Para jogos só travados (kickoff passou) mas ainda não finalizados, comportamento atual continua igual (mostra só o palpite + cadeado).
+Nada mais muda: `calculatePredictedStandings`, ordenação, render da tabela, contador "X de Y jogos com palpite" continuam iguais.
 
-Vantagens:
-- Zero linha nova; mesma altura visual da linha.
-- O placar real fica em destaque (dourado), batendo com o padrão da `MatchCard` da aba Jogos.
-- O palpite continua visível para conferência rápida.
+## Fora de escopo
 
-## Onde mexer
+- KnockoutPage (linhas ~511–525): mantém-se como está (mata-mata ainda não começou; mesmo modelo pode ser aplicado depois se necessário).
+- Sem mudança de UI, tradução, ou tokens de design.
+- Sem mudança no backend / RLS / RPC.
 
-Apenas `src/components/MatchCard.tsx`? Não — é `src/pages/HomePage.tsx`, componente `MatchRow`, ramo `locked` (linhas ~63-73). Adicionar:
+## Verificação
 
-1. Detectar `isFinished = match.status === 'FINISHED' && official_home_score != null && official_away_score != null`.
-2. Se `isFinished`:
-   - Renderizar pequeno texto `(palpiteHome×palpiteAway)` à esquerda dos boxes (apenas se houver palpite).
-   - Trocar o conteúdo dos boxes para `official_home_score` e `official_away_score`, com classe `text-primary`.
-3. Caso contrário, manter exatamente o layout atual.
-
-Nenhuma alteração em hooks, RPC, RLS, i18n ou outras telas.
-
-## Alternativas consideradas (descartadas)
-
-- **Tooltip no cadeado** com o placar oficial → exige toque/hover, não ajuda em mobile.
-- **Substituir palpite pelo placar oficial sem mostrar palpite** → perde a referência do que o usuário apostou.
-- **Badge "+25" ao lado** → já existe na aba Palpites; aqui o foco é o placar real para apoiar próximos palpites.
+- Build TS passa (mudança trivial de tipos).
+- Conferir visualmente um grupo com jogo já finalizado: a linha dos times deve refletir o placar real, não o palpite.
