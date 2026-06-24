@@ -214,18 +214,36 @@ const GroupCard = React.forwardRef<HTMLDivElement, {
   const filledCount = matches.filter(m => existingPredictionIds.has(m.id)).length;
   const allHavePredictions = filledCount === matches.length;
 
-  // Calculate predicted standings from current scores (skip matches without a filled prediction)
+  // Hybrid: use official result when finished, otherwise the user's current prediction.
   const predictedMatches: PredictedMatch[] = matches
-    .filter(m => {
+    .map(m => {
+      const isFinished =
+        m.status === 'FINISHED' &&
+        m.official_home_score !== null &&
+        m.official_away_score !== null;
+
+      if (isFinished) {
+        return {
+          homeTeamId: m.home_team_id,
+          awayTeamId: m.away_team_id,
+          homeScore: m.official_home_score as number,
+          awayScore: m.official_away_score as number,
+        };
+      }
+
       const s = scores[m.id];
-      return s && s.home !== null && s.away !== null;
+      if (s && s.home !== null && s.away !== null) {
+        return {
+          homeTeamId: m.home_team_id,
+          awayTeamId: m.away_team_id,
+          homeScore: s.home as number,
+          awayScore: s.away as number,
+        };
+      }
+
+      return null;
     })
-    .map(m => ({
-      homeTeamId: m.home_team_id,
-      awayTeamId: m.away_team_id,
-      homeScore: scores[m.id]!.home as number,
-      awayScore: scores[m.id]!.away as number,
-    }));
+    .filter((x): x is PredictedMatch => x !== null);
   const standings = calculatePredictedStandings(predictedMatches);
 
   // Get unique teams in this group, seed (first match home team) first
