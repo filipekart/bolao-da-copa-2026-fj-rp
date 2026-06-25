@@ -1,6 +1,6 @@
 import { useGroupStandings, GroupStanding } from '@/hooks/useGroupStandings';
 import { useMatches } from '@/hooks/useMatches';
-import { Loader2, Trophy, Calendar, Info, Check } from 'lucide-react';
+import { Loader2, Trophy, Calendar, Info, Check, ChevronUp, ChevronDown } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -243,34 +243,46 @@ function BracketMatchCard({
           {isFinished ? (
             <span>{realMatch.official_home_score} × {realMatch.official_away_score}</span>
           ) : showInputs ? (
-            <div className="flex items-center gap-0.5" onClick={stop}>
-              <button
-                type="button"
-                onClick={(e) => { stop(e); setHome(h => h === null ? 0 : Math.max(0, h - 1)); }}
-                className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
-              >−</button>
-              <span className={`w-5 text-center text-sm font-bold ${home === null ? 'text-muted-foreground' : 'text-foreground'}`}>
-                {home === null ? '–' : home}
-              </span>
-              <button
-                type="button"
-                onClick={(e) => { stop(e); setHome(h => (h ?? 0) + 1); }}
-                className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
-              >+</button>
-              <span className="text-muted-foreground text-xs mx-0.5">×</span>
-              <button
-                type="button"
-                onClick={(e) => { stop(e); setAway(a => a === null ? 0 : Math.max(0, a - 1)); }}
-                className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
-              >−</button>
-              <span className={`w-5 text-center text-sm font-bold ${away === null ? 'text-muted-foreground' : 'text-foreground'}`}>
-                {away === null ? '–' : away}
-              </span>
-              <button
-                type="button"
-                onClick={(e) => { stop(e); setAway(a => (a ?? 0) + 1); }}
-                className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
-              >+</button>
+            <div className="flex items-center gap-1" onClick={stop}>
+              <div className="flex items-center gap-0.5">
+                <span className={`w-4 text-center text-sm font-bold ${home === null ? 'text-muted-foreground' : 'text-foreground'}`}>
+                  {home === null ? '–' : home}
+                </span>
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={(e) => { stop(e); setHome(h => (h ?? 0) + 1); }}
+                    className="w-4 h-3 rounded-sm bg-secondary text-foreground flex items-center justify-center"
+                    aria-label="+"
+                  ><ChevronUp className="w-3 h-3" /></button>
+                  <button
+                    type="button"
+                    onClick={(e) => { stop(e); setHome(h => h === null ? 0 : Math.max(0, h - 1)); }}
+                    className="w-4 h-3 rounded-sm bg-secondary text-foreground flex items-center justify-center mt-0.5"
+                    aria-label="-"
+                  ><ChevronDown className="w-3 h-3" /></button>
+                </div>
+              </div>
+              <span className="text-muted-foreground text-xs">×</span>
+              <div className="flex items-center gap-0.5">
+                <span className={`w-4 text-center text-sm font-bold ${away === null ? 'text-muted-foreground' : 'text-foreground'}`}>
+                  {away === null ? '–' : away}
+                </span>
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={(e) => { stop(e); setAway(a => (a ?? 0) + 1); }}
+                    className="w-4 h-3 rounded-sm bg-secondary text-foreground flex items-center justify-center"
+                    aria-label="+"
+                  ><ChevronUp className="w-3 h-3" /></button>
+                  <button
+                    type="button"
+                    onClick={(e) => { stop(e); setAway(a => a === null ? 0 : Math.max(0, a - 1)); }}
+                    className="w-4 h-3 rounded-sm bg-secondary text-foreground flex items-center justify-center mt-0.5"
+                    aria-label="-"
+                  ><ChevronDown className="w-3 h-3" /></button>
+                </div>
+              </div>
             </div>
           ) : isLocked && hasRealMatch && (home !== null && away !== null) ? (
             <span className="text-muted-foreground">{home} × {away}</span>
