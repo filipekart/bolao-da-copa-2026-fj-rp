@@ -1,62 +1,24 @@
-## Objetivo
+Reverter a aba **Chave** (2a Fase) de volta a uma lista vertical de cards, conforme a foto de referência.
 
-Na aba **Jogos → Classificação prevista** (HomePage, dentro do `GroupCard`), trocar a fonte dos placares usados para montar a tabela do grupo:
+### Problema
+A IA alterou recentemente o layout da aba Chave para usar `grid grid-cols-1 sm:grid-cols-2 gap-2`, fazendo com que em telas maiores os cards ficassem lado a lado (2 colunas). O usuário quer que volte a ser uma lista empilhada verticalmente, como na foto.
 
-- Se a partida está finalizada (`status === 'FINISHED'` e tem `official_home_score` / `official_away_score`): usar o **placar oficial**.
-- Caso contrário (jogo futuro/ao vivo/sem placar oficial): usar o **palpite atual do usuário**, exatamente como hoje.
-- Se não houver nem placar oficial nem palpite preenchido: a partida é ignorada na conta (comportamento atual).
+### Alteração
+**Arquivo:** `src/pages/KnockoutPage.tsx` (linhas ~440-468)
 
-Sem indicador visual — a tabela simplesmente reflete a realidade conforme os jogos vão acontecendo.
+- Trocar o container interno da lista de jogos de:
+  ```
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+  ```
+  para:
+  ```
+  <div className="space-y-2">
+  ```
 
-## Alteração
+- Manter todo o resto: `BracketMatchCard` com layout horizontal interno (time A + placar + time B), inputs inline, alerta de prorrogação, e abas Classificação/Chave.
 
-Arquivo único: `src/pages/HomePage.tsx`, função `GroupCard` (linhas ~217–229).
-
-Substituir o bloco que monta `predictedMatches` por uma versão que prioriza o placar oficial:
-
-```ts
-const predictedMatches: PredictedMatch[] = matches
-  .map(m => {
-    const isFinished =
-      m.status === 'FINISHED' &&
-      m.official_home_score !== null &&
-      m.official_away_score !== null;
-
-    if (isFinished) {
-      return {
-        homeTeamId: m.home_team_id,
-        awayTeamId: m.away_team_id,
-        homeScore: m.official_home_score as number,
-        awayScore: m.official_away_score as number,
-      };
-    }
-
-    const s = scores[m.id];
-    if (s && s.home !== null && s.away !== null) {
-      return {
-        homeTeamId: m.home_team_id,
-        awayTeamId: m.away_team_id,
-        homeScore: s.home as number,
-        awayScore: s.away as number,
-      };
-    }
-
-    return null;
-  })
-  .filter((x): x is PredictedMatch => x !== null);
-
-const standings = calculatePredictedStandings(predictedMatches);
-```
-
-Nada mais muda: `calculatePredictedStandings`, ordenação, render da tabela, contador "X de Y jogos com palpite" continuam iguais.
-
-## Fora de escopo
-
-- KnockoutPage (linhas ~511–525): mantém-se como está (mata-mata ainda não começou; mesmo modelo pode ser aplicado depois se necessário).
-- Sem mudança de UI, tradução, ou tokens de design.
-- Sem mudança no backend / RLS / RPC.
-
-## Verificação
-
-- Build TS passa (mudança trivial de tipos).
-- Conferir visualmente um grupo com jogo já finalizado: a linha dos times deve refletir o placar real, não o palpite.
+### O que não muda
+- O card interno continua horizontal (time à esquerda, placar no meio, time à direita).
+- Os palpites inline (± botões) permanecem.
+- A aba Classificação permanece inalterada.
+- O alerta sobre "90 min + prorrogação" permanece no topo.
