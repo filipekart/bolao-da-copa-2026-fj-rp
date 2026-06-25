@@ -317,6 +317,31 @@ export default function KnockoutPage() {
   const lang = i18n.language?.substring(0, 2) ?? 'pt';
   const tt = useTranslatedTeamName();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { activeUserId, isActingAsOther } = useActiveProfile();
+
+  const knockoutMatchIds = (allMatches ?? [])
+    .filter(m => m.stage !== 'GROUP_STAGE')
+    .map(m => m.id);
+
+  const { data: knockoutPredictions } = useQuery({
+    queryKey: ['knockout-match-predictions', activeUserId, knockoutMatchIds.length],
+    queryFn: async () => {
+      if (!activeUserId || knockoutMatchIds.length === 0) return [];
+      const { data, error } = await supabase
+        .from('match_predictions')
+        .select('match_id, predicted_home_score, predicted_away_score')
+        .eq('user_id', activeUserId)
+        .in('match_id', knockoutMatchIds);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!user && !!activeUserId && knockoutMatchIds.length > 0,
+  });
+
+  const predictionByMatchId = new Map(
+    (knockoutPredictions ?? []).map(p => [p.match_id, p])
+  );
 
   const KNOCKOUT_STAGES = [
     { key: 'ROUND_OF_32', label: t('knockout.stages.ROUND_OF_32'), bracket: R32_BRACKET },
@@ -406,6 +431,10 @@ export default function KnockoutPage() {
               <div className="space-y-2">
                 {stage.bracket.map(entry => {
                   const real = matchByNumber.get(entry.matchNum);
+                  const canBet = !!real && !!real.id && !!real.home_team_name
+                    && real.status !== 'FINISHED'
+                    && !!real.kickoff_at
+                    && new Date(real.kickoff_at).getTime() > Date.now();
                   return (
                     <BracketMatchCard
                       key={entry.matchNum}
@@ -415,6 +444,10 @@ export default function KnockoutPage() {
                       lang={lang}
                       tt={tt}
                       onClick={real?.id ? () => navigate(`/match/${real.id}`) : undefined}
+                      existingPrediction={real ? predictionByMatchId.get(real.id) as any : null}
+                      canBet={canBet}
+                      activeUserId={activeUserId}
+                      isActingAsOther={isActingAsOther}
                     />
                   );
                 })}
