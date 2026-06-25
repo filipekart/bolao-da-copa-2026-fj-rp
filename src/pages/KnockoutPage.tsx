@@ -420,6 +420,15 @@ export default function KnockoutPage() {
         </div>
       ) : (
         <div className="space-y-6">
+          <Alert className="border-primary/40 bg-primary/5">
+            <Info className="h-4 w-4 text-primary" />
+            <AlertDescription className="text-sm text-muted-foreground">
+              {t(
+                'knockout.scoreScopeNotice',
+                'Os placares dos palpites consideram os 90 minutos + prorrogação (se houver). Pênaltis não contam no placar.'
+              )}
+            </AlertDescription>
+          </Alert>
           {R32_BRACKET.some(e => !matchByNumber.get(e.matchNum)?.home_team_name) && (
             <Alert className="border-accent/50 bg-accent/10">
               <Info className="h-4 w-4 text-accent" />
