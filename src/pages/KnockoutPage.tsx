@@ -129,6 +129,10 @@ function BracketMatchCard({
   lang,
   tt,
   onClick,
+  existingPrediction,
+  canBet,
+  activeUserId,
+  isActingAsOther,
 }: {
   entry: BracketEntry;
   realMatch?: any;
@@ -136,15 +140,74 @@ function BracketMatchCard({
   lang: string;
   tt: (teamId: string | null | undefined, fallbackName?: string) => string;
   onClick?: () => void;
+  existingPrediction?: { predicted_home_score: number; predicted_away_score: number } | null;
+  canBet: boolean;
+  activeUserId?: string | null;
+  isActingAsOther: boolean;
 }) {
   const hasRealMatch = realMatch && realMatch.home_team_name;
   const isFinished = realMatch?.status === 'FINISHED';
+  const isLocked = !canBet;
+  const showInputs = hasRealMatch && canBet && !isFinished;
+
+  const [home, setHome] = useState<number | null>(existingPrediction?.predicted_home_score ?? null);
+  const [away, setAway] = useState<number | null>(existingPrediction?.predicted_away_score ?? null);
+  const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+  const lastSavedRef = useRef<string>(
+    existingPrediction
+      ? `${existingPrediction.predicted_home_score}-${existingPrediction.predicted_away_score}`
+      : ''
+  );
+
+  // Sync when server prediction loads/changes (e.g. acting-as switch)
+  useEffect(() => {
+    if (existingPrediction) {
+      setHome(existingPrediction.predicted_home_score);
+      setAway(existingPrediction.predicted_away_score);
+      lastSavedRef.current = `${existingPrediction.predicted_home_score}-${existingPrediction.predicted_away_score}`;
+    } else {
+      setHome(null);
+      setAway(null);
+      lastSavedRef.current = '';
+    }
+  }, [existingPrediction?.predicted_home_score, existingPrediction?.predicted_away_score]);
+
+  // Debounced auto-save when both scores set and changed
+  useEffect(() => {
+    if (!showInputs || !realMatch?.id) return;
+    if (home === null || away === null) return;
+    const key = `${home}-${away}`;
+    if (key === lastSavedRef.current) return;
+
+    const timer = setTimeout(async () => {
+      setSaving(true);
+      const { error } = await supabase.rpc('submit_match_prediction', {
+        p_match_id: realMatch.id,
+        p_predicted_home_score: home as number,
+        p_predicted_away_score: away as number,
+        ...(isActingAsOther && activeUserId ? { p_acting_as: activeUserId } : {}),
+      });
+      setSaving(false);
+      if (error) {
+        toast.error(error.message ?? 'Erro ao salvar palpite');
+        return;
+      }
+      lastSavedRef.current = key;
+      setSavedAt(Date.now());
+    }, 700);
+
+    return () => clearTimeout(timer);
+  }, [home, away, showInputs, realMatch?.id, isActingAsOther, activeUserId]);
+
+  const stop = (e: React.MouseEvent) => e.stopPropagation();
   const isClickable = !!realMatch?.id && !!onClick;
 
-  const Wrapper: any = isClickable ? 'button' : 'div';
-  const wrapperProps = isClickable
-    ? { onClick, type: 'button', className: 'glass rounded-xl p-3 space-y-1.5 w-full text-left hover:bg-secondary/40 transition-colors cursor-pointer' }
-    : { className: 'glass rounded-xl p-3 space-y-1.5' };
+  const Wrapper: any = isClickable ? 'div' : 'div';
+  const wrapperProps: any = {
+    onClick: isClickable ? onClick : undefined,
+    className: `glass rounded-xl p-3 space-y-1.5 ${isClickable ? 'cursor-pointer hover:bg-secondary/40 transition-colors' : ''}`,
+  };
 
   return (
     <Wrapper {...wrapperProps}>
@@ -173,10 +236,44 @@ function BracketMatchCard({
             )}
           </div>
         </div>
-        <div className="px-2 text-sm font-bold text-foreground shrink-0">
-          {isFinished
-            ? `${realMatch.official_home_score} × ${realMatch.official_away_score}`
-            : 'vs'}
+        <div className="px-1 text-sm font-bold text-foreground shrink-0">
+          {isFinished ? (
+            <span>{realMatch.official_home_score} × {realMatch.official_away_score}</span>
+          ) : showInputs ? (
+            <div className="flex items-center gap-0.5" onClick={stop}>
+              <button
+                type="button"
+                onClick={(e) => { stop(e); setHome(h => h === null ? 0 : Math.max(0, h - 1)); }}
+                className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
+              >−</button>
+              <span className={`w-5 text-center text-sm font-bold ${home === null ? 'text-muted-foreground' : 'text-foreground'}`}>
+                {home === null ? '–' : home}
+              </span>
+              <button
+                type="button"
+                onClick={(e) => { stop(e); setHome(h => (h ?? 0) + 1); }}
+                className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
+              >+</button>
+              <span className="text-muted-foreground text-xs mx-0.5">×</span>
+              <button
+                type="button"
+                onClick={(e) => { stop(e); setAway(a => a === null ? 0 : Math.max(0, a - 1)); }}
+                className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
+              >−</button>
+              <span className={`w-5 text-center text-sm font-bold ${away === null ? 'text-muted-foreground' : 'text-foreground'}`}>
+                {away === null ? '–' : away}
+              </span>
+              <button
+                type="button"
+                onClick={(e) => { stop(e); setAway(a => (a ?? 0) + 1); }}
+                className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
+              >+</button>
+            </div>
+          ) : isLocked && hasRealMatch && (home !== null && away !== null) ? (
+            <span className="text-muted-foreground">{home} × {away}</span>
+          ) : (
+            <span>vs</span>
+          )}
         </div>
         <div className="flex items-center gap-2 flex-1 min-w-0 justify-end text-right">
           <div className="min-w-0">
@@ -193,8 +290,19 @@ function BracketMatchCard({
         </div>
       </div>
       {isClickable && (
-        <div className="text-[10px] text-primary font-medium pt-0.5">
-          {t('knockout.tapToBet', 'Toque para palpitar →')}
+        <div className="flex items-center justify-between text-[10px] pt-0.5">
+          <span className="text-primary font-medium">
+            {t('knockout.openDetails', 'Detalhes / quem avança →')}
+          </span>
+          {showInputs && (
+            <span className="text-muted-foreground flex items-center gap-1">
+              {saving ? (
+                <><Loader2 className="w-3 h-3 animate-spin" /> {t('match.saving', 'Salvando...')}</>
+              ) : savedAt ? (
+                <><Check className="w-3 h-3 text-primary" /> {t('home.saved', 'Salvo')}</>
+              ) : null}
+            </span>
+          )}
         </div>
       )}
     </Wrapper>
