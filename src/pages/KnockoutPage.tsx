@@ -145,6 +145,7 @@ function BracketMatchCard({
   activeUserId?: string | null;
   isActingAsOther: boolean;
 }) {
+  const queryClient = useQueryClient();
   const hasRealMatch = realMatch && realMatch.home_team_name;
   const isFinished = realMatch?.status === 'FINISHED';
   const isLocked = !canBet;
@@ -195,6 +196,8 @@ function BracketMatchCard({
       }
       lastSavedRef.current = key;
       setSavedAt(Date.now());
+      queryClient.invalidateQueries({ queryKey: ['knockout-match-predictions'] });
+      queryClient.invalidateQueries({ queryKey: ['my-predictions'] });
     }, 700);
 
     return () => clearTimeout(timer);
