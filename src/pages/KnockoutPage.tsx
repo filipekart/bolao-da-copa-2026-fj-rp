@@ -1,11 +1,16 @@
 import { useGroupStandings, GroupStanding } from '@/hooks/useGroupStandings';
 import { useMatches } from '@/hooks/useMatches';
-import { Loader2, Trophy, Calendar, Info } from 'lucide-react';
+import { Loader2, Trophy, Calendar, Info, Check } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTranslatedTeamName } from '@/hooks/useTranslatedTeamName';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/lib/auth';
+import { useActiveProfile } from '@/lib/activeProfile';
+import { toast } from 'sonner';
 
 import { Flag } from '@/components/Flag';
 const R32_BRACKET = [
