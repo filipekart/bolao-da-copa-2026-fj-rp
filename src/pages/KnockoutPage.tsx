@@ -440,7 +440,7 @@ export default function KnockoutPage() {
           {KNOCKOUT_STAGES.map(stage => (
             <div key={stage.key} className="space-y-2">
               <h2 className="text-sm font-display font-semibold text-foreground">{stage.label}</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="space-y-2">
                 {stage.bracket.map(entry => {
                   const real = matchByNumber.get(entry.matchNum);
                   const canBet = !!real && !!real.id && !!real.home_team_name
