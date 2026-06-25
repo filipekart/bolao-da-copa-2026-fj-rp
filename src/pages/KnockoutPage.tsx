@@ -225,71 +225,76 @@ function BracketMatchCard({
           </div>
         )}
       </div>
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          {hasRealMatch && realMatch.home_team_flag_url && (
-            <Flag src={realMatch.home_team_flag_url} alt="" className="w-5 h-4 rounded-sm shrink-0" />
+      <div className="flex flex-col gap-2 py-1">
+        {/* Home team row */}
+        <div className="flex items-center gap-2">
+          {hasRealMatch && realMatch.home_team_flag_url ? (
+            <Flag src={realMatch.home_team_flag_url} alt="" className="w-6 h-4 rounded-sm shrink-0" />
+          ) : (
+            <div className="w-6 h-4 shrink-0" />
           )}
-          <div className="min-w-0">
-            <span className="text-sm text-foreground font-medium truncate block">
+          <div className="min-w-0 flex-1">
+            <div className="text-sm text-foreground font-semibold leading-tight">
               {hasRealMatch ? tt(realMatch.home_team_id, realMatch.home_team_name) : entry.home}
-            </span>
-            {hasRealMatch && (
-              <span className="text-[9px] text-muted-foreground">{entry.homeLabel}</span>
-            )}
+            </div>
+            <div className="text-[10px] text-muted-foreground leading-tight">{entry.homeLabel}</div>
           </div>
         </div>
-        <div className="px-1 text-sm font-bold text-foreground shrink-0">
+
+        {/* Score row */}
+        <div className="flex items-center justify-center py-1 text-sm font-bold text-foreground">
           {isFinished ? (
-            <span>{realMatch.official_home_score} × {realMatch.official_away_score}</span>
+            <span className="text-base">{realMatch.official_home_score} × {realMatch.official_away_score}</span>
           ) : showInputs ? (
-            <div className="flex items-center gap-0.5" onClick={stop}>
+            <div className="flex items-center gap-1" onClick={stop}>
               <button
                 type="button"
                 onClick={(e) => { stop(e); setHome(h => h === null ? 0 : Math.max(0, h - 1)); }}
-                className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
+                className="w-7 h-7 rounded bg-secondary text-foreground text-sm font-bold"
               >−</button>
-              <span className={`w-5 text-center text-sm font-bold ${home === null ? 'text-muted-foreground' : 'text-foreground'}`}>
+              <span className={`w-6 text-center text-base font-bold ${home === null ? 'text-muted-foreground' : 'text-foreground'}`}>
                 {home === null ? '–' : home}
               </span>
               <button
                 type="button"
                 onClick={(e) => { stop(e); setHome(h => (h ?? 0) + 1); }}
-                className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
+                className="w-7 h-7 rounded bg-secondary text-foreground text-sm font-bold"
               >+</button>
-              <span className="text-muted-foreground text-xs mx-0.5">×</span>
+              <span className="text-muted-foreground text-sm mx-1">×</span>
               <button
                 type="button"
                 onClick={(e) => { stop(e); setAway(a => a === null ? 0 : Math.max(0, a - 1)); }}
-                className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
+                className="w-7 h-7 rounded bg-secondary text-foreground text-sm font-bold"
               >−</button>
-              <span className={`w-5 text-center text-sm font-bold ${away === null ? 'text-muted-foreground' : 'text-foreground'}`}>
+              <span className={`w-6 text-center text-base font-bold ${away === null ? 'text-muted-foreground' : 'text-foreground'}`}>
                 {away === null ? '–' : away}
               </span>
               <button
                 type="button"
                 onClick={(e) => { stop(e); setAway(a => (a ?? 0) + 1); }}
-                className="w-6 h-6 rounded bg-secondary text-foreground text-xs font-bold"
+                className="w-7 h-7 rounded bg-secondary text-foreground text-sm font-bold"
               >+</button>
             </div>
           ) : isLocked && hasRealMatch && (home !== null && away !== null) ? (
             <span className="text-muted-foreground">{home} × {away}</span>
           ) : (
-            <span>vs</span>
+            <span className="text-muted-foreground">vs</span>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-1 min-w-0 justify-end text-right">
-          <div className="min-w-0">
-            <span className="text-sm text-foreground font-medium truncate block">
-              {hasRealMatch ? tt(realMatch.away_team_id, realMatch.away_team_name) : entry.away}
-            </span>
-            {hasRealMatch && (
-              <span className="text-[9px] text-muted-foreground">{entry.awayLabel}</span>
-            )}
-          </div>
-          {hasRealMatch && realMatch.away_team_flag_url && (
-            <Flag src={realMatch.away_team_flag_url} alt="" className="w-5 h-4 rounded-sm shrink-0" />
+
+        {/* Away team row */}
+        <div className="flex items-center gap-2">
+          {hasRealMatch && realMatch.away_team_flag_url ? (
+            <Flag src={realMatch.away_team_flag_url} alt="" className="w-6 h-4 rounded-sm shrink-0" />
+          ) : (
+            <div className="w-6 h-4 shrink-0" />
           )}
+          <div className="min-w-0 flex-1">
+            <div className="text-sm text-foreground font-semibold leading-tight">
+              {hasRealMatch ? tt(realMatch.away_team_id, realMatch.away_team_name) : entry.away}
+            </div>
+            <div className="text-[10px] text-muted-foreground leading-tight">{entry.awayLabel}</div>
+          </div>
         </div>
       </div>
       {isClickable && (
