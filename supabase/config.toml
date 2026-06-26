@@ -1,3 +1,5 @@
+[functions.admin-reset-password]
+verify_jwt = false
 project_id = "adsosggvlursdngteyhg"
 
 [functions.export-match-predictions]
