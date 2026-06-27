@@ -307,7 +307,7 @@ function BracketMatchCard({
       {isClickable && (
         <div className="flex items-center justify-between text-[10px] pt-0.5">
           <span className="text-primary font-medium">
-            {t('knockout.openDetails', 'Detalhes / quem avança →')}
+            {t('knockout.openDetails', 'Detalhes →')}
           </span>
           {showInputs && (
             <span className="text-muted-foreground flex items-center gap-1">
