@@ -309,21 +309,24 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
         <ScrollArea className="w-full">
           <TabsList className="flex w-max bg-secondary gap-1 p-1">
             <TabsTrigger value="geral" className="flex-shrink-0 text-xs">{t('ranking.general')}</TabsTrigger>
-            <TabsTrigger value="grupos" className="flex-shrink-0 text-xs">{t('ranking.groupStage')}</TabsTrigger>
-            <TabsTrigger value="round3" className="flex-shrink-0 text-xs">{t('ranking.round3')}</TabsTrigger>
             <TabsTrigger value="knockout" className="flex-shrink-0 text-xs">{t('ranking.knockout')}</TabsTrigger>
             <TabsTrigger value="custom" className="flex-shrink-0 text-xs">⭐ {t('ranking.myRankings')}</TabsTrigger>
             <TabsTrigger value="round1" className="flex-shrink-0 text-xs">{t('ranking.round1')}</TabsTrigger>
             <TabsTrigger value="round2" className="flex-shrink-0 text-xs">{t('ranking.round2')}</TabsTrigger>
+            <TabsTrigger value="round3" className="flex-shrink-0 text-xs">{t('ranking.round3')}</TabsTrigger>
+            <TabsTrigger value="grupos" className="flex-shrink-0 text-xs">{t('ranking.groupStage')}</TabsTrigger>
           </TabsList>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
         <TabsContent value="geral" className="mt-4">
           <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} extrasRevealed={extrasRevealed} collapsible />
         </TabsContent>
-        <TabsContent value="grupos" className="mt-4">
-          {groupLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(groupRanking)} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} collapsible showExtras={false} hitsFilter={(h) => h.stage === 'GROUP_STAGE'} />}
+        <TabsContent value="knockout" className="mt-4">
+          {koLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
+            <RankingList ranking={mergeExtras(knockout)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} />}
+        </TabsContent>
+        <TabsContent value="custom" className="mt-4">
+          <CustomRankingsTab extrasRevealed={extrasRevealed} />
         </TabsContent>
         <TabsContent value="round1" className="mt-4">
           {r1Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
@@ -337,12 +340,9 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
           {r3Loading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
             <RankingList ranking={mergeExtras(round3)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible showExtras={false} hitsFilter={(h) => h.stage === 'GROUP_STAGE' && h.match_number > 48 && h.match_number <= 72} />}
         </TabsContent>
-        <TabsContent value="knockout" className="mt-4">
-          {koLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(knockout)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} />}
-        </TabsContent>
-        <TabsContent value="custom" className="mt-4">
-          <CustomRankingsTab extrasRevealed={extrasRevealed} />
+        <TabsContent value="grupos" className="mt-4">
+          {groupLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
+            <RankingList ranking={mergeExtras(groupRanking)} userId={user?.id} showField="group_points" t={t} extrasRevealed={extrasRevealed} collapsible showExtras={false} hitsFilter={(h) => h.stage === 'GROUP_STAGE'} />}
         </TabsContent>
       </Tabs>
     </div>
