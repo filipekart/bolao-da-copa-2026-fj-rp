@@ -108,6 +108,7 @@ export function useSubmitPrediction() {
       queryClient.invalidateQueries({ queryKey: ['prediction', variables.matchId] });
       queryClient.invalidateQueries({ queryKey: ['my-predictions'] });
       queryClient.invalidateQueries({ queryKey: ['all-predictions'] });
+      queryClient.invalidateQueries({ queryKey: ['knockout-match-predictions'] });
       toast.success('Palpite salvo!');
     },
     onError: (error: Error, variables) => {
