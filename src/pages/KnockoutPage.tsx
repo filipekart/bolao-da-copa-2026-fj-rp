@@ -451,7 +451,7 @@ export default function KnockoutPage() {
               </AlertDescription>
             </Alert>
           )}
-          {visibleStages.map(stage => (
+          {KNOCKOUT_STAGES.map(stage => (
             <div key={stage.key} className="space-y-2">
               <h2 className="text-sm font-display font-semibold text-foreground">{stage.label}</h2>
               <div className="space-y-2">
