@@ -364,24 +364,10 @@ export default function KnockoutPage() {
     { key: 'ROUND_OF_16', label: t('knockout.stages.ROUND_OF_16'), bracket: R16_BRACKET },
     { key: 'QUARTER_FINAL', label: t('knockout.stages.QUARTER_FINAL'), bracket: QF_BRACKET },
     { key: 'SEMI_FINAL', label: t('knockout.stages.SEMI_FINAL'), bracket: SF_BRACKET },
-    { key: 'THIRD_PLACE', label: 'Disputa do 3º lugar', bracket: THIRD_PLACE_BRACKET, group: 'FINAL_GROUP' },
-    { key: 'FINAL', label: t('knockout.stages.FINAL'), bracket: FINAL_BRACKET, group: 'FINAL_GROUP' },
+    { key: 'THIRD_PLACE', label: 'Disputa do 3º lugar', bracket: THIRD_PLACE_BRACKET },
+    { key: 'FINAL', label: t('knockout.stages.FINAL'), bracket: FINAL_BRACKET },
   ] as const;
 
-  const STAGE_FILTERS = [
-    { value: 'all', label: t('knockout.filterAll', 'Todas as fases') },
-    { value: 'ROUND_OF_32', label: t('knockout.stages.ROUND_OF_32') },
-    { value: 'ROUND_OF_16', label: t('knockout.stages.ROUND_OF_16') },
-    { value: 'QUARTER_FINAL', label: t('knockout.stages.QUARTER_FINAL') },
-    { value: 'SEMI_FINAL', label: t('knockout.stages.SEMI_FINAL') },
-    { value: 'FINAL_GROUP', label: t('knockout.filterFinalGroup', 'Final e 3º lugar') },
-  ];
-
-  const visibleStages = KNOCKOUT_STAGES.filter(s => {
-    if (stageFilter === 'all') return true;
-    if (stageFilter === 'FINAL_GROUP') return (s as any).group === 'FINAL_GROUP';
-    return s.key === stageFilter;
-  });
 
   if (standingsLoading || matchesLoading) {
     return (
