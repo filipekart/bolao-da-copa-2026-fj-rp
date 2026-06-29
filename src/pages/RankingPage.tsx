@@ -1,7 +1,7 @@
 import { forwardRef, useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useRanking } from '@/hooks/useRanking';
 import { useGroupRanking } from '@/hooks/useGroupRanking';
-import { useRoundRanking } from '@/hooks/useRoundRanking';
+import { useRoundRanking, KnockoutSubStage } from '@/hooks/useRoundRanking';
 import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { computePositions } from '@/lib/rankingPositions';
 import { useUserExactHits } from '@/hooks/useUserExactHits';
 import { formatStageLabel } from '@/lib/stageLabel';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { Flag } from '@/components/Flag';
 function useExtrasRevealed() {
@@ -259,12 +260,13 @@ RankingList.displayName = 'RankingList';
 
 const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref) {
   const [activeTab, setActiveTab] = useState('geral');
+  const [knockoutStageFilter, setKnockoutStageFilter] = useState<KnockoutSubStage>('all');
   const { data: ranking, isLoading } = useRanking();
   const { data: groupRanking, isLoading: groupLoading } = useGroupRanking(activeTab === 'grupos');
   const { data: round1, isLoading: r1Loading } = useRoundRanking('round1', activeTab === 'round1');
   const { data: round2, isLoading: r2Loading } = useRoundRanking('round2', activeTab === 'round2');
   const { data: round3, isLoading: r3Loading } = useRoundRanking('round3', activeTab === 'round3');
-  const { data: knockout, isLoading: koLoading } = useRoundRanking('knockout', activeTab === 'knockout');
+  const { data: knockout, isLoading: koLoading } = useRoundRanking('knockout', activeTab === 'knockout', knockoutStageFilter);
   const { user } = useAuth();
   const { t } = useTranslation();
   const { data: extrasRevealed = false } = useExtrasRevealed();
@@ -290,6 +292,29 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
       }),
     [extrasMap]
   );
+
+  const knockoutStageFilterOptions = [
+    { value: 'all', label: t('knockout.filterAll', 'Todas as fases') },
+    { value: 'ROUND_OF_32', label: t('knockout.stages.ROUND_OF_32') },
+    { value: 'ROUND_OF_16', label: t('knockout.stages.ROUND_OF_16') },
+    { value: 'QUARTER_FINAL', label: t('knockout.stages.QUARTER_FINAL') },
+    { value: 'SEMI_FINAL', label: t('knockout.stages.SEMI_FINAL') },
+    { value: 'FINAL_GROUP', label: t('knockout.filterFinalGroup', 'Final e 3º lugar') },
+  ] as { value: KnockoutSubStage; label: string }[];
+
+  const knockoutHitsFilter = useCallback((h: any) => {
+    if (h.stage === 'GROUP_STAGE') return false;
+    if (knockoutStageFilter === 'all') return true;
+    if (knockoutStageFilter === 'FINAL_GROUP') return h.match_number >= 103 && h.match_number <= 104;
+    const ranges: Record<Exclude<KnockoutSubStage, 'all' | 'FINAL_GROUP'>, [number, number]> = {
+      ROUND_OF_32: [73, 88],
+      ROUND_OF_16: [89, 96],
+      QUARTER_FINAL: [97, 100],
+      SEMI_FINAL: [101, 102],
+    };
+    const [min, max] = ranges[knockoutStageFilter];
+    return h.match_number >= min && h.match_number <= max;
+  }, [knockoutStageFilter]);
 
   if (isLoading) {
     return (
@@ -321,9 +346,19 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
         <TabsContent value="geral" className="mt-4">
           <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} extrasRevealed={extrasRevealed} collapsible />
         </TabsContent>
-        <TabsContent value="knockout" className="mt-4">
+        <TabsContent value="knockout" className="mt-4 space-y-3">
+          <Select value={knockoutStageFilter} onValueChange={(v) => setKnockoutStageFilter(v as KnockoutSubStage)}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {knockoutStageFilterOptions.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {koLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(knockout)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} />}
+            <RankingList ranking={mergeExtras(knockout)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible hitsFilter={knockoutHitsFilter} />}
         </TabsContent>
         <TabsContent value="custom" className="mt-4">
           <CustomRankingsTab extrasRevealed={extrasRevealed} />
