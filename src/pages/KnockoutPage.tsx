@@ -329,7 +329,6 @@ export default function KnockoutPage() {
   const { data: standings, isLoading: standingsLoading } = useGroupStandings();
   const { data: allMatches, isLoading: matchesLoading } = useMatches();
   const [activeTab, setActiveTab] = useState<'groups' | 'bracket'>('bracket');
-  const [stageFilter, setStageFilter] = useState<string>('all');
   const { t, i18n } = useTranslation();
   const lang = i18n.language?.substring(0, 2) ?? 'pt';
   const tt = useTranslatedTeamName();
