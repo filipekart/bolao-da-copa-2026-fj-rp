@@ -13,7 +13,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { computePositions } from '@/lib/rankingPositions';
 import { useUserExactHits } from '@/hooks/useUserExactHits';
 import { formatStageLabel } from '@/lib/stageLabel';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 
 import { Flag } from '@/components/Flag';
 function useExtrasRevealed() {
