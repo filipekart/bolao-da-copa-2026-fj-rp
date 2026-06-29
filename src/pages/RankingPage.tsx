@@ -346,9 +346,19 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
         <TabsContent value="geral" className="mt-4">
           <RankingList ranking={ranking} userId={user?.id} showField="points_total" t={t} extrasRevealed={extrasRevealed} collapsible />
         </TabsContent>
-        <TabsContent value="knockout" className="mt-4">
+        <TabsContent value="knockout" className="mt-4 space-y-3">
+          <Select value={knockoutStageFilter} onValueChange={(v) => setKnockoutStageFilter(v as KnockoutSubStage)}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {knockoutStageFilterOptions.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {koLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(knockout)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} />}
+            <RankingList ranking={mergeExtras(knockout)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible hitsFilter={knockoutHitsFilter} />}
         </TabsContent>
         <TabsContent value="custom" className="mt-4">
           <CustomRankingsTab extrasRevealed={extrasRevealed} />
