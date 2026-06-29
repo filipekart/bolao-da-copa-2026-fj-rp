@@ -293,6 +293,29 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
     [extrasMap]
   );
 
+  const knockoutStageFilterOptions = [
+    { value: 'all', label: t('knockout.filterAll', 'Todas as fases') },
+    { value: 'ROUND_OF_32', label: t('knockout.stages.ROUND_OF_32') },
+    { value: 'ROUND_OF_16', label: t('knockout.stages.ROUND_OF_16') },
+    { value: 'QUARTER_FINAL', label: t('knockout.stages.QUARTER_FINAL') },
+    { value: 'SEMI_FINAL', label: t('knockout.stages.SEMI_FINAL') },
+    { value: 'FINAL_GROUP', label: t('knockout.filterFinalGroup', 'Final e 3º lugar') },
+  ] as { value: KnockoutSubStage; label: string }[];
+
+  const knockoutHitsFilter = useCallback((h: any) => {
+    if (h.stage === 'GROUP_STAGE') return false;
+    if (knockoutStageFilter === 'all') return true;
+    if (knockoutStageFilter === 'FINAL_GROUP') return h.match_number >= 103 && h.match_number <= 104;
+    const ranges: Record<Exclude<KnockoutSubStage, 'all' | 'FINAL_GROUP'>, [number, number]> = {
+      ROUND_OF_32: [73, 88],
+      ROUND_OF_16: [89, 96],
+      QUARTER_FINAL: [97, 100],
+      SEMI_FINAL: [101, 102],
+    };
+    const [min, max] = ranges[knockoutStageFilter];
+    return h.match_number >= min && h.match_number <= max;
+  }, [knockoutStageFilter]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
