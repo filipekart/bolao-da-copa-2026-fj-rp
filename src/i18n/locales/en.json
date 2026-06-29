@@ -151,9 +151,7 @@
       "QUARTER_FINAL": "Quarter-finals",
       "SEMI_FINAL": "Semi-finals",
       "FINAL": "Final"
-    },
-    "filterAll": "All stages",
-    "filterFinalGroup": "Final & 3rd place"
+    }
   },
   "extras": {
     "title": "Extras",

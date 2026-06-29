@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/auth';
 import { useActiveProfile } from '@/lib/activeProfile';
 import { toast } from 'sonner';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 
 import { Flag } from '@/components/Flag';
 const R32_BRACKET = [
@@ -329,7 +329,6 @@ export default function KnockoutPage() {
   const { data: standings, isLoading: standingsLoading } = useGroupStandings();
   const { data: allMatches, isLoading: matchesLoading } = useMatches();
   const [activeTab, setActiveTab] = useState<'groups' | 'bracket'>('bracket');
-  const [stageFilter, setStageFilter] = useState<string>('all');
   const { t, i18n } = useTranslation();
   const lang = i18n.language?.substring(0, 2) ?? 'pt';
   const tt = useTranslatedTeamName();
@@ -365,24 +364,10 @@ export default function KnockoutPage() {
     { key: 'ROUND_OF_16', label: t('knockout.stages.ROUND_OF_16'), bracket: R16_BRACKET },
     { key: 'QUARTER_FINAL', label: t('knockout.stages.QUARTER_FINAL'), bracket: QF_BRACKET },
     { key: 'SEMI_FINAL', label: t('knockout.stages.SEMI_FINAL'), bracket: SF_BRACKET },
-    { key: 'THIRD_PLACE', label: 'Disputa do 3º lugar', bracket: THIRD_PLACE_BRACKET, group: 'FINAL_GROUP' },
-    { key: 'FINAL', label: t('knockout.stages.FINAL'), bracket: FINAL_BRACKET, group: 'FINAL_GROUP' },
+    { key: 'THIRD_PLACE', label: 'Disputa do 3º lugar', bracket: THIRD_PLACE_BRACKET },
+    { key: 'FINAL', label: t('knockout.stages.FINAL'), bracket: FINAL_BRACKET },
   ] as const;
 
-  const STAGE_FILTERS = [
-    { value: 'all', label: t('knockout.filterAll', 'Todas as fases') },
-    { value: 'ROUND_OF_32', label: t('knockout.stages.ROUND_OF_32') },
-    { value: 'ROUND_OF_16', label: t('knockout.stages.ROUND_OF_16') },
-    { value: 'QUARTER_FINAL', label: t('knockout.stages.QUARTER_FINAL') },
-    { value: 'SEMI_FINAL', label: t('knockout.stages.SEMI_FINAL') },
-    { value: 'FINAL_GROUP', label: t('knockout.filterFinalGroup', 'Final e 3º lugar') },
-  ];
-
-  const visibleStages = KNOCKOUT_STAGES.filter(s => {
-    if (stageFilter === 'all') return true;
-    if (stageFilter === 'FINAL_GROUP') return (s as any).group === 'FINAL_GROUP';
-    return s.key === stageFilter;
-  });
 
   if (standingsLoading || matchesLoading) {
     return (
@@ -449,16 +434,6 @@ export default function KnockoutPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          <Select value={stageFilter} onValueChange={setStageFilter}>
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STAGE_FILTERS.map(opt => (
-                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <Alert className="border-primary/40 bg-primary/5">
             <Info className="h-4 w-4 text-primary" />
             <AlertDescription className="text-sm text-muted-foreground">
@@ -476,7 +451,7 @@ export default function KnockoutPage() {
               </AlertDescription>
             </Alert>
           )}
-          {visibleStages.map(stage => (
+          {KNOCKOUT_STAGES.map(stage => (
             <div key={stage.key} className="space-y-2">
               <h2 className="text-sm font-display font-semibold text-foreground">{stage.label}</h2>
               <div className="space-y-2">
