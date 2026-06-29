@@ -324,7 +324,7 @@ const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref)
         </TabsContent>
         <TabsContent value="knockout" className="mt-4">
           {koLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> :
-            <RankingList ranking={mergeExtras(knockout)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible />}
+            <RankingList ranking={mergeExtras(knockout)} userId={user?.id} showField="round_points" t={t} extrasRevealed={extrasRevealed} collapsible hitsFilter={(h) => h.stage !== 'GROUP_STAGE'} />}
         </TabsContent>
         <TabsContent value="custom" className="mt-4">
           <CustomRankingsTab extrasRevealed={extrasRevealed} />
