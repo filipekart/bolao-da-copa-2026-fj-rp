@@ -1,7 +1,7 @@
 import { forwardRef, useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useRanking } from '@/hooks/useRanking';
 import { useGroupRanking } from '@/hooks/useGroupRanking';
-import { useRoundRanking } from '@/hooks/useRoundRanking';
+import { useRoundRanking, KnockoutSubStage } from '@/hooks/useRoundRanking';
 import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { computePositions } from '@/lib/rankingPositions';
 import { useUserExactHits } from '@/hooks/useUserExactHits';
 import { formatStageLabel } from '@/lib/stageLabel';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { Flag } from '@/components/Flag';
 function useExtrasRevealed() {
