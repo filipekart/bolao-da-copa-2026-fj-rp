@@ -260,12 +260,13 @@ RankingList.displayName = 'RankingList';
 
 const RankingPage = forwardRef<HTMLDivElement>(function RankingPage(_props, ref) {
   const [activeTab, setActiveTab] = useState('geral');
+  const [knockoutStageFilter, setKnockoutStageFilter] = useState<KnockoutSubStage>('all');
   const { data: ranking, isLoading } = useRanking();
   const { data: groupRanking, isLoading: groupLoading } = useGroupRanking(activeTab === 'grupos');
   const { data: round1, isLoading: r1Loading } = useRoundRanking('round1', activeTab === 'round1');
   const { data: round2, isLoading: r2Loading } = useRoundRanking('round2', activeTab === 'round2');
   const { data: round3, isLoading: r3Loading } = useRoundRanking('round3', activeTab === 'round3');
-  const { data: knockout, isLoading: koLoading } = useRoundRanking('knockout', activeTab === 'knockout');
+  const { data: knockout, isLoading: koLoading } = useRoundRanking('knockout', activeTab === 'knockout', knockoutStageFilter);
   const { user } = useAuth();
   const { t } = useTranslation();
   const { data: extrasRevealed = false } = useExtrasRevealed();
