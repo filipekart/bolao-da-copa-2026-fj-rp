@@ -434,16 +434,6 @@ export default function KnockoutPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          <Select value={stageFilter} onValueChange={setStageFilter}>
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STAGE_FILTERS.map(opt => (
-                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <Alert className="border-primary/40 bg-primary/5">
             <Info className="h-4 w-4 text-primary" />
             <AlertDescription className="text-sm text-muted-foreground">
