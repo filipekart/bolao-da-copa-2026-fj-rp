@@ -14,15 +14,38 @@ const ROUND_PARAMS: Record<string, { p_min_match: number; p_max_match: number; p
   round3: { p_min_match: 49, p_max_match: 72 },
 };
 
-export function useRoundRanking(round: 'round1' | 'round2' | 'round3' | 'knockout', enabled = true) {
+export type KnockoutSubStage = 'all' | 'ROUND_OF_32' | 'ROUND_OF_16' | 'QUARTER_FINAL' | 'SEMI_FINAL' | 'FINAL_GROUP';
+
+const KNOCKOUT_SUBSTAGE_RANGES: Record<KnockoutSubStage, { p_min_match: number; p_max_match: number } | null> = {
+  all: null,
+  ROUND_OF_32: { p_min_match: 73, p_max_match: 88 },
+  ROUND_OF_16: { p_min_match: 89, p_max_match: 96 },
+  QUARTER_FINAL: { p_min_match: 97, p_max_match: 100 },
+  SEMI_FINAL: { p_min_match: 101, p_max_match: 102 },
+  FINAL_GROUP: { p_min_match: 103, p_max_match: 104 },
+};
+
+export function useRoundRanking(
+  round: 'round1' | 'round2' | 'round3' | 'knockout',
+  enabled = true,
+  subStage?: KnockoutSubStage,
+) {
   return useQuery({
-    queryKey: ['round-ranking', round],
+    queryKey: ['round-ranking', round, subStage ?? 'all'],
     enabled,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const params = round === 'knockout'
-        ? { p_knockout: true }
-        : ROUND_PARAMS[round];
+      let params: Record<string, any>;
+      if (round === 'knockout') {
+        const range = subStage ? KNOCKOUT_SUBSTAGE_RANGES[subStage] : null;
+        if (range) {
+          params = range;
+        } else {
+          params = { p_knockout: true };
+        }
+      } else {
+        params = ROUND_PARAMS[round];
+      }
 
       const [rankRes, profRes] = await Promise.all([
         supabase.rpc('get_round_ranking', params),
@@ -59,3 +82,4 @@ export function useRoundRanking(round: 'round1' | 'round2' | 'round3' | 'knockou
     },
   });
 }
+
